@@ -1,0 +1,107 @@
+"use client";
+
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { siteConfig } from "@/config/site";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "@/constants/routes";
+import { LogOut, User } from "lucide-react";
+import { useAuthStore } from "@/store/auth-store";
+import { buttonVariants } from "@/components/ui/button";
+import { logoutRequest } from "@/modules/auth/services/auth.service";
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+
+type Props = {
+  /** Main heading shown next to brand */
+  sectionTitle: string;
+  /** Subtle subtitle under section title (optional) */
+  sectionHint?: string;
+};
+
+export function AppChromeHeader({ sectionTitle, sectionHint }: Props) {
+  const router = useRouter();
+  const user = useAuthStore((s) => s.user);
+  const clearSession = useAuthStore((s) => s.clearSession);
+
+  async function logout() {
+    try {
+      await logoutRequest();
+    } catch {
+      /* ignore */
+    }
+    clearSession();
+    router.refresh();
+    router.push(ROUTES.home);
+  }
+
+  return (
+    <header className="border-border bg-background flex h-14 shrink-0 items-center justify-between border-b px-4 lg:px-6">
+      <div className="min-w-0">
+        <p className="text-muted-foreground truncate text-[11px] font-medium tracking-wide uppercase">
+          {siteConfig.name}
+        </p>
+        <div className="flex flex-wrap items-baseline gap-2">
+          <h1 className="font-heading truncate text-base font-semibold tracking-tight md:text-lg">
+            {sectionTitle}
+          </h1>
+          {sectionHint ? (
+            <span className="text-muted-foreground hidden text-xs md:inline">
+              {sectionHint}
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      {user ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className={cn(
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "gap-2"
+            )}
+          >
+            <User className="size-4 shrink-0" />
+            <span className="max-w-[140px] truncate">{user.name}</span>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <span className="text-sm font-medium">{user.name}</span>
+                <span className="text-muted-foreground text-xs">
+                  {user.email}
+                </span>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {user.role === "customer" && (
+              <DropdownMenuItem
+                onClick={() => {
+                  router.push(ROUTES.profile);
+                }}
+              >
+                <User className="mr-2 size-4" /> Profile
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem onClick={() => void logout()}>
+              <LogOut className="mr-2 size-4" /> Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : (
+        <Link
+          href={ROUTES.login}
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+        >
+          Sign in
+        </Link>
+      )}
+    </header>
+  );
+}
