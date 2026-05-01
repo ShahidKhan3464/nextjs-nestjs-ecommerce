@@ -9,7 +9,7 @@ import { buttonVariants } from "@/components/ui/button";
 export function Hero() {
   return (
     <section className="relative overflow-hidden border-b">
-      <div className="from-background via-background to-muted/40 absolute inset-0 bg-gradient-to-b" />
+      <div className="from-background via-background to-muted/40 absolute inset-0 bg-linear-to-b" />
       <div className="relative mx-auto flex max-w-7xl flex-col gap-10 px-4 py-20 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:py-28">
         <motion.div
           className="max-w-xl space-y-6"
@@ -46,9 +46,9 @@ export function Hero() {
           animate={{ opacity: 1, scale: 1 }}
           initial={{ opacity: 0, scale: 0.96 }}
           transition={{ duration: 0.5, delay: 0.05 }}
-          className="border-border bg-card text-muted-foreground relative aspect-[4/3] w-full max-w-md rounded-2xl border p-6 shadow-sm lg:max-w-lg"
+          className="border-border bg-card text-muted-foreground relative aspect-4/3 w-full max-w-md rounded-2xl border p-6 shadow-sm lg:max-w-lg"
         >
-          <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_top,_rgba(120,120,120,0.12),_transparent_55%)]" />
+          <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_top,rgba(120,120,120,0.12),transparent_55%)]" />
           <div className="relative flex h-full flex-col justify-between gap-6">
             <div className="space-y-2">
               <p className="text-foreground text-sm font-medium">
