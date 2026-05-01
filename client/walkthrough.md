@@ -13,7 +13,7 @@ This document describes how the **Next.js 15** storefront under `client/` is org
 | `src/components/ui/` | Reusable primitives from **shadcn/ui** (buttons, forms, sheets, …) |
 | `src/shared/` | Cross-cutting layout, providers, marketing blocks, shared hooks |
 | `src/store/` | **Zustand** stores (auth, cart, wishlist, recently viewed) |
-| `src/lib/` | Utilities, mock/product data, API helpers, server-side order memory |
+| `src/lib/` | Utilities, mock/product data, API helpers, `session-cookie.ts` (JWT from cookies), server-side order memory |
 | `src/config/` | `site.ts` — brand name, description, URL, locale |
 | `src/constants/` | `routes.ts`, `query-keys.ts`, shared constants |
 | `components.json` | **shadcn** CLI config (do not delete; see below) |
@@ -41,22 +41,15 @@ Parentheses in folder names are **route groups**: they organize files **without*
 |-------------------------|--------------|----------------|
 | `(marketing)/` | `/` | `SiteShell` — marketing header/footer |
 | `(auth)/` | `/login`, `/register`, `/forgot-password` | `SiteShell` + centered card |
-| `(shop)/` | `/products`, `/products/[slug]`, `/cart`, `/checkout`, `/orders`, … | `AuthAwareShell` (see below) |
-| `admin/` | `/admin`, `/admin/users`, … | `AdminAppShell`, **dynamic** |
+| `(shop)/` | `/products`, `/products/[slug]`, `/cart`, `/checkout`, `/orders`, `/dashboard`, `/profile`, `/wishlist`, `/users`, … | `ShopRoleShell` → `CustomerAppShell` or `AdminAppShell` |
 
-### `AuthAwareShell` (shop)
+### Auth, middleware, and `ShopRoleShell`
 
-File: `src/shared/components/layout/auth-aware-shell.tsx` (**client**).
+**Middleware** protects shop URLs and redirects legacy `/admin/*`. **`ShopRoleShell`** picks **`AdminAppShell`** vs **`CustomerAppShell`** from **`useAuthStore`** after mount.
 
-After hydration it chooses:
+File: `src/shared/components/layout/shop-role-shell.tsx` (**client**).
 
-1. **Guest** → `SiteShell` (same public chrome as marketing).
-2. **Admin user** → `AdminAppShell` (admin navigation chrome).
-3. **Customer** → `CustomerAppShell` (account-oriented chrome).
-
-Until mounted, a minimal full-screen wrapper avoids layout flash.
-
-**Note:** `/admin/*` uses **`src/app/admin/layout.tsx`** directly with `AdminAppShell` and does not go through `(shop)/layout.tsx`. The admin chrome also appears when an admin visits shop routes under `(shop)` because of `AuthAwareShell`.
+Until the client store has hydrated, a minimal padded wrapper is shown. Shared paths (`/dashboard`, `/products`, `/orders`, …) render admin vs customer content by role; `/users` and `/products/new` are admin-only.
 
 ---
 
@@ -82,12 +75,13 @@ These are **per-route** behaviors in the App Router:
 
 ### ISR (Incremental Static Regeneration)
 
-- **`(shop)/products/page.tsx`**: `export const revalidate = 60` — static shell with revalidation every 60s (listing uses client search params inside `Suspense`).
-- **`(shop)/products/[slug]/page.tsx`**: `generateStaticParams()` prebuilds known slugs + `revalidate = 120` — **SSG paths** that refresh on that interval.
+- **`(shop)/products/[slug]/page.tsx`**: `generateStaticParams()` + `revalidate = 120` — **SSG** product pages with periodic refresh.
+
+- **`(shop)/products/page.tsx`**: uses `getAccessTokenPayload()` to branch admin vs customer UI → typically **dynamic** (also serves admin inventory on the same URL).
 
 ### Dynamic / SSR
 
-- **`admin/layout.tsx`**: `export const dynamic = "force-dynamic"` — admin always server-rendered per request (fresh analytics and lists).
+- Combined shop routes such as **`/dashboard`**, **`/orders`**, **`/products`** (when role-split), and admin analytics use server rendering or client data hooks as needed.
 
 ### Default behavior
 
@@ -110,7 +104,7 @@ Routes without `dynamic` or `revalidate` follow Next defaults (often static wher
 - **Zustand** stores consumed in UI (cart, auth UI, wishlist).
 - **TanStack Query** (`useQuery`, `useMutation`).
 - **Forms** with `react-hook-form` where the form component uses hooks.
-- Layout shells that depend on auth store or pathname for navigation: `AuthAwareShell`, `CustomerAppShell`, `AdminAppShell`, `SiteHeader`, etc.
+- Layout shells that depend on auth store or pathname for navigation: `ShopRoleShell`, `CustomerAppShell`, `AdminAppShell`, `SiteHeader`, etc.
 
 **Pattern:** Keep `page.tsx` as a thin Server Component when possible; import a `"use client"` module component for interactivity (e.g. product PDP passes server-fetched `product` into `ProductDetailView`).
 

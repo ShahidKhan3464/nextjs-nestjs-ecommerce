@@ -3,42 +3,60 @@ import type { NextRequest } from "next/server";
 import { verifyToken } from "@/lib/server-auth";
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const protectedPrefix =
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/admin") ||
-    pathname.startsWith("/profile") ||
-    pathname.startsWith("/orders");
+  const url = request.nextUrl.clone();
+  const { pathname } = url;
 
-  if (!protectedPrefix) {
+  /** Historical `/admin` URLs → canonical paths (same URLs as post-login admin) */
+  if (pathname === "/admin" || pathname === "/admin/") {
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+  if (pathname.startsWith("/admin/")) {
+    url.pathname = pathname.slice("/admin".length) || "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
+  const protectedRoute =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/orders") ||
+    pathname.startsWith("/products") ||
+    pathname.startsWith("/cart") ||
+    pathname.startsWith("/checkout") ||
+    pathname.startsWith("/wishlist") ||
+    pathname.startsWith("/users");
+
+  if (!protectedRoute) {
     return NextResponse.next();
   }
 
   const token = request.cookies.get("access_token")?.value;
   if (!token) {
     const login = new URL("/login", request.url);
-    login.searchParams.set("next", pathname);
+    login.searchParams.set(
+      "next",
+      `${pathname}${request.nextUrl.search}`
+    );
     return NextResponse.redirect(login);
   }
 
   const payload = await verifyToken(token);
   if (!payload || payload.typ !== "access") {
     const login = new URL("/login", request.url);
-    login.searchParams.set("next", pathname);
+    login.searchParams.set(
+      "next",
+      `${pathname}${request.nextUrl.search}`
+    );
     return NextResponse.redirect(login);
   }
 
-  if (pathname.startsWith("/admin") && payload.role !== "admin") {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
+  const adminOnly =
+    pathname.startsWith("/users") ||
+    pathname === "/products/new" ||
+    pathname.startsWith("/products/new/");
 
-  if (
-    payload.role === "admin" &&
-    (pathname.startsWith("/dashboard") ||
-      pathname.startsWith("/profile") ||
-      pathname.startsWith("/orders"))
-  ) {
-    return NextResponse.redirect(new URL("/admin", request.url));
+  if (adminOnly && payload.role !== "admin") {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();
@@ -46,13 +64,23 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/admin",
+    "/admin/:path*",
     "/dashboard",
     "/dashboard/:path*",
     "/profile",
     "/profile/:path*",
     "/orders",
     "/orders/:path*",
-    "/admin",
-    "/admin/:path*",
+    "/products",
+    "/products/:path*",
+    "/cart",
+    "/cart/:path*",
+    "/checkout",
+    "/checkout/:path*",
+    "/wishlist",
+    "/wishlist/:path*",
+    "/users",
+    "/users/:path*",
   ],
 };

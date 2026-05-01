@@ -9,11 +9,11 @@ export const metadata: Metadata = {
   title: "New product",
 };
 
-export default function AdminNewProductPage() {
+export default function NewProductPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <Link
-        href={ROUTES.adminProducts}
+        href={ROUTES.products}
         className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "-ml-2")}
       >
         ← Back to products
