@@ -13,7 +13,7 @@ export default function AdminHomePage() {
           Analytics
         </h1>
         <p className="text-muted-foreground text-sm">
-          Revenue charts and inventory signals powered by Recharts + demo orders.
+          Monitor sales trends and order volume to spot what is performing well.
         </p>
       </header>
       <AdminAnalytics />

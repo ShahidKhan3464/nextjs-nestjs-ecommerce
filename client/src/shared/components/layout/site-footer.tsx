@@ -58,12 +58,12 @@ export function SiteFooter() {
             <ul className="text-muted-foreground space-y-2">
               <li>
                 <span className="cursor-not-allowed opacity-70">
-                  Privacy (demo)
+                  Privacy policy
                 </span>
               </li>
               <li>
                 <span className="cursor-not-allowed opacity-70">
-                  Terms (demo)
+                  Terms of service
                 </span>
               </li>
             </ul>
@@ -71,7 +71,7 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-border border-t py-6 text-center text-xs text-zinc-500">
-        © {new Date().getFullYear()} {siteConfig.name}. Demo storefront.
+        © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
       </div>
     </footer>
   );

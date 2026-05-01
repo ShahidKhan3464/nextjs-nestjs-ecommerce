@@ -19,8 +19,8 @@ export default function AdminNewProductPage() {
         ← Back to products
       </Link>
       <p className="text-muted-foreground text-sm">
-        Creates a catalog entry with one default variant — extend with multi-variant
-        editors when your API supports it.
+        Add a new product with images, description, price, and stock so it appears
+        on the storefront right away.
       </p>
       <AdminProductCreateForm />
     </div>

@@ -11,8 +11,8 @@ export function ProductsPageContent() {
           Shop
         </h1>
         <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
-          Debounced search, filters, and pagination backed by TanStack Query with
-          optimistic cache reuse.
+          Search by name, narrow by category or price, and browse the collection
+          at your own pace.
         </p>
       </header>
       <div className="grid gap-10 lg:grid-cols-[260px_1fr]">

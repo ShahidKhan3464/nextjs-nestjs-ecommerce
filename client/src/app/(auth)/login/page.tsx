@@ -24,8 +24,7 @@ export default function LoginPage() {
           Welcome back
         </h1>
         <p className="text-muted-foreground text-sm">
-          Demo admin: <code className="rounded bg-muted px-1 text-xs">admin@example.com</code> /{" "}
-          <code className="rounded bg-muted px-1 text-xs">Admin123!</code>
+          Sign in with the email and password you used when you registered.
         </p>
       </div>
       <Suspense fallback={<LoginFallback />}>

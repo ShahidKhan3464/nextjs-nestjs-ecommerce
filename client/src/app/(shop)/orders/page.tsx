@@ -15,7 +15,7 @@ export default function OrdersPage() {
           Orders
         </h1>
         <p className="text-muted-foreground text-sm">
-          Authenticated TanStack Query list with optimistic cache keys.
+          View status, totals, and receipts for everything you have ordered.
         </p>
       </header>
       <OrdersList />

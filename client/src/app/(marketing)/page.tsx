@@ -25,11 +25,8 @@ export default function HomePage() {
             Featured right now
           </h2>
           <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
-            Static marketing shell with ISR-powered product cards — connect{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">
-              NEXT_PUBLIC_SITE_URL
-            </code>{" "}
-            for accurate absolute fetches in deployment.
+            Hand-picked pieces from our catalog—refresh your space with quality
+            that lasts.
           </p>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

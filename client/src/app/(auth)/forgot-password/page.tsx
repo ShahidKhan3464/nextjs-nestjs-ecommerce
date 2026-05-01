@@ -15,7 +15,8 @@ export default function ForgotPasswordPage() {
           Reset password
         </h1>
         <p className="text-muted-foreground text-sm">
-          Demo endpoint always succeeds — integrate your mail provider in production.
+          Enter your email and we will send reset instructions if we find an
+          account.
         </p>
       </div>
       <ForgotPasswordForm />

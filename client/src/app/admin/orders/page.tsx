@@ -9,7 +9,8 @@ export default function AdminOrdersPage() {
   return (
     <div className="space-y-6">
       <p className="text-muted-foreground max-w-2xl text-sm">
-        Every order placed through checkout (in-memory for this demo).
+        Every order placed through checkout, newest first—open one for full line
+        items and totals.
       </p>
       <AdminOrdersList />
     </div>

@@ -24,8 +24,8 @@ export function Hero() {
             Quiet essentials for intentional living.
           </h1>
           <p className="text-muted-foreground max-w-lg text-base leading-relaxed">
-            Built with Next.js 15, TanStack Query, Zustand, and shadcn/ui —
-            production patterns with polished UX defaults.
+            Thoughtfully made goods, calm browsing, and checkout that stays out
+            of your way—so you can focus on what belongs in your home.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -55,13 +55,13 @@ export function Hero() {
                 Featured drops weekly
               </p>
               <p className="text-sm leading-relaxed">
-                ISR listings, variant-aware PDPs, optimistic carts, and admin
-                analytics — ready for your API.
+                Curated drops, detailed product pages, easy cart updates, and
+                order tracking—everything you expect from a modern shop.
               </p>
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span>App Router · Strict TS · Accessible UI</span>
-              <span className="tabular-nums">v1</span>
+              <span>New arrivals · Careful packing · Easy returns</span>
+              <span className="tabular-nums">Designed to last</span>
             </div>
           </div>
         </motion.div>

@@ -28,7 +28,7 @@ export function DashboardOverview() {
           Hello{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
         </h1>
         <p className="text-muted-foreground mt-2 text-sm">
-          Overview of your orders and activity on this demo storefront.
+          A quick snapshot of your spending and recent orders with us.
         </p>
       </div>
 

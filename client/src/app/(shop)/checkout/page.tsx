@@ -15,8 +15,8 @@ export default function CheckoutPage() {
           Checkout
         </h1>
         <p className="text-muted-foreground text-sm">
-          Multi-step flow with shipping, mock payment, coupon validation, and
-          order snapshot on the server.
+          Enter shipping details, choose payment, apply a coupon if you have
+          one, then review before you submit.
         </p>
       </header>
       <CheckoutWizard />

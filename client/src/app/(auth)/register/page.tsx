@@ -17,7 +17,7 @@ export default function RegisterPage() {
           Create your account
         </h1>
         <p className="text-muted-foreground text-sm">
-          Passwords are validated with Zod on the client and server.
+          Save your details for faster checkout, order updates, and your wishlist.
         </p>
       </div>
       <RegisterForm />

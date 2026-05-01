@@ -18,9 +18,8 @@ export default function AdminProductsPage() {
             Inventory
           </h1>
           <p className="text-muted-foreground text-sm">
-            CRUD hooks into the mock catalog — extend with uploads by wiring{" "}
-            <code className="rounded bg-muted px-1 text-xs">multipart</code>{" "}
-            handling on your API.
+            Maintain your catalog here—edit listings, adjust pricing, and remove
+            items that are no longer offered.
           </p>
         </div>
         <Link
