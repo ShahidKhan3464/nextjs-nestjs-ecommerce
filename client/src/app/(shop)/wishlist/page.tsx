@@ -15,7 +15,7 @@ export default function WishlistPage() {
           Wishlist
         </h1>
         <p className="text-muted-foreground text-sm">
-          Persisted client-side with Zustand — swap for API-backed ids when ready.
+          Save pieces you love and come back when you are ready to decide.
         </p>
       </header>
       <WishlistGrid />

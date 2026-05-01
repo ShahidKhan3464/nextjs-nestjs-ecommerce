@@ -8,7 +8,8 @@ export default function NotFound() {
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 py-24 text-center">
       <p className="text-lg font-medium">Page not found</p>
       <p className="text-muted-foreground mt-2 max-w-md text-sm">
-        The route you requested does not exist in this App Router tree.
+        That page may have moved or the link might be out of date. Try starting
+        from the home page.
       </p>
       <Link
         href={ROUTES.home}

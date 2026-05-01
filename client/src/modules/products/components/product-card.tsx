@@ -33,7 +33,7 @@ export function ProductCard({ product, className }: Props) {
     >
       <Link
         href={ROUTES.product(product.slug)}
-        className="relative aspect-[4/5] overflow-hidden"
+        className="relative aspect-4/5 overflow-hidden"
       >
         <Image
           fill

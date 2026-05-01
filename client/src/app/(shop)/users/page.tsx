@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: "Users",
 };
 
-export default function AdminUsersPage() {
+export default function UsersPage() {
   return (
     <div className="space-y-6">
       <p className="text-muted-foreground max-w-2xl text-sm">
-        All registered accounts (demo data includes seeded users and self-registered
-        customers).
+        Everyone who has created an account—review roles and contact details in
+        one place.
       </p>
       <AdminUsersList />
     </div>

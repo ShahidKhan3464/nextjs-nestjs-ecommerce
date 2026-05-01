@@ -33,7 +33,7 @@ export function AdminUserDetail({ userId }: Props) {
         description="This account may have been removed."
         action={
           <Link
-            href={ROUTES.adminUsers}
+            href={ROUTES.users}
             className={cn(buttonVariants({ variant: "outline" }))}
           >
             Back to users
@@ -74,7 +74,7 @@ export function AdminUserDetail({ userId }: Props) {
       </dl>
 
       <Link
-        href={ROUTES.adminUsers}
+        href={ROUTES.users}
         className={cn(buttonVariants({ variant: "outline" }))}
       >
         All users

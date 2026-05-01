@@ -26,7 +26,6 @@ import {
   Menu,
   Moon,
   LogOut,
-  Shield,
   Package,
   ShoppingBag,
   LayoutDashboard,
@@ -66,9 +65,6 @@ export function SiteHeader({ onOpenCart }: Props) {
           { href: ROUTES.orders, label: "Orders" },
           { href: ROUTES.dashboard, label: "Dashboard" },
         ]
-      : []),
-    ...(user?.role === "admin"
-      ? [{ href: ROUTES.admin, label: "Admin" }]
       : []),
   ];
 
@@ -176,15 +172,6 @@ export function SiteHeader({ onOpenCart }: Props) {
                 >
                   <LayoutDashboard className="mr-2 size-4" /> Dashboard
                 </DropdownMenuItem>
-                {user.role === "admin" && (
-                  <DropdownMenuItem
-                    onClick={() => {
-                      router.push(ROUTES.admin);
-                    }}
-                  >
-                    <Shield className="mr-2 size-4" /> Admin
-                  </DropdownMenuItem>
-                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => void logout()}>
                   <LogOut className="mr-2 size-4" /> Log out

@@ -131,7 +131,7 @@ export function CartSheet({ open, onOpenChange }: Props) {
           {items.length > 0 && <Separator className="my-2" />}
         </ScrollArea>
 
-        <SheetFooter className="border-t bg-background/95 p-6 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <SheetFooter className="border-t bg-background/95 p-6 backdrop-blur supports-backdrop-filter:bg-background/80">
           <div className="flex w-full flex-col gap-4">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>

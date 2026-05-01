@@ -264,8 +264,8 @@ export function CheckoutWizard() {
 
         <TabsContent value="payment" className="space-y-4">
           <p className="text-muted-foreground text-sm">
-            Demo checkout — choose a mock instrument. Card details are not
-            collected in this sample.
+            Choose how you would like to pay. You will confirm the total on the
+            review step before placing your order.
           </p>
           <div className="flex flex-wrap gap-3">
             <Button type="button" onClick={() => onPaymentMock("card")}>

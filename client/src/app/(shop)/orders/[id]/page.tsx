@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
+import { getAccessTokenPayload } from "@/lib/session-cookie";
 import { OrderDetailView } from "@/modules/orders/components/order-detail-view";
+import { AdminOrderDetail } from "@/modules/admin/components/admin-order-detail";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -14,5 +16,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function OrderPage({ params }: Props) {
   const { id } = await params;
+  const session = await getAccessTokenPayload();
+
+  if (session?.role === "admin") {
+    return <AdminOrderDetail orderId={id} />;
+  }
+
   return <OrderDetailView orderId={id} />;
 }

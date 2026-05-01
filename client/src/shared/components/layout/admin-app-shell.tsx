@@ -15,32 +15,29 @@ import {
 } from "lucide-react";
 
 const nav = [
-  { href: ROUTES.admin, label: "Overview", icon: LayoutDashboard },
-  { href: ROUTES.adminUsers, label: "Users", icon: Users },
-  { href: ROUTES.adminProducts, label: "Products", icon: Package },
-  { href: ROUTES.adminProductNew, label: "New product", icon: PlusCircle },
-  { href: ROUTES.adminOrders, label: "Orders", icon: ShoppingCart },
+  { href: ROUTES.dashboard, label: "Overview", icon: LayoutDashboard },
+  { href: ROUTES.users, label: "Users", icon: Users },
+  { href: ROUTES.products, label: "Products", icon: Package },
+  { href: ROUTES.productNew, label: "New product", icon: PlusCircle },
+  { href: ROUTES.orders, label: "Orders", icon: ShoppingCart },
 ];
 
 function adminNavActive(pathname: string, href: string): boolean {
-  if (href === ROUTES.admin) {
-    return pathname === ROUTES.admin || pathname === `${ROUTES.admin}/`;
+  if (href === ROUTES.dashboard) {
+    return pathname === ROUTES.dashboard || pathname === `${ROUTES.dashboard}/`;
   }
-  if (href === ROUTES.adminProducts) {
-    return pathname === ROUTES.adminProducts;
+  if (href === ROUTES.products) {
+    return pathname === ROUTES.products;
   }
-  if (href === ROUTES.adminProductNew) {
-    return pathname === ROUTES.adminProductNew;
+  if (href === ROUTES.productNew) {
+    return pathname === ROUTES.productNew;
   }
-  if (href === ROUTES.adminUsers) {
+  if (href === ROUTES.users) {
+    return pathname === ROUTES.users || pathname.startsWith(`${ROUTES.users}/`);
+  }
+  if (href === ROUTES.orders) {
     return (
-      pathname === ROUTES.adminUsers || pathname.startsWith(`${ROUTES.adminUsers}/`)
-    );
-  }
-  if (href === ROUTES.adminOrders) {
-    return (
-      pathname === ROUTES.adminOrders ||
-      pathname.startsWith(`${ROUTES.adminOrders}/`)
+      pathname === ROUTES.orders || pathname.startsWith(`${ROUTES.orders}/`)
     );
   }
   return false;
@@ -54,8 +51,8 @@ export function AdminAppShell({ children }: { children: React.ReactNode }) {
     <div className="bg-background flex min-h-screen">
       <aside
         id="admin-sidebar"
-        className="border-border bg-muted/30 hidden w-56 shrink-0 flex-col border-r lg:flex"
         aria-label="Admin navigation"
+        className="border-border bg-muted/30 hidden w-56 shrink-0 flex-col border-r lg:flex"
       >
         <div className="border-border flex h-14 items-center border-b px-4">
           <span className="font-heading text-sm font-semibold tracking-tight">

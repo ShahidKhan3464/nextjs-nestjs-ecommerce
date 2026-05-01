@@ -8,7 +8,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: `User ${id}` };
 }
 
-export default async function AdminUserPage({ params }: Props) {
+export default async function UserDetailPage({ params }: Props) {
   const { id } = await params;
   return <AdminUserDetail userId={id} />;
 }

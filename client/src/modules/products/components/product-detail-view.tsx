@@ -69,7 +69,7 @@ export function ProductDetailView({ product }: Props) {
       <div className="space-y-4">
         <motion.div
           layout
-          className="bg-muted relative aspect-[4/5] overflow-hidden rounded-2xl"
+          className="bg-muted relative aspect-4/5 overflow-hidden rounded-2xl"
         >
           <Image
             fill

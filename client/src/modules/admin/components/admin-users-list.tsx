@@ -58,7 +58,7 @@ export function AdminUsersList() {
               </TableCell>
               <TableCell className="text-right">
                 <Link
-                  href={ROUTES.adminUser(u.id)}
+                  href={ROUTES.user(u.id)}
                   className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
                 >
                   View

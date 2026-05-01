@@ -32,7 +32,7 @@ export function AdminOrderDetail({ orderId }: Props) {
         title="Order not found"
         action={
           <Link
-            href={ROUTES.adminOrders}
+            href={ROUTES.orders}
             className={cn(buttonVariants({ variant: "outline" }))}
           >
             All orders
@@ -59,7 +59,7 @@ export function AdminOrderDetail({ orderId }: Props) {
         <div className="flex flex-col items-end gap-2">
           <Badge>{order.status}</Badge>
           <Link
-            href={ROUTES.adminUser(customerUserId)}
+            href={ROUTES.user(customerUserId)}
             className="text-primary text-sm hover:underline"
           >
             Customer: {customerUserId}
@@ -147,7 +147,7 @@ export function AdminOrderDetail({ orderId }: Props) {
       </div>
 
       <Link
-        href={ROUTES.adminOrders}
+        href={ROUTES.orders}
         className={cn(buttonVariants({ variant: "outline" }))}
       >
         All orders

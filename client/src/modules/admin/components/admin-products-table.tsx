@@ -88,8 +88,8 @@ export function AdminProductsTable() {
         </TableBody>
       </Table>
       <p className="text-muted-foreground border-t px-4 py-3 text-xs">
-        Demo admin — uploads & rich editors would plug into the same service
-        layer.
+        Clear titles, accurate prices, and up-to-date stock help customers shop
+        with confidence.
       </p>
     </div>
   );

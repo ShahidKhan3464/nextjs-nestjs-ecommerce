@@ -24,8 +24,7 @@ export default function LoginPage() {
           Welcome back
         </h1>
         <p className="text-muted-foreground text-sm">
-          Demo admin: <code className="rounded bg-muted px-1 text-xs">admin@example.com</code> /{" "}
-          <code className="rounded bg-muted px-1 text-xs">Admin123!</code>
+          Sign in with the email and password you used when you registered.
         </p>
       </div>
       <Suspense fallback={<LoginFallback />}>
@@ -34,8 +33,8 @@ export default function LoginPage() {
       <p className="text-muted-foreground text-center text-sm">
         New here?{" "}
         <Link
-          className="text-foreground font-medium underline-offset-4 hover:underline"
           href={ROUTES.register}
+          className="text-foreground underline-offset-4 hover:underline"
         >
           Create an account
         </Link>

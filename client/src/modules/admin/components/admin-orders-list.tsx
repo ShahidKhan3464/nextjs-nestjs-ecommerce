@@ -69,7 +69,7 @@ export function AdminOrdersList() {
               </TableCell>
               <TableCell className="text-right">
                 <Link
-                  href={ROUTES.adminOrder(o.id)}
+                  href={ROUTES.order(o.id)}
                   className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
                 >
                   View

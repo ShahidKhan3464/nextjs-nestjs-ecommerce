@@ -81,7 +81,7 @@ export function AdminProductCreateForm() {
     try {
       await createAdminProduct(product);
       toast.success("Product created");
-      router.push(ROUTES.adminProducts);
+      router.push(ROUTES.products);
       router.refresh();
     } catch {
       toast.error("Could not create product");
