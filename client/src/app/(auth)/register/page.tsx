@@ -1,7 +1,5 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
-import { ROUTES } from "@/constants/routes";
 import { RegisterForm } from "@/modules/auth/components/register-form";
 
 export const metadata: Metadata = {
@@ -21,15 +19,6 @@ export default function RegisterPage() {
         </p>
       </div>
       <RegisterForm />
-      <p className="text-muted-foreground text-center text-sm">
-        Already registered?{" "}
-        <Link
-          className="text-foreground font-medium underline-offset-4 hover:underline"
-          href={ROUTES.login}
-        >
-          Sign in
-        </Link>
-      </p>
     </div>
   );
 }

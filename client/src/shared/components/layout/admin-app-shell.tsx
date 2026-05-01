@@ -54,8 +54,8 @@ export function AdminAppShell({ children }: { children: React.ReactNode }) {
     <div className="bg-background flex min-h-screen">
       <aside
         id="admin-sidebar"
-        className="border-border bg-muted/30 hidden w-56 shrink-0 flex-col border-r lg:flex"
         aria-label="Admin navigation"
+        className="border-border bg-muted/30 hidden w-56 shrink-0 flex-col border-r lg:flex"
       >
         <div className="border-border flex h-14 items-center border-b px-4">
           <span className="font-heading text-sm font-semibold tracking-tight">

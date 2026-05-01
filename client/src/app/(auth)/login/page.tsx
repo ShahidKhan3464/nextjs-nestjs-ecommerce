@@ -33,8 +33,8 @@ export default function LoginPage() {
       <p className="text-muted-foreground text-center text-sm">
         New here?{" "}
         <Link
-          className="text-foreground font-medium underline-offset-4 hover:underline"
           href={ROUTES.register}
+          className="text-foreground underline-offset-4 hover:underline"
         >
           Create an account
         </Link>
