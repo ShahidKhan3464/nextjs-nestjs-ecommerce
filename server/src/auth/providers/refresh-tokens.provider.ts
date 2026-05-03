@@ -1,0 +1,48 @@
+import {
+  Inject,
+  forwardRef,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import jwtConfig from '../config/jwt.config';
+import type { ConfigType } from '@nestjs/config';
+import { UsersService } from '../../users/users.service';
+import { RefreshTokenDto } from '../dtos/refresh-token.dto';
+import { GenerateTokensProvider } from './generate-tokens.provider';
+
+interface RefreshTokenPayload {
+  sub: number;
+}
+
+@Injectable()
+export class RefreshTokensProvider {
+  constructor(
+    private readonly jwtService: JwtService,
+    @Inject(forwardRef(() => UsersService))
+    private readonly usersService: UsersService,
+    private readonly generateTokensProvider: GenerateTokensProvider,
+
+    @Inject(jwtConfig.KEY)
+    private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
+  ) {}
+
+  public async refreshTokens(RefreshTokenDto: RefreshTokenDto) {
+    try {
+      const { refreshToken } = RefreshTokenDto;
+      const { sub } = await this.jwtService.verifyAsync<RefreshTokenPayload>(
+        refreshToken,
+        {
+          secret: this.jwtConfiguration.secret,
+        },
+      );
+      const user = await this.usersService.findOneById(sub);
+      if (!user) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+      return await this.generateTokensProvider.generateTokens(user);
+    } catch (error) {
+      throw new UnauthorizedException(error as Error);
+    }
+  }
+}

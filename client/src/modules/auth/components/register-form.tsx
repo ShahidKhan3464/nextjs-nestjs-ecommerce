@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useAuthStore } from "@/store/auth-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerRequest } from "@/modules/auth/services/auth.service";
 import {
@@ -20,44 +19,60 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
+/** Align with server `CreateUserDto.confirmPassword` (class-validator). */
+const PASSWORD_PATTERN =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
 const schema = z
   .object({
-    name: z.string().min(2, "Name is too short"),
+    fullName: z.string().min(5, "Name is too short").max(30, "Name is too long"),
     email: z.string().email("Enter a valid email"),
-    password: z.string().min(8, "Use at least 8 characters"),
-    confirm: z.string(),
+    password: z
+      .string()
+      .min(8, "Use at least 8 characters")
+      .max(30, "Password is too long")
+      .regex(
+        PASSWORD_PATTERN,
+        "Include upper & lowercase, a number, and a special character (@$!%*?&)"
+      ),
+    confirmPassword: z
+      .string()
+      .min(8, "Use at least 8 characters")
+      .max(30, "Password is too long")
+      .regex(
+        PASSWORD_PATTERN,
+        "Include upper & lowercase, a number, and a special character (@$!%*?&)"
+      ),
   })
-  .refine((data) => data.password === data.confirm, {
+  .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
-    path: ["confirm"],
+    path: ["confirmPassword"],
   });
 
 type Values = z.infer<typeof schema>;
 
 export function RegisterForm() {
   const router = useRouter();
-  const setSession = useAuthStore((s) => s.setSession);
   const form = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: {
-      name: "",
+      fullName: "",
       email: "",
-      confirm: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
   async function onSubmit(values: Values) {
     try {
-      const data = await registerRequest({
-        name: values.name,
+      await registerRequest({
+        fullName: values.fullName,
         email: values.email,
         password: values.password,
+        confirmPassword: values.confirmPassword,
       });
-      setSession(data.user, data.accessToken);
-      toast.success("Account created");
-      router.push(ROUTES.home);
-      router.refresh();
+      toast.success("Account created. Sign in to continue.");
+      router.push(ROUTES.login);
     } catch {
       toast.error("Could not create account");
     }
@@ -71,7 +86,7 @@ export function RegisterForm() {
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <FormField
-          name="name"
+          name="fullName"
           control={form.control}
           render={({ field }) => (
             <FormItem>
@@ -119,7 +134,7 @@ export function RegisterForm() {
           )}
         />
         <FormField
-          name="confirm"
+          name="confirmPassword"
           control={form.control}
           render={({ field }) => (
             <FormItem>
