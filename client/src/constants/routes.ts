@@ -11,6 +11,7 @@ export const ROUTES = {
   products: "/products",
   dashboard: "/dashboard",
   productNew: "/products/new",
+  resetPassword: "/reset-password",
   forgotPassword: "/forgot-password",
   user: (id: string) => `/users/${id}`,
   order: (id: string) => `/orders/${id}`,

@@ -71,5 +71,5 @@ export async function POST(req: Request) {
     },
   };
 
-  return jsonOk(response);
+  return jsonOk(response, { status: 201 });
 }

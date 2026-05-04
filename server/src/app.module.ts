@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import appConfig from './config/app.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
-// import { MailModule } from './mail/mail.module';
+import { MailModule } from './mail/mail.module';
 import jwtConfig from './auth/config/jwt.config';
 import { UsersModule } from './users/users.module';
 import databaseConfig from './config/database.config';
@@ -18,8 +18,8 @@ import { DataResponseInterceptor } from './common/interceptors/data-response/dat
 @Module({
   imports: [
     AuthModule,
+    MailModule,
     UsersModule,
-    // MailModule,
     // PaginationModule,
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),

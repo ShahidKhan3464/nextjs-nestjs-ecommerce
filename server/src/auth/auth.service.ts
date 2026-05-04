@@ -4,8 +4,12 @@ import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { RefreshTokenDto } from './dtos/refresh-token.dto';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { ForgotPasswordDto } from './dtos/forgot-password.dto';
+import { ResetPasswordDto } from './dtos/reset-password.dto';
 import { LoggedInUser, LoginProvider } from './providers/login.provider';
 import { RefreshTokensProvider } from './providers/refresh-tokens.provider';
+import { ForgotPasswordProvider } from './providers/forgot-password.provider';
+import { ResetPasswordProvider } from './providers/reset-password.provider';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +17,8 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly loginProvider: LoginProvider,
     private readonly refreshTokensProvider: RefreshTokensProvider,
+    private readonly forgotPasswordProvider: ForgotPasswordProvider,
+    private readonly resetPasswordProvider: ResetPasswordProvider,
   ) {}
 
   public async register(registerDto: CreateUserDto): Promise<{
@@ -32,6 +38,18 @@ export class AuthService {
 
   public async login(loginDto: LoginDto): Promise<{ user: LoggedInUser }> {
     return await this.loginProvider.login(loginDto);
+  }
+
+  public async forgotPassword(
+    forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<{ sent: boolean }> {
+    return await this.forgotPasswordProvider.forgotPassword(forgotPasswordDto);
+  }
+
+  public async resetPassword(
+    resetPasswordDto: ResetPasswordDto,
+  ): Promise<{ reset: true }> {
+    return await this.resetPasswordProvider.resetPassword(resetPasswordDto);
   }
 
   public async refreshTokens(

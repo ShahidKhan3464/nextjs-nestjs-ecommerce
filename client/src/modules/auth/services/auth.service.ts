@@ -34,6 +34,18 @@ export async function forgotPasswordRequest(email: string) {
   return res.data.data;
 }
 
+export async function resetPasswordRequest(body: {
+  token: string;
+  password: string;
+  confirmPassword: string;
+}) {
+  const res = await api.post<ApiResponse<{ reset: true }>>(
+    "/api/v1/auth/reset-password",
+    body
+  );
+  return res.data.data;
+}
+
 export async function logoutRequest() {
   await api.post<ApiResponse<{ ok: true }>>("/api/v1/auth/logout");
 }

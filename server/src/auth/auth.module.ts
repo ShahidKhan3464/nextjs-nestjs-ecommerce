@@ -9,7 +9,9 @@ import { LoginProvider } from './providers/login.provider';
 import { BcryptProvider } from './providers/bycrypt.provider';
 import { HashingProvider } from './providers/hashing.provider';
 import { RefreshTokensProvider } from './providers/refresh-tokens.provider';
+import { ResetPasswordProvider } from './providers/reset-password.provider';
 import { GenerateTokensProvider } from './providers/generate-tokens.provider';
+import { ForgotPasswordProvider } from './providers/forgot-password.provider';
 
 @Module({
   providers: [
@@ -17,6 +19,8 @@ import { GenerateTokensProvider } from './providers/generate-tokens.provider';
     LoginProvider,
     RefreshTokensProvider,
     GenerateTokensProvider,
+    ForgotPasswordProvider,
+    ResetPasswordProvider,
     { provide: HashingProvider, useClass: BcryptProvider },
   ],
   exports: [HashingProvider],

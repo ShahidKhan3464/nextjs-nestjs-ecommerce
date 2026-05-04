@@ -12,7 +12,10 @@ export default Joi.object({
   JWT_EXPIRATION_TIME: Joi.string().default('1hr'),
   JWT_REFRESH_TOKEN_TTL: Joi.string().default('7d'),
   API_VERSION: Joi.string().default('v1'),
+  FRONTEND_URL: Joi.string().optional(),
   MAIL_HOST: Joi.string().required(),
   SMTP_USERNAME: Joi.string().required(),
   SMTP_PASSWORD: Joi.string().required(),
+  MAIL_SECURE: Joi.boolean().default(false),
+  MAIL_PORT: Joi.number().integer().min(1).max(65535).default(2525),
 });
