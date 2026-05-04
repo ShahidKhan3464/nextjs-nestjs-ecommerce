@@ -3,13 +3,15 @@
 import { z } from "zod";
 import Link from "next/link";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { isAxiosError } from "axios";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerRequest } from "@/modules/auth/services/auth.service";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { resetPasswordRequest } from "@/modules/auth/services/auth.service";
 import {
   Form,
   FormItem,
@@ -19,14 +21,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-/** Align with server `CreateUserDto.confirmPassword` (class-validator). */
 const PASSWORD_PATTERN =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 const schema = z
   .object({
-    fullName: z.string().min(5, "Name is too short").max(30, "Name is too long"),
-    email: z.string().email("Enter a valid email"),
     password: z
       .string()
       .min(8, "Use at least 8 characters")
@@ -51,31 +50,68 @@ const schema = z
 
 type Values = z.infer<typeof schema>;
 
-export function RegisterForm() {
+export function ResetPasswordForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token")?.trim() ?? "";
+
   const form = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: {
-      fullName: "",
-      email: "",
       password: "",
       confirmPassword: "",
     },
   });
 
   async function onSubmit(values: Values) {
+    if (!token) {
+      toast.error("This reset link is missing a token. Request a new link.");
+      return;
+    }
     try {
-      await registerRequest({
-        fullName: values.fullName,
-        email: values.email,
+      await resetPasswordRequest({
+        token,
         password: values.password,
         confirmPassword: values.confirmPassword,
       });
-      toast.success("Account created. Sign in to continue.");
+      toast.success("Password updated. You can sign in with your new password.");
       router.push(ROUTES.login);
-    } catch {
-      toast.error("Could not create account");
+    } catch (e: unknown) {
+      const raw =
+        isAxiosError(e) && e.response?.data && typeof e.response.data === "object"
+          ? (e.response.data as { message?: unknown }).message
+          : undefined;
+      const msg =
+        typeof raw === "string"
+          ? raw
+          : Array.isArray(raw)
+            ? raw.filter((x): x is string => typeof x === "string").join(", ")
+            : "Something went wrong";
+      toast.error(msg);
     }
+  }
+
+  if (!token) {
+    return (
+      <div className="space-y-4 text-center text-sm">
+        <p className="text-muted-foreground">
+          This page needs a valid reset link. Open the link from your email, or
+          request a new one.
+        </p>
+        <Link
+          href={ROUTES.forgotPassword}
+          className={cn(buttonVariants({ variant: "outline" }), "w-full")}
+        >
+          Request reset link
+        </Link>
+        <Link
+          href={ROUTES.login}
+          className={cn(buttonVariants({ variant: "ghost" }), "w-full")}
+        >
+          Back to sign in
+        </Link>
+      </div>
+    );
   }
 
   return (
@@ -86,46 +122,16 @@ export function RegisterForm() {
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <FormField
-          name="fullName"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Full name</FormLabel>
-              <FormControl>
-                <Input autoComplete="name" placeholder="Alex Doe" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="email"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input
-                  type="email"
-                  autoComplete="email"
-                  placeholder="you@example.com"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
           name="password"
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>New password</FormLabel>
               <FormControl>
                 <Input
                   type="password"
                   autoComplete="new-password"
+                  placeholder="••••••••"
                   {...field}
                 />
               </FormControl>
@@ -138,11 +144,12 @@ export function RegisterForm() {
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirm password</FormLabel>
+              <FormLabel>Confirm new password</FormLabel>
               <FormControl>
                 <Input
                   type="password"
                   autoComplete="new-password"
+                  placeholder="••••••••"
                   {...field}
                 />
               </FormControl>
@@ -155,17 +162,8 @@ export function RegisterForm() {
           className="w-full"
           disabled={form.formState.isSubmitting}
         >
-          {form.formState.isSubmitting ? "Creating account…" : "Create account"}
+          {form.formState.isSubmitting ? "Updating…" : "Update password"}
         </Button>
-        <p className="text-muted-foreground text-center text-sm">
-          Already have an account?{" "}
-          <Link
-            href={ROUTES.login}
-            className="text-foreground underline-offset-4 hover:underline"
-          >
-            Sign in
-          </Link>
-        </p>
       </form>
     </Form>
   );

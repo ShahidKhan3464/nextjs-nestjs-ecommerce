@@ -1,66 +1,88 @@
-import { z } from "zod";
-import type { User } from "@/types";
 import { cookies } from "next/headers";
-import type { ApiResponse } from "@/types";
-import { MOCK_USERS } from "@/lib/mock-data";
+import { getBackendUrl } from "@/lib/backend-url";
 import { jsonMessage, jsonOk } from "@/lib/api-response";
-import {
-  signAccessToken,
-  signRefreshToken,
-} from "@/lib/server-auth";
+import type { ApiResponse, User, UserRole } from "@/types";
 
-const bodySchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
-});
+const DEFAULT_ROLE: UserRole = "customer";
 
-function sanitizeUser(u: (typeof MOCK_USERS)[number]): User {
-  return {
-    id: u.id,
-    email: u.email,
-    name: u.name,
-    role: u.role,
-    createdAt: u.createdAt,
-    avatarUrl: u.avatarUrl,
+/** Nest wraps controller return values with DataResponseInterceptor: `{ data, version }`. */
+type NestLoginPayload = {
+  data?: {
+    user?: {
+      id: number;
+      email: string;
+      fullName: string;
+      accessToken: string;
+      refreshToken: string;
+    };
   };
+  statusCode?: number;
+  message?: string | string[];
+};
+
+function nestErrorMessage(payload: NestLoginPayload | null): string {
+  const raw = payload?.message;
+  if (Array.isArray(raw)) return raw.join(", ");
+  if (typeof raw === "string") return raw;
+  return "Invalid email or password";
 }
 
 export async function POST(req: Request) {
-  let json: unknown;
+  let body: unknown;
   try {
-    json = await req.json();
+    body = await req.json();
   } catch {
     return jsonMessage("Invalid JSON body", 400);
   }
-  const parsed = bodySchema.safeParse(json);
-  if (!parsed.success) {
+
+  if (
+    !body ||
+    typeof body !== "object" ||
+    typeof (body as { email?: unknown }).email !== "string" ||
+    typeof (body as { password?: unknown }).password !== "string"
+  ) {
     return jsonMessage("Invalid credentials payload", 422);
   }
-  const { email, password } = parsed.data;
-  const userRecord = MOCK_USERS.find(
-    (u) => u.email.toLowerCase() === email.toLowerCase()
-  );
-  if (!userRecord || userRecord.password !== password) {
-    return jsonMessage("Invalid email or password", 401);
+
+  const { email, password } = body as { email: string; password: string };
+
+  const res = await fetch(`${getBackendUrl()}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  let payload: NestLoginPayload | null = null;
+  try {
+    payload = (await res.json()) as NestLoginPayload;
+  } catch {
+    payload = null;
   }
 
-  const base = {
-    sub: userRecord.id,
-    email: userRecord.email,
-    role: userRecord.role,
-  };
-  const accessToken = await signAccessToken(base);
-  const refreshToken = await signRefreshToken(base);
+  if (!res.ok) {
+    return jsonMessage(nestErrorMessage(payload), res.status === 401 ? 401 : res.status);
+  }
+
+  const u = payload?.data?.user;
+  if (
+    !u?.accessToken ||
+    !u.refreshToken ||
+    u.email === undefined ||
+    u.fullName === undefined ||
+    u.id === undefined
+  ) {
+    return jsonMessage("Unexpected response from server", 502);
+  }
 
   const jar = await cookies();
-  jar.set("access_token", accessToken, {
+  jar.set("access_token", u.accessToken, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: 60 * 15,
   });
-  jar.set("refresh_token", refreshToken, {
+  jar.set("refresh_token", u.refreshToken, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -68,19 +90,27 @@ export async function POST(req: Request) {
     maxAge: 60 * 60 * 24 * 7,
   });
 
-  const user = sanitizeUser(userRecord);
-  const payload: ApiResponse<{
+  const user: User = {
+    id: String(u.id),
+    email: u.email,
+    name: u.fullName,
+    role: DEFAULT_ROLE,
+    createdAt: new Date().toISOString(),
+  };
+
+  const response: ApiResponse<{
     user: User;
     accessToken: string;
     refreshToken: string;
-    expiresIn: number;
+    // expiresIn: number;
   }> = {
     data: {
       user,
-      accessToken,
-      refreshToken,
-      expiresIn: 900,
+      accessToken: u.accessToken,
+      refreshToken: u.refreshToken,
+      // expiresIn: 900,
     },
   };
-  return jsonOk(payload);
+
+  return jsonOk(response);
 }

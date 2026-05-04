@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const clientEnvSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
-  NEXT_PUBLIC_API_URL: z.string().optional(),
+  NEXT_PUBLIC_API_URL: z.string().url().optional(),
 });
 
 export type ClientEnv = z.infer<typeof clientEnvSchema>;

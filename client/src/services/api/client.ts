@@ -10,10 +10,15 @@ declare module "axios" {
   }
 }
 
+/** Browser: same-origin `/api/v1/*` (Route Handlers → Nest). Server: absolute URL to this Next app so paths resolve correctly. */
 const base =
   typeof window !== "undefined"
     ? ""
-    : process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+    : (
+        process.env.NEXT_PUBLIC_API_URL ??
+        process.env.NEXT_PUBLIC_SITE_URL ??
+        "http://localhost:3000"
+      ).replace(/\/$/, "");
 
 export const api = axios.create({
   withCredentials: true,
@@ -36,7 +41,8 @@ api.interceptors.response.use(
     if (
       !original ||
       original.url?.includes("/auth/refresh") ||
-      original.url?.includes("/auth/login")
+      original.url?.includes("/auth/login") ||
+      original.url?.includes("/auth/reset-password")
     ) {
       return Promise.reject(error);
     }
