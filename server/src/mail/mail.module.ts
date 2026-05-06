@@ -13,12 +13,12 @@ import { EjsAdapter } from '@nestjs-modules/mailer/adapters/ejs.adapter';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         transport: {
-          host: configService.getOrThrow<string>('appConfig.mailHost'),
-          port: configService.get<number>('appConfig.mailPort') ?? 2525,
-          secure: configService.get<boolean>('appConfig.mailSecure') ?? false,
+          host: configService.getOrThrow<string>('mail.host'),
+          port: configService.get<number>('mail.port') ?? 2525,
+          secure: configService.get<boolean>('mail.secure') ?? false,
           auth: {
-            user: configService.getOrThrow<string>('appConfig.smtpUsername'),
-            pass: configService.getOrThrow<string>('appConfig.smtpPassword'),
+            user: configService.getOrThrow<string>('mail.smtpUsername'),
+            pass: configService.getOrThrow<string>('mail.smtpPassword'),
           },
         },
         defaults: {

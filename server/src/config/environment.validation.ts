@@ -18,4 +18,7 @@ export default Joi.object({
   SMTP_PASSWORD: Joi.string().required(),
   MAIL_SECURE: Joi.boolean().default(false),
   MAIL_PORT: Joi.number().integer().min(1).max(65535).default(2525),
+  ADMIN_EMAIL: Joi.string().email().optional(),
+  ADMIN_NAME: Joi.string().min(5).max(30).optional(),
+  ADMIN_PASSWORD: Joi.string().min(8).max(30).optional(),
 });

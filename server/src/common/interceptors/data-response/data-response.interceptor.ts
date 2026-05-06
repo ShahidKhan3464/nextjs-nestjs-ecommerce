@@ -15,7 +15,7 @@ export class DataResponseInterceptor implements NestInterceptor {
       map((data: unknown) => {
         return {
           data,
-          version: this.configService.get<string>('appConfig.apiVersion'),
+          version: this.configService.get<string>('app.apiVersion'),
         };
       }),
     );
