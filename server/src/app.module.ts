@@ -1,12 +1,14 @@
 import { JwtModule } from '@nestjs/jwt';
 import { Module } from '@nestjs/common';
 import appConfig from './config/app.config';
+import mailConfig from './config/mail.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import jwtConfig from './auth/config/jwt.config';
 import { UsersModule } from './users/users.module';
 import databaseConfig from './config/database.config';
+import { SeedersModule } from './seeders/seeders.module';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import environmentValidation from './config/environment.validation';
@@ -20,14 +22,15 @@ import { DataResponseInterceptor } from './common/interceptors/data-response/dat
     AuthModule,
     MailModule,
     UsersModule,
+    SeedersModule,
     // PaginationModule,
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-      load: [appConfig, databaseConfig],
       validationSchema: environmentValidation,
+      load: [appConfig, databaseConfig, mailConfig],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

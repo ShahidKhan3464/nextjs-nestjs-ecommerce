@@ -46,7 +46,7 @@ export class ForgotPasswordProvider {
     );
 
     const base = (
-      this.configService.get<string>('appConfig.frontendUrl') ??
+      this.configService.get<string>('app.frontendUrl') ??
       'http://localhost:3000'
     ).replace(/\/$/, '');
     const resetUrl = `${base}/reset-password?token=${encodeURIComponent(token)}`;
