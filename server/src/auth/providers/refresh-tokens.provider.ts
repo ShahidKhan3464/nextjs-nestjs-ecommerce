@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import jwtConfig from '../config/jwt.config';
 import type { ConfigType } from '@nestjs/config';
 import { UsersService } from '../../users/users.service';
-import { RefreshTokenDto } from '../dtos/refresh-token.dto';
+import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { GenerateTokensProvider } from './generate-tokens.provider';
 
 interface RefreshTokenPayload {

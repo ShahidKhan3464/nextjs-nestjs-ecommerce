@@ -2,7 +2,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { HashingProvider } from './hashing.provider';
 import { UsersService } from 'src/users/users.service';
-import { ResetPasswordDto } from '../dtos/reset-password.dto';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
 import {
   Logger,
   Injectable,

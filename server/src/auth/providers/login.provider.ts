@@ -1,4 +1,4 @@
-import { LoginDto } from '../dtos/login.dto';
+import { LoginDto } from '../dto/login.dto';
 import { HashingProvider } from './hashing.provider';
 import { User } from '../../users/entities/user.entity';
 import { UsersService } from '../../users/users.service';

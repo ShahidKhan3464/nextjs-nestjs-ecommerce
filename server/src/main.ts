@@ -20,11 +20,21 @@ async function bootstrap() {
 
   // 3️⃣ Swagger Config
   const config = new DocumentBuilder()
-    .addBearerAuth()
     .setVersion('1.0')
     .setTitle('My API')
     .setDescription('API documentation')
     .addServer('http://localhost:3001')
+    .addBearerAuth(
+      {
+        name: 'JWT',
+        in: 'header',
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Enter JWT token',
+      },
+      'access-token',
+    )
     .build();
 
   // 4️⃣ Create Swagger document

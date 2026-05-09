@@ -10,15 +10,15 @@ import {
 
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
-  private static readonly defaultAuthType = AuthType.Bearer;
+  private static readonly defaultAuthType = AuthType.BEARER;
   private readonly authTypeGuardMap: Record<string, CanActivate>;
   constructor(
     private readonly reflector: Reflector,
     private readonly accessTokenGuard: AccessTokenGuard,
   ) {
     this.authTypeGuardMap = {
-      [AuthType.Bearer]: this.accessTokenGuard,
-      [AuthType.None]: {
+      [AuthType.BEARER]: this.accessTokenGuard,
+      [AuthType.NONE]: {
         canActivate: () => true,
       },
     };
@@ -35,13 +35,13 @@ export class AuthenticationGuard implements CanActivate {
     const error = new UnauthorizedException();
 
     for (const guard of guards) {
-      console.log(guard);
+      // console.log(guard);
       const canActivate = await Promise.resolve(
         guard.canActivate(context),
       ).catch(() => {
         throw error;
       });
-      console.log(canActivate);
+      // console.log(canActivate);
       if (canActivate) {
         return true;
       }

@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { LoginDto } from './dtos/login.dto';
+import { LoginDto } from './dto/login.dto';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { RefreshTokenDto } from './dtos/refresh-token.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { ForgotPasswordDto } from './dtos/forgot-password.dto';
-import { ResetPasswordDto } from './dtos/reset-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoggedInUser, LoginProvider } from './providers/login.provider';
+import { ResetPasswordProvider } from './providers/reset-password.provider';
 import { RefreshTokensProvider } from './providers/refresh-tokens.provider';
 import { ForgotPasswordProvider } from './providers/forgot-password.provider';
-import { ResetPasswordProvider } from './providers/reset-password.provider';
 
 @Injectable()
 export class AuthService {

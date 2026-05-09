@@ -10,12 +10,16 @@ import { UsersModule } from './users/users.module';
 import databaseConfig from './config/database.config';
 import { SeedersModule } from './seeders/seeders.module';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { ProductsModule } from './products/products.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RolesGuard } from './auth/guards/roles/roles.guard';
 import environmentValidation from './config/environment.validation';
 // import { PaginationModule } from './common/pagination/pagination.module';
 import { AccessTokenGuard } from './auth/guards/access-token/access-token.guard';
 import { AuthenticationGuard } from './auth/guards/authentication/authentication.guard';
 import { DataResponseInterceptor } from './common/interceptors/data-response/data-response.interceptor';
+import { CategoriesModule } from './categories/categories.module';
+import { ProductVariantsModule } from './product-variants/product-variants.module';
 
 @Module({
   imports: [
@@ -23,6 +27,7 @@ import { DataResponseInterceptor } from './common/interceptors/data-response/dat
     MailModule,
     UsersModule,
     SeedersModule,
+    ProductsModule,
     // PaginationModule,
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
@@ -47,6 +52,8 @@ import { DataResponseInterceptor } from './common/interceptors/data-response/dat
           configService.get('database.autoLoadEntities') === 'true',
       }),
     }),
+    CategoriesModule,
+    ProductVariantsModule,
   ],
   providers: [
     AccessTokenGuard,
@@ -57,6 +64,10 @@ import { DataResponseInterceptor } from './common/interceptors/data-response/dat
     {
       provide: APP_GUARD,
       useClass: AuthenticationGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 })

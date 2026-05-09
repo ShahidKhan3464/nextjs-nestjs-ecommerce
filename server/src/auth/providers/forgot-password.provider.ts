@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { MailService } from 'src/mail/providers/mail.service';
-import { ForgotPasswordDto } from '../dtos/forgot-password.dto';
+import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 
 @Injectable()
 export class ForgotPasswordProvider {
