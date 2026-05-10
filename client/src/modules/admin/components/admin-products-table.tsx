@@ -7,23 +7,24 @@ import { Button } from "@/components/ui/button";
 import { queryKeys } from "@/constants/query-keys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   deleteAdminProduct,
   fetchAdminProducts,
 } from "@/modules/admin/services/admin.service";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  TableHead,
+  TableHeader,
+} from "@/components/ui/table";
+
 
 export function AdminProductsTable() {
   const qc = useQueryClient();
   const { data, isPending } = useQuery({
     queryKey: queryKeys.admin.products,
-    queryFn: fetchAdminProducts,
+    queryFn: () => fetchAdminProducts({ limit: 100, page: 1 }),
   });
 
   const remove = useMutation({

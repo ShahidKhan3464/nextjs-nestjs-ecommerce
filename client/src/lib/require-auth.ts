@@ -1,40 +1,43 @@
 import type { User } from "@/types";
 import { cookies } from "next/headers";
 import { MOCK_USERS } from "@/lib/mock-data";
-import { verifyToken } from "@/lib/server-auth";
 import { jsonMessage } from "@/lib/api-response";
+import { AUTH_SESSION_COOKIE } from "@/lib/auth-cookies";
+import { verifyToken, type JwtPayload } from "@/lib/server-auth";
 
-function bearer(req: Request): string | null {
-  const h = req.headers.get("authorization");
-  if (!h?.startsWith("Bearer ")) return null;
-  return h.slice(7);
+export function userFromSessionPayload(payload: JwtPayload): User {
+  const mock = MOCK_USERS.find((u) => u.id === payload.sub);
+  if (mock) {
+    return {
+      id: mock.id,
+      name: mock.name,
+      role: mock.role,
+      email: mock.email,
+      createdAt: mock.createdAt,
+      avatarUrl: mock.avatarUrl,
+    };
+  }
+  return {
+    id: payload.sub,
+    role: payload.role,
+    email: payload.email,
+    name: payload.name ?? payload.email.split("@")[0] ?? "User",
+    createdAt: new Date().toISOString(),
+  };
 }
 
 export async function requireUser(req: Request): Promise<User | Response> {
-  const headerToken = bearer(req);
+  void req;
   const jar = await cookies();
-  const cookieToken = jar.get("access_token")?.value;
-  const raw = headerToken ?? cookieToken;
-  if (!raw) {
+  const session = jar.get(AUTH_SESSION_COOKIE)?.value;
+  if (!session) {
     return jsonMessage("Unauthorized", 401);
   }
-  const payload = await verifyToken(raw);
+  const payload = await verifyToken(session);
   if (!payload || payload.typ !== "access") {
     return jsonMessage("Unauthorized", 401);
   }
-  const record = MOCK_USERS.find((u) => u.id === payload.sub);
-  if (!record) {
-    return jsonMessage("User not found", 401);
-  }
-  const user: User = {
-    id: record.id,
-    name: record.name,
-    role: record.role,
-    email: record.email,
-    createdAt: record.createdAt,
-    avatarUrl: record.avatarUrl,
-  };
-  return user;
+  return userFromSessionPayload(payload);
 }
 
 export async function requireAdmin(req: Request): Promise<User | Response> {

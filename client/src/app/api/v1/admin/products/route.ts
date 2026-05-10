@@ -1,58 +1,89 @@
-import { z } from "zod";
 import type { Product } from "@/types";
 import type { ApiResponse } from "@/types";
-import { requireAdmin } from "@/lib/require-auth";
+import { getBackendUrl } from "@/lib/backend-url";
 import { jsonMessage, jsonOk } from "@/lib/api-response";
-import { getProductCatalog, upsertProduct } from "@/lib/product-store";
+import {
+  forwardAuthorization,
+  nestErrorMessage,
+} from "@/lib/nest-http";
+import {
+  mapNestProductToAdminProduct,
+  type NestProductDto,
+} from "@/lib/nest-catalog-mapper";
+
+type NestPagedEnvelope = {
+  data?: {
+    page?: number;
+    limit?: number;
+    total?: number;
+    data?: NestProductDto[];
+  };
+};
 
 export async function GET(req: Request) {
-  const admin = await requireAdmin(req);
-  if (admin instanceof Response) return admin;
-  const list = getProductCatalog();
-  const body: ApiResponse<{ products: Product[] }> = { data: { products: list } };
+  const url = new URL(req.url);
+  const qs = url.searchParams.toString();
+  const backend = getBackendUrl();
+  const res = await fetch(`${backend}/products${qs ? `?${qs}` : ""}`, {
+    headers: { ...forwardAuthorization(req) },
+  });
+
+  let raw: unknown = null;
+  try {
+    raw = await res.json();
+  } catch {
+    raw = null;
+  }
+
+  if (!res.ok) {
+    return jsonMessage(nestErrorMessage(raw), res.status);
+  }
+
+  const envelope = raw as NestPagedEnvelope;
+  const inner = envelope?.data;
+  if (!inner || !Array.isArray(inner.data)) {
+    return jsonMessage("Unexpected catalog response", 502);
+  }
+
+  const products = inner.data.map(mapNestProductToAdminProduct);
+  const page = inner.page ?? 1;
+  const limit = inner.limit ?? 10;
+  const total = inner.total ?? products.length;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  const body: ApiResponse<{
+    products: Product[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  }> = {
+    data: {
+      products,
+      pagination: { page, limit, total, totalPages },
+    },
+  };
+
   return jsonOk(body);
 }
 
-const variantSchema = z.object({
-  id: z.string(),
-  productId: z.string(),
-  sku: z.string(),
-  name: z.string(),
-  options: z.record(z.string(), z.string()),
-  price: z.number().positive(),
-  compareAtPrice: z.number().optional(),
-  stock: z.number().int().min(0),
-  image: z.string().optional(),
-});
-
-const productSchema = z.object({
-  id: z.string(),
-  slug: z.string(),
-  name: z.string(),
-  description: z.string(),
-  category: z.string(),
-  rating: z.number(),
-  reviewCount: z.number().int().min(0),
-  images: z.array(z.string()),
-  variants: z.array(variantSchema).min(1),
-  featured: z.boolean().optional(),
-});
-
 export async function POST(req: Request) {
-  const admin = await requireAdmin(req);
-  if (admin instanceof Response) return admin;
-  let json: unknown;
-  try {
-    json = await req.json();
-  } catch {
-    return jsonMessage("Invalid JSON body", 400);
-  }
-  const parsed = productSchema.safeParse(json);
-  if (!parsed.success) {
-    return jsonMessage("Invalid product payload", 422);
-  }
-  const product = parsed.data as Product;
-  upsertProduct(product);
-  const body: ApiResponse<{ product: Product }> = { data: { product } };
-  return jsonOk(body, { status: 201 });
+  const backend = getBackendUrl();
+  const formData = await req.formData();
+
+  const res = await fetch(`${backend}/products`, {
+    method: "POST",
+    headers: { ...forwardAuthorization(req) },
+    body: formData,
+  });
+
+  const text = await res.text();
+  return new Response(text, {
+    status: res.status,
+    headers: {
+      "Content-Type": res.headers.get("Content-Type") ?? "application/json",
+    },
+  });
 }

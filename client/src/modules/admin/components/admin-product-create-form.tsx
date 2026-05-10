@@ -2,15 +2,22 @@
 
 import { z } from "zod";
 import { toast } from "sonner";
-import type { Product } from "@/types";
+import Image from "next/image";
+import { XIcon } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { queryKeys } from "@/constants/query-keys";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Resolver } from "react-hook-form";
-import { createAdminProduct } from "@/modules/admin/services/admin.service";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  createAdminProduct,
+  fetchAdminCategories,
+} from "@/modules/admin/services/admin.service";
 import {
   Form,
   FormItem,
@@ -20,67 +27,127 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-const img = (seed: string) =>
-  `https://picsum.photos/seed/${encodeURIComponent(seed)}/800/1000`;
-
 const schema = z.object({
   name: z.string().min(2),
-  slug: z
+  description: z
     .string()
-    .min(2)
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase kebab-case"),
-  description: z.string().min(10),
-  category: z.string().min(2),
-  price: z.coerce.number().positive(),
+    .optional()
+    .refine((v) => !v?.trim() || v.trim().length >= 10, {
+      message: "Description must be at least 10 characters when provided",
+    }),
+  categoryId: z.string().min(1, "Pick a category"),
+  size: z.string().min(1, "Size is required"),
+  color: z.string().min(1, "Color is required"),
+  sku: z.string().min(2),
   stock: z.coerce.number().int().min(0),
+  price: z.coerce.number().positive(),
 });
 
 type Values = z.infer<typeof schema>;
 
+function previewKey(file: File, index: number) {
+  return `${file.name}-${file.size}-${file.lastModified}-${index}`;
+}
+
 export function AdminProductCreateForm() {
   const router = useRouter();
+  const qc = useQueryClient();
+  const [files, setFiles] = useState<File[]>([]);
+  const objectUrlsRef = useRef<Map<File, string>>(new Map());
+  const { data: categories = [], isPending: categoriesLoading } = useQuery({
+    queryKey: queryKeys.admin.categories,
+    queryFn: () => fetchAdminCategories({ limit: 200 }),
+  });
+
+  const categoryOptions = useMemo(
+    () =>
+      [...categories].sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+      ),
+    [categories]
+  );
+
+  useEffect(() => {
+    const map = objectUrlsRef.current;
+    return () => {
+      map.forEach((url) => URL.revokeObjectURL(url));
+      map.clear();
+    };
+  }, []);
+
+  function objectUrlFor(file: File): string {
+    const map = objectUrlsRef.current;
+    let url = map.get(file);
+    if (!url) {
+      url = URL.createObjectURL(file);
+      map.set(file, url);
+    }
+    return url;
+  }
+
+  function addFiles(incoming: File[]) {
+    if (incoming.length === 0) return;
+    setFiles((prev) => [...prev, ...incoming]);
+  }
+
+  function removeFileAt(index: number) {
+    setFiles((prev) => {
+      const next = [...prev];
+      const [removed] = next.splice(index, 1);
+      if (removed) {
+        const url = objectUrlsRef.current.get(removed);
+        if (url) {
+          URL.revokeObjectURL(url);
+          objectUrlsRef.current.delete(removed);
+        }
+      }
+      return next;
+    });
+  }
+
   const form = useForm<Values>({
     resolver: zodResolver(schema) as Resolver<Values>,
     defaultValues: {
       name: "",
-      slug: "",
-      price: 99,
-      stock: 20,
       description: "",
-      category: "Apparel",
+      categoryId: "",
+      size: "M",
+      color: "Black",
+      sku: "",
+      stock: 20,
+      price: 99,
     },
   });
 
   async function onSubmit(values: Values) {
-    const id = `p${crypto.randomUUID().slice(0, 8)}`;
-    const product: Product = {
-      id,
-      slug: values.slug,
-      name: values.name,
-      description: values.description,
-      category: values.category,
-      rating: 0,
-      reviewCount: 0,
-      images: [img(values.slug), img(`${values.slug}-2`)],
-      featured: false,
-      variants: [
-        {
-          id: `${id}-v1`,
-          productId: id,
-          sku: `${values.slug.toUpperCase()}-DEF`,
-          name: "Default",
-          options: { type: "Default" },
-          price: values.price,
-          compareAtPrice: values.price + 20,
-          stock: values.stock,
-          image: img(`${values.slug}-v`),
-        },
-      ],
-    };
+    if (files.length === 0) {
+      toast.error("Add at least one product image");
+      return;
+    }
 
     try {
-      await createAdminProduct(product);
+      const categoryId = Number(values.categoryId);
+      if (!Number.isFinite(categoryId) || categoryId < 1) {
+        toast.error("Pick a valid category");
+        return;
+      }
+      await createAdminProduct({
+        categoryId,
+        images: files,
+        name: values.name.trim(),
+        description: values.description?.trim() || undefined,
+        variants: [
+          {
+            stock: values.stock,
+            price: values.price,
+            sku: values.sku.trim(),
+            size: values.size.trim(),
+            color: values.color.trim(),
+          },
+        ],
+      });
       toast.success("Product created");
+      await qc.invalidateQueries({ queryKey: queryKeys.admin.products });
       router.push(ROUTES.products);
       router.refresh();
     } catch {
@@ -90,7 +157,10 @@ export function AdminProductCreateForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-xl space-y-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="w-full max-w-4xl space-y-6"
+      >
         <FormField
           name="name"
           control={form.control}
@@ -104,52 +174,110 @@ export function AdminProductCreateForm() {
             </FormItem>
           )}
         />
+
         <FormField
-          name="slug"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Slug</FormLabel>
-              <FormControl>
-                <Input placeholder="my-product" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="category"
+          name="categoryId"
           control={form.control}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <select
+                  ref={field.ref}
+                  name={field.name}
+                  value={field.value}
+                  onBlur={field.onBlur}
+                  disabled={categoriesLoading}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  className="border-input bg-background ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">
+                    {categoriesLoading
+                      ? "Loading categories…"
+                      : categoryOptions.length === 0
+                        ? "No categories yet — restart the API after seeding"
+                        : "Select category"}
+                  </option>
+                  {categoryOptions.map((c) => (
+                    <option key={c.id} value={String(c.id)}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           name="description"
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>Description (optional)</FormLabel>
               <FormControl>
-                <Textarea rows={5} {...field} />
+                <Textarea
+                  rows={5}
+                  placeholder="At least 10 characters if filled in"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField
+            name="size"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Variant size</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="color"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Variant color</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          name="sku"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>SKU</FormLabel>
+              <FormControl>
+                <Input placeholder="UNIQUE-SKU-001" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField
             name="price"
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price (USD)</FormLabel>
+                <FormLabel>Price</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.01" min={0} {...field} />
                 </FormControl>
@@ -162,7 +290,7 @@ export function AdminProductCreateForm() {
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Initial stock</FormLabel>
+                <FormLabel>Stock</FormLabel>
                 <FormControl>
                   <Input type="number" min={0} {...field} />
                 </FormControl>
@@ -171,6 +299,58 @@ export function AdminProductCreateForm() {
             )}
           />
         </div>
+
+        <div className="space-y-3">
+          <label
+            className="text-sm leading-none font-medium"
+            htmlFor="product-images"
+          >
+            Images
+          </label>
+          <Input
+            multiple
+            type="file"
+            id="product-images"
+            accept="image/jpeg,image/png,image/gif,image/webp"
+            onChange={(e) => {
+              addFiles(Array.from(e.target.files ?? []));
+              e.target.value = "";
+            }}
+          />
+          <p className="text-muted-foreground text-xs">
+            Add one or more images (JPEG, PNG, GIF, or Webp). Max 5 MB each.
+          </p>
+
+          {files.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+              {files.map((file, index) => (
+                <div
+                  key={previewKey(file, index)}
+                  className="bg-muted relative aspect-square overflow-hidden rounded-lg border"
+                >
+                  <Image
+                    alt=""
+                    fill
+                    unoptimized
+                    className="object-cover"
+                    src={objectUrlFor(file)}
+                  />
+                  <Button
+                    size="icon"
+                    type="button"
+                    variant="secondary"
+                    onClick={() => removeFileAt(index)}
+                    aria-label={`Remove image ${index + 1}`}
+                    className="absolute top-1 right-1 size-8 rounded-full shadow-sm"
+                  >
+                    <XIcon className="size-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
+
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? "Creating…" : "Create product"}
         </Button>

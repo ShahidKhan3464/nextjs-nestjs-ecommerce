@@ -9,6 +9,8 @@ export interface JwtPayload {
   email: string;
   role: "admin" | "customer";
   typ: "access" | "refresh";
+  /** Session tokens may carry display name from Nest login/refresh. */
+  name?: string;
 }
 
 export async function signAccessToken(payload: Omit<JwtPayload, "typ">) {
@@ -32,18 +34,37 @@ export async function signRefreshToken(payload: Omit<JwtPayload, "typ">) {
 export async function verifyToken(token: string): Promise<JwtPayload | null> {
   try {
     const { payload } = await jwtVerify(token, secret);
-    const sub = typeof payload.sub === "string" ? payload.sub : null;
+    const rawSub = payload.sub;
+    const sub =
+      typeof rawSub === "string"
+        ? rawSub
+        : typeof rawSub === "number"
+          ? String(rawSub)
+          : null;
+    if (!sub) return null;
+
     const email = typeof payload.email === "string" ? payload.email : "";
-    const role =
-      payload.role === "admin" || payload.role === "customer"
-        ? payload.role
-        : "customer";
+
+    const rawRole = payload.role;
+    const role: JwtPayload["role"] =
+      rawRole === "admin" || rawRole === "ADMIN"
+        ? "admin"
+        : rawRole === "customer" || rawRole === "CUSTOMER"
+          ? "customer"
+          : "customer";
+
     const typ =
       payload.typ === "access" || payload.typ === "refresh"
         ? payload.typ
         : "access";
-    if (!sub) return null;
-    return { sub, email, role, typ };
+
+    const nameRaw = payload.name;
+    const name =
+      typeof nameRaw === "string" && nameRaw.trim().length > 0
+        ? nameRaw.trim()
+        : undefined;
+
+    return { sub, email, role, typ, name };
   } catch {
     return null;
   }

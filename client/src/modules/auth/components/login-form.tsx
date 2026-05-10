@@ -4,12 +4,13 @@ import { z } from "zod";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/auth-store";
+import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { safeProtectedRedirectPath } from "@/lib/auth-route-guards";
 import { loginRequest } from "@/modules/auth/services/auth.service";
 import {
   Form,
@@ -28,7 +29,7 @@ const schema = z.object({
 type Values = z.infer<typeof schema>;
 
 export function LoginForm() {
-  const router = useRouter();
+  const searchParams = useSearchParams();
   const setSession = useAuthStore((s) => s.setSession);
   const form = useForm<Values>({
     resolver: zodResolver(schema),
@@ -40,7 +41,10 @@ export function LoginForm() {
       const data = await loginRequest(values.email, values.password);
       setSession(data.user, data.accessToken);
       toast.success("Signed in");
-      router.push(ROUTES.dashboard);
+      const next =
+        safeProtectedRedirectPath(searchParams.get("next")) ??
+        ROUTES.dashboard;
+      window.location.assign(next);
     } catch {
       toast.error("Invalid email or password");
     }

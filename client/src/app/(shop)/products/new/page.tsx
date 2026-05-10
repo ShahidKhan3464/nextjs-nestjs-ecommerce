@@ -11,17 +11,23 @@ export const metadata: Metadata = {
 
 export default function NewProductPage() {
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <div className="w-full max-w-full space-y-6">
       <Link
         href={ROUTES.products}
         className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "-ml-2")}
       >
         ← Back to products
       </Link>
-      <p className="text-muted-foreground text-sm">
-        Add a new product with images, description, price, and stock so it appears
-        on the storefront right away.
-      </p>
+      <div className="space-y-2">
+        <h2 className="font-heading text-xl font-semibold tracking-tight">
+          New product
+        </h2>
+        <p className="text-muted-foreground max-w-2xl text-sm">
+          Add images, pick a category, and set variant details (SKU, price, stock).
+          The form aligns with the admin header above—full width of the main
+          column.
+        </p>
+      </div>
       <AdminProductCreateForm />
     </div>
   );

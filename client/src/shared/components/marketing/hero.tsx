@@ -29,16 +29,16 @@ export function Hero() {
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
-              href={ROUTES.products}
+              href={ROUTES.login}
               className={cn(buttonVariants({ size: "lg" }))}
             >
-              Shop collection
+              Get started
             </Link>
             <Link
-              href={ROUTES.dashboard}
+              href={ROUTES.register}
               className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
             >
-              Account
+              Create account
             </Link>
           </div>
         </motion.div>
