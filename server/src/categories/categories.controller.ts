@@ -1,14 +1,13 @@
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
-import { QueryCategoryDto } from './dto/query-category.dto';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { UserRole } from 'src/users/constants/user.constants';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 import {
   Get,
   Body,
   Post,
   Param,
+  Patch,
+  Delete,
   Query,
   Controller,
   ParseIntPipe,
@@ -34,5 +33,17 @@ export class CategoriesController {
   @Roles(UserRole.ADMIN)
   create(@Body() dto: CreateCategoryDto) {
     return this.categoriesService.create(dto);
+  }
+
+  @Patch(':id')
+  @Roles(UserRole.ADMIN)
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateCategoryDto) {
+    return this.categoriesService.update(id, dto);
+  }
+
+  @Delete(':id')
+  @Roles(UserRole.ADMIN)
+  delete(@Param('id', ParseIntPipe) id: number) {
+    return this.categoriesService.delete(id);
   }
 }

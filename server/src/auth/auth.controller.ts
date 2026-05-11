@@ -9,7 +9,7 @@ import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
-@ApiTags('Auth')
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

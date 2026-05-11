@@ -10,7 +10,7 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden border-b">
       <div className="from-background via-background to-muted/40 absolute inset-0 bg-linear-to-b" />
-      <div className="relative mx-auto flex max-w-7xl flex-col gap-10 px-4 py-20 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:py-28">
+      <div className="relative mx-auto flex max-w-7xl flex-col gap-10 px-4 py-20 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:py-28">
         <motion.div
           className="max-w-xl space-y-6"
           animate={{ opacity: 1, y: 0 }}

@@ -15,10 +15,6 @@ import { useForm, type Resolver } from "react-hook-form";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  createAdminProduct,
-  fetchAdminCategories,
-} from "@/modules/admin/services/admin.service";
-import {
   Form,
   FormItem,
   FormField,
@@ -26,6 +22,10 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  createAdminProduct,
+  fetchAdminCategories,
+} from "@/modules/admin/services/admin.service";
 
 const schema = z.object({
   name: z.string().min(2),
@@ -148,10 +148,8 @@ export function AdminProductCreateForm() {
       });
       toast.success("Product created");
       await qc.invalidateQueries({ queryKey: queryKeys.admin.products });
-      router.push(ROUTES.products);
-      router.refresh();
-    } catch {
-      toast.error("Could not create product");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message);
     }
   }
 
