@@ -10,10 +10,13 @@ export const ROUTES = {
   wishlist: "/wishlist",
   products: "/products",
   dashboard: "/dashboard",
+  categories: "/categories",
   productNew: "/products/new",
+  categoryNew: "/categories/new",
   resetPassword: "/reset-password",
   forgotPassword: "/forgot-password",
   user: (id: string) => `/users/${id}`,
   order: (id: string) => `/orders/${id}`,
   product: (slug: string) => `/products/${slug}`,
+  category: (id: string | number) => `/categories/${id}`,
 } as const;

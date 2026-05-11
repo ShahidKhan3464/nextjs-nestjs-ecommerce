@@ -11,8 +11,8 @@ import { queryKeys } from "@/constants/query-keys";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "@/components/ui/button";
+import { fetchAdminOrder } from "../services/orders.service";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
-import { fetchAdminOrder } from "@/modules/admin/services/admin.service";
 
 type Props = { orderId: string };
 
@@ -35,7 +35,7 @@ export function AdminOrderDetail({ orderId }: Props) {
             href={ROUTES.orders}
             className={cn(buttonVariants({ variant: "outline" }))}
           >
-            All orders
+            Back to orders
           </Link>
         }
       />

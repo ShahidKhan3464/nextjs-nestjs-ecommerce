@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+import { AdminAnalytics } from "@/modules/admin/dashboard";
 import { getAccessTokenPayload } from "@/lib/session-cookie";
-import { AdminAnalytics } from "@/modules/admin/components/admin-analytics";
 import { DashboardOverview } from "@/modules/dashboard/components/dashboard-overview";
 
 export const metadata: Metadata = {

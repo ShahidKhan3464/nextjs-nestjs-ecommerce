@@ -42,7 +42,7 @@ export function ForgotPasswordForm() {
     <Form {...form}>
       <form
         noValidate
-        className="space-y-6"
+        className="space-y-4"
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <FormField

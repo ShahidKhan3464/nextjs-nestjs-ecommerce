@@ -23,6 +23,7 @@ export const queryKeys = {
     categories: ["admin", "categories"] as const,
     user: (id: string) => ["admin", "users", id] as const,
     order: (id: string) => ["admin", "orders", id] as const,
+    category: (id: number) => ["admin", "categories", id] as const,
   },
   coupons: (code: string) => ["coupons", code] as const,
 } as const;

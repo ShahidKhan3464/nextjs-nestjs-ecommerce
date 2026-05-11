@@ -4,16 +4,18 @@ import { z } from "zod";
 import { toast } from "sonner";
 import Image from "next/image";
 import { XIcon } from "lucide-react";
-import { ROUTES } from "@/constants/routes";
-import { useRouter } from "next/navigation";
+import { isAxiosError } from "axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useFieldArray } from "react-hook-form";
 import { queryKeys } from "@/constants/query-keys";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Resolver } from "react-hook-form";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createAdminProduct } from "../services/products.service";
+import { fetchAdminCategories } from "../../categories/services/categories.service";
 import {
   Form,
   FormItem,
@@ -22,10 +24,14 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  createAdminProduct,
-  fetchAdminCategories,
-} from "@/modules/admin/services/admin.service";
+
+const variantSchema = z.object({
+  size: z.string().min(1, "Size is required"),
+  color: z.string().min(1, "Color is required"),
+  sku: z.string().min(2),
+  stock: z.coerce.number().int().min(0),
+  price: z.coerce.number().positive(),
+});
 
 const schema = z.object({
   name: z.string().min(2),
@@ -36,11 +42,7 @@ const schema = z.object({
       message: "Description must be at least 10 characters when provided",
     }),
   categoryId: z.string().min(1, "Pick a category"),
-  size: z.string().min(1, "Size is required"),
-  color: z.string().min(1, "Color is required"),
-  sku: z.string().min(2),
-  stock: z.coerce.number().int().min(0),
-  price: z.coerce.number().positive(),
+  variants: z.array(variantSchema).min(1),
 });
 
 type Values = z.infer<typeof schema>;
@@ -50,14 +52,15 @@ function previewKey(file: File, index: number) {
 }
 
 export function AdminProductCreateForm() {
-  const router = useRouter();
   const qc = useQueryClient();
   const [files, setFiles] = useState<File[]>([]);
   const objectUrlsRef = useRef<Map<File, string>>(new Map());
-  const { data: categories = [], isPending: categoriesLoading } = useQuery({
+  const { data: categoriesResp, isPending: categoriesLoading } = useQuery({
     queryKey: queryKeys.admin.categories,
     queryFn: () => fetchAdminCategories({ limit: 200 }),
   });
+
+  const categories = categoriesResp?.categories ?? [];
 
   const categoryOptions = useMemo(
     () =>
@@ -111,12 +114,13 @@ export function AdminProductCreateForm() {
       name: "",
       description: "",
       categoryId: "",
-      size: "M",
-      color: "Black",
-      sku: "",
-      stock: 20,
-      price: 99,
+      variants: [{ size: "M", color: "Black", sku: "", stock: 20, price: 99 }],
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "variants",
   });
 
   async function onSubmit(values: Values) {
@@ -136,20 +140,23 @@ export function AdminProductCreateForm() {
         images: files,
         name: values.name.trim(),
         description: values.description?.trim() || undefined,
-        variants: [
-          {
-            stock: values.stock,
-            price: values.price,
-            sku: values.sku.trim(),
-            size: values.size.trim(),
-            color: values.color.trim(),
-          },
-        ],
+        variants: values.variants.map((v) => ({
+          stock: v.stock,
+          price: v.price,
+          sku: v.sku.trim(),
+          size: v.size.trim(),
+          color: v.color.trim(),
+        })),
       });
       toast.success("Product created");
       await qc.invalidateQueries({ queryKey: queryKeys.admin.products });
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message);
+    } catch (err) {
+      const msg = isAxiosError(err)
+        ? (err.response?.data as { message?: string })?.message ??
+        err.message
+        : "Something went wrong";
+      toast.error(typeof msg === "string" ? msg : "Could not create product");
+      toast.error((err.response?.data as { message?: string })?.message ?? "Could not create product");
     }
   }
 

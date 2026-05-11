@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
+import { AdminOrderDetail } from "@/modules/admin/orders";
 import { getAccessTokenPayload } from "@/lib/session-cookie";
 import { OrderDetailView } from "@/modules/orders/components/order-detail-view";
-import { AdminOrderDetail } from "@/modules/admin/components/admin-order-detail";
 
 type Props = { params: Promise<{ id: string }> };
 

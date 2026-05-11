@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AdminUserDetail } from "@/modules/admin/components/admin-user-detail";
+import { AdminUserDetail } from "@/modules/admin/users";
 
 type Props = { params: Promise<{ id: string }> };
 

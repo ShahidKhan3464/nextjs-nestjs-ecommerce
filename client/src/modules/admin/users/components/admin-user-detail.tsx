@@ -9,8 +9,8 @@ import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/constants/query-keys";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buttonVariants } from "@/components/ui/button";
+import { fetchAdminUser } from "../services/users.service";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
-import { fetchAdminUser } from "@/modules/admin/services/admin.service";
 
 type Props = {
   userId: string;

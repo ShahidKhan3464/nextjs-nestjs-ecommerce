@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/constants/query-keys";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchAdminAnalytics } from "@/modules/admin/services/admin.service";
+import { fetchAdminAnalytics } from "../services/analytics.service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Area,

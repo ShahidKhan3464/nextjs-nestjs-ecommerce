@@ -88,10 +88,10 @@ export async function POST(req: Request) {
         : DEFAULT_ROLE;
 
   const sessionJwt = await signAccessToken({
-    sub: String(u.id),
-    email: u.email,
     role,
+    email: u.email,
     name: u.fullName,
+    sub: String(u.id),
   });
 
   const jar = await cookies();
