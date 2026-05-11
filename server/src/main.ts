@@ -1,12 +1,14 @@
+import { join } from 'path';
 import { AppModule } from './app.module';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-// import { DataResponseInterceptor } from './common/interceptors/data-response/data-response.interceptor';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   // 1️⃣ Create Nest app
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.useStaticAssets(join(process.cwd(), 'uploads'), { prefix: '/uploads/' });
 
   // 2️⃣ Global Validation Pipe
   app.useGlobalPipes(
@@ -20,11 +22,21 @@ async function bootstrap() {
 
   // 3️⃣ Swagger Config
   const config = new DocumentBuilder()
-    .addBearerAuth()
     .setVersion('1.0')
     .setTitle('My API')
     .setDescription('API documentation')
     .addServer('http://localhost:3001')
+    .addBearerAuth(
+      {
+        name: 'JWT',
+        in: 'header',
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Enter JWT token',
+      },
+      'access-token',
+    )
     .build();
 
   // 4️⃣ Create Swagger document

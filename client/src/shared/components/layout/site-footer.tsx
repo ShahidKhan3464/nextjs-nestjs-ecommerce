@@ -14,42 +14,32 @@ export function SiteFooter() {
         </div>
         <div className="grid grid-cols-2 gap-10 text-sm sm:grid-cols-3">
           <div className="space-y-3">
-            <p className="font-medium">Shop</p>
+            <p className="font-medium">Company</p>
             <ul className="text-muted-foreground space-y-2">
               <li>
-                <Link className="hover:text-foreground" href={ROUTES.products}>
-                  All products
-                </Link>
+                <span className="cursor-default">About Us</span>
               </li>
               <li>
-                <Link className="hover:text-foreground" href={ROUTES.cart}>
-                  Cart
-                </Link>
+                <span className="cursor-default">Sustainability</span>
               </li>
               <li>
-                <Link className="hover:text-foreground" href={ROUTES.checkout}>
-                  Checkout
-                </Link>
+                <span className="cursor-default">Careers</span>
               </li>
             </ul>
           </div>
           <div className="space-y-3">
-            <p className="font-medium">Account</p>
+            <p className="font-medium">Support</p>
             <ul className="text-muted-foreground space-y-2">
               <li>
                 <Link className="hover:text-foreground" href={ROUTES.login}>
-                  Sign in
+                  Account Login
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-foreground" href={ROUTES.register}>
-                  Register
-                </Link>
+                <span className="cursor-default">Help Center</span>
               </li>
               <li>
-                <Link className="hover:text-foreground" href={ROUTES.orders}>
-                  Orders
-                </Link>
+                <span className="cursor-default">Contact Us</span>
               </li>
             </ul>
           </div>

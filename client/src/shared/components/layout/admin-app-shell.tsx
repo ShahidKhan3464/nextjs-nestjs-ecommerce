@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useAppSectionMeta } from "@/shared/hooks/use-app-section-meta";
 import { AppChromeHeader } from "@/shared/components/layout/app-chrome-header";
 import {
+  Store,
   Users,
   Package,
   PlusCircle,
@@ -52,11 +53,14 @@ export function AdminAppShell({ children }: { children: React.ReactNode }) {
       <aside
         id="admin-sidebar"
         aria-label="Admin navigation"
-        className="border-border bg-muted/30 hidden w-56 shrink-0 flex-col border-r lg:flex"
+        className="border-border bg-muted/30 sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r lg:flex"
       >
-        <div className="border-border flex h-14 items-center border-b px-4">
+        <div className="border-border flex h-14 items-center gap-2 border-b px-4">
+          <div className="bg-primary flex size-6 items-center justify-center rounded-md">
+            <Store className="text-primary-foreground size-4" />
+          </div>
           <span className="font-heading text-sm font-semibold tracking-tight">
-            Admin
+            Admin Portal
           </span>
         </div>
         <nav className="flex flex-col gap-0.5 p-2">
@@ -84,7 +88,7 @@ export function AdminAppShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <AppChromeHeader sectionTitle={meta.title} sectionHint={meta.hint} />
-        <div id="main-content" className="flex-1 overflow-auto p-4 lg:p-6">
+        <div id="main-content" className="flex-1 p-4 lg:p-6">
           {children}
         </div>
       </div>

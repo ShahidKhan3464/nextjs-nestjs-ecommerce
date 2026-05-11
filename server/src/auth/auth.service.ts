@@ -1,15 +1,15 @@
+import { LoginDto } from './dto/login.dto';
 import { Injectable } from '@nestjs/common';
-import { LoginDto } from './dtos/login.dto';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { RefreshTokenDto } from './dtos/refresh-token.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { ForgotPasswordDto } from './dtos/forgot-password.dto';
-import { ResetPasswordDto } from './dtos/reset-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoggedInUser, LoginProvider } from './providers/login.provider';
+import { ResetPasswordProvider } from './providers/reset-password.provider';
 import { RefreshTokensProvider } from './providers/refresh-tokens.provider';
 import { ForgotPasswordProvider } from './providers/forgot-password.provider';
-import { ResetPasswordProvider } from './providers/reset-password.provider';
 
 @Injectable()
 export class AuthService {
@@ -17,14 +17,14 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly loginProvider: LoginProvider,
     private readonly refreshTokensProvider: RefreshTokensProvider,
-    private readonly forgotPasswordProvider: ForgotPasswordProvider,
     private readonly resetPasswordProvider: ResetPasswordProvider,
+    private readonly forgotPasswordProvider: ForgotPasswordProvider,
   ) {}
 
-  public async register(registerDto: CreateUserDto): Promise<{
+  public async register(dto: CreateUserDto): Promise<{
     user: Pick<User, 'id' | 'fullName' | 'email' | 'role' | 'isBlocked'>;
   }> {
-    const user = await this.usersService.createUser(registerDto);
+    const user = await this.usersService.createUser(dto);
     return {
       user: {
         id: user.id,
@@ -36,27 +36,25 @@ export class AuthService {
     };
   }
 
-  public async login(loginDto: LoginDto): Promise<{ user: LoggedInUser }> {
-    return await this.loginProvider.login(loginDto);
+  public async login(dto: LoginDto): Promise<{ user: LoggedInUser }> {
+    return await this.loginProvider.login(dto);
   }
 
   public async forgotPassword(
-    forgotPasswordDto: ForgotPasswordDto,
+    dto: ForgotPasswordDto,
   ): Promise<{ sent: boolean }> {
-    return await this.forgotPasswordProvider.forgotPassword(forgotPasswordDto);
+    return await this.forgotPasswordProvider.forgotPassword(dto);
   }
 
-  public async resetPassword(
-    resetPasswordDto: ResetPasswordDto,
-  ): Promise<{ reset: true }> {
-    return await this.resetPasswordProvider.resetPassword(resetPasswordDto);
+  public async resetPassword(dto: ResetPasswordDto): Promise<{ reset: true }> {
+    return await this.resetPasswordProvider.resetPassword(dto);
   }
 
   public async refreshTokens(
-    refreshTokenDto: RefreshTokenDto,
+    dto: RefreshTokenDto,
   ): Promise<{ user: LoggedInUser }> {
     const { accessToken, refreshToken, user } =
-      await this.refreshTokensProvider.refreshTokens(refreshTokenDto);
+      await this.refreshTokensProvider.refreshTokens(dto);
     return {
       user: {
         accessToken,

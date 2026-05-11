@@ -7,15 +7,20 @@ import { usePathname } from "next/navigation";
 import { useAppSectionMeta } from "@/shared/hooks/use-app-section-meta";
 import { AppChromeHeader } from "@/shared/components/layout/app-chrome-header";
 import {
+  Heart,
+  Store,
   Package,
   UserRound,
   ShoppingBag,
+  ShoppingCart,
   LayoutDashboard,
 } from "lucide-react";
 
 const nav = [
   { href: ROUTES.dashboard, label: "Dashboard", icon: LayoutDashboard },
-  { href: ROUTES.products, label: "Products", icon: ShoppingBag },
+  { href: ROUTES.products, label: "Shop", icon: ShoppingBag },
+  { href: ROUTES.cart, label: "Cart", icon: ShoppingCart },
+  { href: ROUTES.wishlist, label: "Wishlist", icon: Heart },
   { href: ROUTES.orders, label: "Orders", icon: Package },
   { href: ROUTES.profile, label: "Profile", icon: UserRound },
 ];
@@ -28,12 +33,15 @@ export function CustomerAppShell({ children }: { children: React.ReactNode }) {
     <div className="bg-background flex min-h-screen">
       <aside
         id="customer-sidebar"
-        className="border-border bg-muted/30 hidden w-56 shrink-0 flex-col border-r md:flex"
+        className="border-border bg-muted/30 sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r md:flex"
         aria-label="Customer navigation"
       >
-        <div className="border-border flex h-14 items-center border-b px-4">
+        <div className="border-border flex h-14 items-center gap-2 border-b px-4">
+          <div className="bg-primary flex size-6 items-center justify-center rounded-md">
+            <Store className="text-primary-foreground size-4" />
+          </div>
           <span className="font-heading text-sm font-semibold tracking-tight">
-            Account
+            My Account
           </span>
         </div>
         <nav className="flex flex-col gap-0.5 p-2">
@@ -70,7 +78,7 @@ export function CustomerAppShell({ children }: { children: React.ReactNode }) {
         />
         <div
           id="main-content"
-          className="flex-1 overflow-auto p-4 pb-20 md:pb-6 md:p-6"
+          className="flex-1 p-4 pb-20 md:p-6 md:pb-6"
         >
           {children}
         </div>

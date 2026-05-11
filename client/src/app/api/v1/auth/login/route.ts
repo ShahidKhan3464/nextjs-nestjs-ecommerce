@@ -1,7 +1,12 @@
 import { cookies } from "next/headers";
 import { getBackendUrl } from "@/lib/backend-url";
+import { signAccessToken } from "@/lib/server-auth";
 import { jsonMessage, jsonOk } from "@/lib/api-response";
 import type { ApiResponse, User, UserRole } from "@/types";
+import {
+  AUTH_SESSION_COOKIE,
+  AUTH_BACKEND_ACCESS_COOKIE,
+} from "@/lib/auth-cookies";
 
 const DEFAULT_ROLE: UserRole = "customer";
 
@@ -10,6 +15,7 @@ type NestLoginPayload = {
   data?: {
     user?: {
       id: number;
+      role: string;
       email: string;
       fullName: string;
       accessToken: string;
@@ -74,27 +80,48 @@ export async function POST(req: Request) {
     return jsonMessage("Unexpected response from server", 502);
   }
 
+  const role: UserRole =
+    u.role === "ADMIN"
+      ? "admin"
+      : u.role === "CUSTOMER"
+        ? "customer"
+        : DEFAULT_ROLE;
+
+  const sessionJwt = await signAccessToken({
+    sub: String(u.id),
+    email: u.email,
+    role,
+    name: u.fullName,
+  });
+
   const jar = await cookies();
-  jar.set("access_token", u.accessToken, {
+  jar.set(AUTH_SESSION_COOKIE, sessionJwt, {
+    path: "/",
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
     maxAge: 60 * 15,
+    secure: process.env.NODE_ENV === "production",
+  });
+  jar.set(AUTH_BACKEND_ACCESS_COOKIE, u.accessToken, {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 60 * 15,
+    secure: process.env.NODE_ENV === "production",
   });
   jar.set("refresh_token", u.refreshToken, {
+    path: "/",
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
     maxAge: 60 * 60 * 24 * 7,
+    secure: process.env.NODE_ENV === "production",
   });
 
   const user: User = {
-    id: String(u.id),
+    role,
     email: u.email,
     name: u.fullName,
-    role: DEFAULT_ROLE,
+    id: String(u.id),
     createdAt: new Date().toISOString(),
   };
 

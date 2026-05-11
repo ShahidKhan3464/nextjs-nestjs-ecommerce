@@ -31,6 +31,9 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
+  }
   return config;
 });
 
@@ -50,6 +53,7 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
     original._retry = true;
+    /* Automatic refresh disabled until the auth flow is fully aligned end-to-end.
     try {
       const res = await axios.post<{ data: { accessToken: string } }>(
         `${base}/api/v1/auth/refresh`,
@@ -64,5 +68,8 @@ api.interceptors.response.use(
       useAuthStore.getState().clearSession();
       return Promise.reject(error);
     }
+    */
+    useAuthStore.getState().clearSession();
+    return Promise.reject(error);
   }
 );

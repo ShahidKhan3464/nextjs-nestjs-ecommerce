@@ -31,6 +31,7 @@ export class GenerateTokensProvider {
     const [accessToken, refreshToken] = await Promise.all([
       this.signToken(user.id, this.jwtConfiguration.accessTokenTtl, {
         email: user.email,
+        role: user.role,
       }),
       this.signToken(user.id, this.jwtConfiguration.refreshTokenTtl),
     ]);
@@ -39,6 +40,7 @@ export class GenerateTokensProvider {
       refreshToken,
       user: {
         id: user.id,
+        role: user.role,
         email: user.email,
         fullName: user.fullName,
       },

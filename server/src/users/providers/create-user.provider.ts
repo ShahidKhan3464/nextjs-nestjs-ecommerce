@@ -25,9 +25,9 @@ export class CreateUserProvider {
     private readonly hashingProvider: HashingProvider,
   ) {}
 
-  public async createUser(createUserDto: CreateUserDto): Promise<User> {
+  public async createUser(dto: CreateUserDto): Promise<User> {
     const existingUser = await this.userRepository.findOne({
-      where: { email: createUserDto.email },
+      where: { email: dto.email },
     });
 
     if (existingUser) {
@@ -35,11 +35,9 @@ export class CreateUserProvider {
     }
 
     const newUser = this.userRepository.create({
-      ...createUserDto,
-      password: await this.hashingProvider.hash(createUserDto.password),
-      confirmPassword: await this.hashingProvider.hash(
-        createUserDto.confirmPassword,
-      ),
+      ...dto,
+      password: await this.hashingProvider.hash(dto.password),
+      confirmPassword: await this.hashingProvider.hash(dto.confirmPassword),
     });
 
     const savedUser = await this.userRepository.save(newUser);

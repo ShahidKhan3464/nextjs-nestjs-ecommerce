@@ -10,10 +10,14 @@ import { UsersModule } from './users/users.module';
 import databaseConfig from './config/database.config';
 import { SeedersModule } from './seeders/seeders.module';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { ProductsModule } from './products/products.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RolesGuard } from './auth/guards/roles/roles.guard';
+import { CategoriesModule } from './categories/categories.module';
 import environmentValidation from './config/environment.validation';
-// import { PaginationModule } from './common/pagination/pagination.module';
+import { PaginationModule } from './common/pagination/pagination.module';
 import { AccessTokenGuard } from './auth/guards/access-token/access-token.guard';
+// import { ProductVariantsModule } from './product-variants/product-variants.module';
 import { AuthenticationGuard } from './auth/guards/authentication/authentication.guard';
 import { DataResponseInterceptor } from './common/interceptors/data-response/data-response.interceptor';
 
@@ -23,7 +27,10 @@ import { DataResponseInterceptor } from './common/interceptors/data-response/dat
     MailModule,
     UsersModule,
     SeedersModule,
-    // PaginationModule,
+    ProductsModule,
+    CategoriesModule,
+    PaginationModule,
+    // ProductVariantsModule,
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forRoot({
@@ -57,6 +64,10 @@ import { DataResponseInterceptor } from './common/interceptors/data-response/dat
     {
       provide: APP_GUARD,
       useClass: AuthenticationGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 })

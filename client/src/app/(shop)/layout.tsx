@@ -18,9 +18,11 @@ export default function ShopLayout({
 
   if (!mounted) {
     return (
-      <div className="bg-background min-h-screen">
-        <div className="mx-auto w-full max-w-[1600px] px-4 py-6 md:p-6">
-          {children}
+      <div className="bg-background flex min-h-screen">
+        <aside className="border-border bg-muted/30 hidden w-56 shrink-0 border-r md:flex" />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="border-border bg-background h-14 border-b" />
+          <main className="flex-1 p-4 md:p-6">{children}</main>
         </div>
       </div>
     );
