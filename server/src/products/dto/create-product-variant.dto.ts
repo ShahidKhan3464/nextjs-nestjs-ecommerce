@@ -30,14 +30,14 @@ export class CreateProductVariantDto {
   sku: string;
 
   @ApiProperty({ example: 10 })
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
-  @Type(() => Number)
   stock: number;
 
   @ApiProperty({ example: 99.99 })
   @Type(() => Number)
-  @Min(0)
   @IsNumber()
+  @Min(0)
   price: number;
 }

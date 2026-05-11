@@ -6,6 +6,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { UserRole } from 'src/users/constants/user.constants';
 import { ApiTags, ApiConsumes, ApiBearerAuth } from '@nestjs/swagger';
+import { ParseProductImagesPipe } from './pipes/parse-product-images.pipe';
 import { getUploadsRoot, UploadSubdir } from 'src/common/storage/uploads-root';
 import { createImageDiskMulterOptions } from 'src/common/storage/image-upload.multer';
 import {
@@ -49,7 +50,8 @@ export class ProductsController {
   @UseInterceptors(FilesInterceptor('images', 12, imagesMulter))
   create(
     @Body() body: CreateProductDto,
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFiles(ParseProductImagesPipe)
+    files: Express.Multer.File[],
   ) {
     return this.productsService.create(body, files ?? []);
   }

@@ -1,19 +1,24 @@
-import { Transform, Type } from 'class-transformer';
 import { ProductStatus } from '../constants/product.constants';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { plainToInstance, Transform, Type } from 'class-transformer';
+import { CreateProductVariantDto } from './create-product-variant.dto';
+import { UniqueVariantSkuConstraint } from '../validators/unique-variant-sku.validator';
 import {
   Min,
   IsEnum,
+  IsArray,
   IsNumber,
+  Validate,
   IsString,
   MaxLength,
   MinLength,
   IsNotEmpty,
   IsOptional,
   ValidateIf,
+  ArrayMinSize,
+  ValidateNested,
 } from 'class-validator';
 
-/** Form fields for `multipart/form-data` product creation (files use field `images`) */
 export class CreateProductDto {
   @ApiProperty()
   @Transform(({ value }) => (value === '' ? undefined : Number(value)))
@@ -44,15 +49,28 @@ export class CreateProductDto {
   @IsEnum(ProductStatus)
   status?: ProductStatus;
 
-  /** JSON array string of variant objects (size, color, sku, stock, price) */
   @ApiProperty({
-    description: 'JSON stringified array of variants',
-    example:
-      '[{"size":"M","color":"Black","sku":"ABC-1","stock":10,"price":99.99}]',
+    type: [CreateProductVariantDto],
   })
-  @IsString()
-  @IsNotEmpty()
-  variants: string;
+  @Transform(({ value }): CreateProductVariantDto[] => {
+    if (typeof value !== 'string') return value;
+
+    try {
+      const parsed: unknown = JSON.parse(value);
+
+      if (!Array.isArray(parsed)) return [];
+
+      return plainToInstance(CreateProductVariantDto, parsed);
+    } catch {
+      return [];
+    }
+  })
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => CreateProductVariantDto)
+  @Validate(UniqueVariantSkuConstraint)
+  variants: CreateProductVariantDto[];
 
   @ApiProperty({
     type: 'array',

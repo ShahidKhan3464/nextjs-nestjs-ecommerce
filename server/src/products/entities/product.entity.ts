@@ -31,7 +31,7 @@ export class Product {
     type: 'text',
     nullable: true,
   })
-  description: string;
+  description: string | null;
 
   // @Column({
   //   scale: 2,
