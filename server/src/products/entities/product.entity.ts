@@ -1,6 +1,8 @@
+import { ProductImage } from './product-image.entity';
+import { ProductVariant } from './product-variant.entity';
 import { ProductStatus } from '../constants/product.constants';
 import { Category } from 'src/categories/entities/category.entity';
-import { ProductVariant } from 'src/product-variants/entity/product-variant.entity';
+
 import {
   Index,
   Column,
@@ -57,6 +59,11 @@ export class Product {
     cascade: true,
   })
   variants: ProductVariant[];
+
+  @OneToMany(() => ProductImage, (image) => image.product, {
+    cascade: true,
+  })
+  images: ProductImage[];
 
   @CreateDateColumn()
   createdAt: Date;

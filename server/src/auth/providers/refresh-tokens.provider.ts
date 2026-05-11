@@ -1,15 +1,15 @@
-import {
-  Inject,
-  forwardRef,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import jwtConfig from '../config/jwt.config';
 import type { ConfigType } from '@nestjs/config';
 import { UsersService } from '../../users/users.service';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { GenerateTokensProvider } from './generate-tokens.provider';
+import {
+  Inject,
+  forwardRef,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 interface RefreshTokenPayload {
   sub: number;
@@ -27,9 +27,9 @@ export class RefreshTokensProvider {
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
   ) {}
 
-  public async refreshTokens(RefreshTokenDto: RefreshTokenDto) {
+  public async refreshTokens(dto: RefreshTokenDto) {
     try {
-      const { refreshToken } = RefreshTokenDto;
+      const { refreshToken } = dto;
       const { sub } = await this.jwtService.verifyAsync<RefreshTokenPayload>(
         refreshToken,
         {

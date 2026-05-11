@@ -46,6 +46,9 @@ lerna-debug.log*
 .temp
 .tmp
 
+# Local uploaded assets (product images)
+/uploads
+
 # Runtime data
 pids
 *.pid

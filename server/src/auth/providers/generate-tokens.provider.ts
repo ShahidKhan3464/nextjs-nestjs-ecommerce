@@ -40,6 +40,7 @@ export class GenerateTokensProvider {
       refreshToken,
       user: {
         id: user.id,
+        role: user.role,
         email: user.email,
         fullName: user.fullName,
       },

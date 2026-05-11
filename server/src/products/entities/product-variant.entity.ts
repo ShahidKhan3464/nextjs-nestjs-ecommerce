@@ -1,5 +1,6 @@
 import { Product } from 'src/products/entities/product.entity';
 import {
+  Index,
   Column,
   Entity,
   ManyToOne,
@@ -7,7 +8,6 @@ import {
   UpdateDateColumn,
   CreateDateColumn,
   PrimaryGeneratedColumn,
-  Index,
 } from 'typeorm';
 
 @Entity('product_variants')

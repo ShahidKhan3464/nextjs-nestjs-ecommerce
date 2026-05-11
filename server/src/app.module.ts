@@ -13,13 +13,13 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ProductsModule } from './products/products.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RolesGuard } from './auth/guards/roles/roles.guard';
+import { CategoriesModule } from './categories/categories.module';
 import environmentValidation from './config/environment.validation';
-// import { PaginationModule } from './common/pagination/pagination.module';
+import { PaginationModule } from './common/pagination/pagination.module';
 import { AccessTokenGuard } from './auth/guards/access-token/access-token.guard';
+// import { ProductVariantsModule } from './product-variants/product-variants.module';
 import { AuthenticationGuard } from './auth/guards/authentication/authentication.guard';
 import { DataResponseInterceptor } from './common/interceptors/data-response/data-response.interceptor';
-import { CategoriesModule } from './categories/categories.module';
-import { ProductVariantsModule } from './product-variants/product-variants.module';
 
 @Module({
   imports: [
@@ -28,7 +28,9 @@ import { ProductVariantsModule } from './product-variants/product-variants.modul
     UsersModule,
     SeedersModule,
     ProductsModule,
-    // PaginationModule,
+    CategoriesModule,
+    PaginationModule,
+    // ProductVariantsModule,
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forRoot({
@@ -52,8 +54,6 @@ import { ProductVariantsModule } from './product-variants/product-variants.modul
           configService.get('database.autoLoadEntities') === 'true',
       }),
     }),
-    CategoriesModule,
-    ProductVariantsModule,
   ],
   providers: [
     AccessTokenGuard,

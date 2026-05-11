@@ -13,8 +13,8 @@ export class UsersService {
     private readonly createUserProvider: CreateUserProvider,
   ) {}
 
-  public async createUser(createUserDto: CreateUserDto): Promise<User> {
-    return await this.createUserProvider.createUser(createUserDto);
+  public async createUser(dto: CreateUserDto): Promise<User> {
+    return await this.createUserProvider.createUser(dto);
   }
 
   public async findOneById(id: number): Promise<User | null> {

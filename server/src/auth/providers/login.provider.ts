@@ -9,7 +9,7 @@ import {
   RequestTimeoutException,
 } from '@nestjs/common';
 
-export type LoggedInUser = Pick<User, 'id' | 'fullName' | 'email'> & {
+export type LoggedInUser = Pick<User, 'id' | 'fullName' | 'email' | 'role'> & {
   accessToken: string;
   refreshToken: string;
 };
@@ -22,22 +22,20 @@ export class LoginProvider {
     private readonly generateTokensProvider: GenerateTokensProvider,
   ) {}
 
-  public async login(loginDto: LoginDto): Promise<{ user: LoggedInUser }> {
-    const user = await this.usersService
-      .findOneByEmail(loginDto.email)
-      .catch(() => {
-        throw new RequestTimeoutException(
-          'Unable to process your request at the moment',
-          { description: 'Error connecting to the database' },
-        );
-      });
+  public async login(dto: LoginDto): Promise<{ user: LoggedInUser }> {
+    const user = await this.usersService.findOneByEmail(dto.email).catch(() => {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment',
+        { description: 'Error connecting to the database' },
+      );
+    });
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const isPasswordValid = await this.hashingProvider.compare(
-      loginDto.password,
+      dto.password,
       user.password,
     );
 

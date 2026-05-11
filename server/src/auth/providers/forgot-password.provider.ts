@@ -1,15 +1,15 @@
-import {
-  Logger,
-  Injectable,
-  NotFoundException,
-  RequestTimeoutException,
-} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { MailService } from 'src/mail/providers/mail.service';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
+import {
+  Logger,
+  Injectable,
+  NotFoundException,
+  RequestTimeoutException,
+} from '@nestjs/common';
 
 @Injectable()
 export class ForgotPasswordProvider {
@@ -23,11 +23,11 @@ export class ForgotPasswordProvider {
   ) {}
 
   public async forgotPassword(
-    forgotPasswordDto: ForgotPasswordDto,
+    dto: ForgotPasswordDto,
   ): Promise<{ sent: boolean }> {
     let user: User | null;
     try {
-      user = await this.usersService.findOneByEmail(forgotPasswordDto.email);
+      user = await this.usersService.findOneByEmail(dto.email);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process your request at the moment',
