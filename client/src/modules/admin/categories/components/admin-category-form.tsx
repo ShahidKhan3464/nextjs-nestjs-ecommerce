@@ -1,6 +1,5 @@
 "use client";
 
-import { z } from "zod";
 import { toast } from "sonner";
 import { isAxiosError } from "axios";
 import { useForm } from "react-hook-form";
@@ -12,6 +11,7 @@ import { queryKeys } from "@/constants/query-keys";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
+import { categorySchema, type CategoryValues } from "../schemas";
 import {
   createAdminCategory,
   updateAdminCategory,
@@ -24,13 +24,6 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-
-const schema = z.object({
-  name: z.string().min(2),
-  description: z.string().optional(),
-});
-
-type Values = z.infer<typeof schema>;
 
 function buildCategoryPayload(values: Values) {
   const name = values.name.trim();
@@ -49,15 +42,15 @@ export function AdminCategoryForm({
 }) {
   const router = useRouter();
   const qc = useQueryClient();
-  const form = useForm<Values>({
-    resolver: zodResolver(schema),
+  const form = useForm<CategoryValues>({
+    resolver: zodResolver(categorySchema),
     defaultValues: {
       name: initial?.name ?? "",
       description: initial?.description ?? "",
     },
   });
 
-  async function onSubmit(values: Values) {
+  async function onSubmit(values: CategoryValues) {
     const payload = buildCategoryPayload(values);
     try {
       if (initial) {
@@ -74,8 +67,7 @@ export function AdminCategoryForm({
       router.push(ROUTES.categories);
     } catch (e) {
       const msg = isAxiosError(e)
-        ? (e.response?.data as { message?: string })?.message ??
-        e.message
+        ? ((e.response?.data as { message?: string })?.message ?? e.message)
         : "Something went wrong";
       toast.error(typeof msg === "string" ? msg : "Could not save category");
     }

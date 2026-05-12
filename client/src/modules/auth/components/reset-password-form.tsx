@@ -1,6 +1,5 @@
 "use client";
 
-import { z } from "zod";
 import Link from "next/link";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -11,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { resetPasswordSchema, type ResetPasswordValues } from "../schemas";
 import { resetPasswordRequest } from "@/modules/auth/services/auth.service";
 import {
   Form,
@@ -21,49 +21,20 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-const PASSWORD_PATTERN =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-const schema = z
-  .object({
-    password: z
-      .string()
-      .min(8, "Use at least 8 characters")
-      .max(30, "Password is too long")
-      .regex(
-        PASSWORD_PATTERN,
-        "Include upper & lowercase, a number, and a special character (@$!%*?&)"
-      ),
-    confirmPassword: z
-      .string()
-      .min(8, "Use at least 8 characters")
-      .max(30, "Password is too long")
-      .regex(
-        PASSWORD_PATTERN,
-        "Include upper & lowercase, a number, and a special character (@$!%*?&)"
-      ),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
-type Values = z.infer<typeof schema>;
-
 export function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token")?.trim() ?? "";
 
-  const form = useForm<Values>({
-    resolver: zodResolver(schema),
+  const form = useForm<ResetPasswordValues>({
+    resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       password: "",
       confirmPassword: "",
     },
   });
 
-  async function onSubmit(values: Values) {
+  async function onSubmit(values: ResetPasswordValues) {
     if (!token) {
       toast.error("This reset link is missing a token. Request a new link.");
       return;
@@ -74,11 +45,15 @@ export function ResetPasswordForm() {
         password: values.password,
         confirmPassword: values.confirmPassword,
       });
-      toast.success("Password updated. You can sign in with your new password.");
+      toast.success(
+        "Password updated. You can sign in with your new password."
+      );
       router.push(ROUTES.login);
     } catch (e: unknown) {
       const raw =
-        isAxiosError(e) && e.response?.data && typeof e.response.data === "object"
+        isAxiosError(e) &&
+        e.response?.data &&
+        typeof e.response.data === "object"
           ? (e.response.data as { message?: unknown }).message
           : undefined;
       const msg =
@@ -130,8 +105,8 @@ export function ResetPasswordForm() {
               <FormControl>
                 <Input
                   type="password"
-                  autoComplete="new-password"
                   placeholder="••••••••"
+                  autoComplete="new-password"
                   {...field}
                 />
               </FormControl>
@@ -148,8 +123,8 @@ export function ResetPasswordForm() {
               <FormControl>
                 <Input
                   type="password"
-                  autoComplete="new-password"
                   placeholder="••••••••"
+                  autoComplete="new-password"
                   {...field}
                 />
               </FormControl>

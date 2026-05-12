@@ -1,6 +1,5 @@
 "use client";
 
-import { z } from "zod";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
@@ -9,6 +8,7 @@ import { ROUTES } from "@/constants/routes";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { registerSchema, type RegisterValues } from "../schemas";
 import { registerRequest } from "@/modules/auth/services/auth.service";
 import {
   Form,
@@ -19,42 +19,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-/** Align with server `CreateUserDto.confirmPassword` (class-validator). */
-const PASSWORD_PATTERN =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-const schema = z
-  .object({
-    fullName: z.string().min(5, "Name is too short").max(30, "Name is too long"),
-    email: z.string().email("Enter a valid email"),
-    password: z
-      .string()
-      .min(8, "Use at least 8 characters")
-      .max(30, "Password is too long")
-      .regex(
-        PASSWORD_PATTERN,
-        "Include upper & lowercase, a number, and a special character (@$!%*?&)"
-      ),
-    confirmPassword: z
-      .string()
-      .min(8, "Use at least 8 characters")
-      .max(30, "Password is too long")
-      .regex(
-        PASSWORD_PATTERN,
-        "Include upper & lowercase, a number, and a special character (@$!%*?&)"
-      ),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
-type Values = z.infer<typeof schema>;
-
 export function RegisterForm() {
   const router = useRouter();
-  const form = useForm<Values>({
-    resolver: zodResolver(schema),
+  const form = useForm<RegisterValues>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       fullName: "",
       email: "",
@@ -63,7 +31,7 @@ export function RegisterForm() {
     },
   });
 
-  async function onSubmit(values: Values) {
+  async function onSubmit(values: RegisterValues) {
     try {
       await registerRequest({
         fullName: values.fullName,
@@ -123,11 +91,7 @@ export function RegisterForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input
-                  type="password"
-                  autoComplete="new-password"
-                  {...field}
-                />
+                <Input type="password" autoComplete="new-password" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -140,11 +104,7 @@ export function RegisterForm() {
             <FormItem>
               <FormLabel>Confirm password</FormLabel>
               <FormControl>
-                <Input
-                  type="password"
-                  autoComplete="new-password"
-                  {...field}
-                />
+                <Input type="password" autoComplete="new-password" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

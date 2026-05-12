@@ -1,6 +1,5 @@
 "use client";
 
-import { z } from "zod";
 import Link from "next/link";
 import { toast } from "sonner";
 import * as React from "react";
@@ -17,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { placeOrder } from "../services/checkout.service";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { shippingSchema, type ShippingValues } from "../schemas";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Form,
@@ -26,19 +26,6 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-
-const shippingSchema = z.object({
-  fullName: z.string().min(2),
-  line1: z.string().min(2),
-  line2: z.string().optional(),
-  city: z.string().min(1),
-  region: z.string().min(1),
-  postalCode: z.string().min(3),
-  country: z.string().min(2),
-  phone: z.string().optional(),
-});
-
-type ShippingValues = z.infer<typeof shippingSchema>;
 
 export function CheckoutWizard() {
   const router = useRouter();

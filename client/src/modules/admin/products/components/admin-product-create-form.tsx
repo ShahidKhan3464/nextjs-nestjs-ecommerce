@@ -1,6 +1,5 @@
 "use client";
 
-import { z } from "zod";
 import { toast } from "sonner";
 import Image from "next/image";
 import { XIcon } from "lucide-react";
@@ -13,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Resolver } from "react-hook-form";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { productSchema, type ProductValues } from "../schemas";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createAdminProduct } from "../services/products.service";
 import { fetchAdminCategories } from "../../categories/services/categories.service";
@@ -24,28 +24,6 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-
-const variantSchema = z.object({
-  size: z.string().min(1, "Size is required"),
-  color: z.string().min(1, "Color is required"),
-  sku: z.string().min(2),
-  stock: z.coerce.number().int().min(0),
-  price: z.coerce.number().positive(),
-});
-
-const schema = z.object({
-  name: z.string().min(2),
-  description: z
-    .string()
-    .optional()
-    .refine((v) => !v?.trim() || v.trim().length >= 10, {
-      message: "Description must be at least 10 characters when provided",
-    }),
-  categoryId: z.string().min(1, "Pick a category"),
-  variants: z.array(variantSchema).min(1),
-});
-
-type Values = z.infer<typeof schema>;
 
 function previewKey(file: File, index: number) {
   return `${file.name}-${file.size}-${file.lastModified}-${index}`;
@@ -108,8 +86,8 @@ export function AdminProductCreateForm() {
     });
   }
 
-  const form = useForm<Values>({
-    resolver: zodResolver(schema) as Resolver<Values>,
+  const form = useForm<ProductValues>({
+    resolver: zodResolver(productSchema) as Resolver<ProductValues>,
     defaultValues: {
       name: "",
       description: "",
@@ -152,11 +130,13 @@ export function AdminProductCreateForm() {
       await qc.invalidateQueries({ queryKey: queryKeys.admin.products });
     } catch (err) {
       const msg = isAxiosError(err)
-        ? (err.response?.data as { message?: string })?.message ??
-        err.message
+        ? ((err.response?.data as { message?: string })?.message ?? err.message)
         : "Something went wrong";
       toast.error(typeof msg === "string" ? msg : "Could not create product");
-      toast.error((err.response?.data as { message?: string })?.message ?? "Could not create product");
+      toast.error(
+        (err.response?.data as { message?: string })?.message ??
+          "Could not create product"
+      );
     }
   }
 

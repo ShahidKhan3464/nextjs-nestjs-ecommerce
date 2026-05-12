@@ -1,6 +1,5 @@
 "use client";
 
-import { z } from "zod";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
@@ -10,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/auth-store";
 import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, type LoginValues } from "../schemas";
 import { safeProtectedRedirectPath } from "@/lib/auth-route-guards";
 import { loginRequest } from "@/modules/auth/services/auth.service";
 import {
@@ -21,29 +21,21 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-const schema = z.object({
-  email: z.string().email("Enter a valid email"),
-  password: z.string().min(1, "Password is required"),
-});
-
-type Values = z.infer<typeof schema>;
-
 export function LoginForm() {
   const searchParams = useSearchParams();
   const setSession = useAuthStore((s) => s.setSession);
-  const form = useForm<Values>({
-    resolver: zodResolver(schema),
+  const form = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
 
-  async function onSubmit(values: Values) {
+  async function onSubmit(values: LoginValues) {
     try {
       const data = await loginRequest(values.email, values.password);
       setSession(data.user, data.accessToken);
       toast.success("Signed in");
       const next =
-        safeProtectedRedirectPath(searchParams.get("next")) ??
-        ROUTES.dashboard;
+        safeProtectedRedirectPath(searchParams.get("next")) ?? ROUTES.dashboard;
       window.location.assign(next);
     } catch {
       toast.error("Invalid email or password");

@@ -1,12 +1,12 @@
 "use client";
 
-import { z } from "zod";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { forgotPasswordRequest } from "@/modules/auth/services/auth.service";
+import { forgotPasswordSchema, type ForgotPasswordValues } from "../schemas";
 import {
   Form,
   FormItem,
@@ -16,19 +16,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-const schema = z.object({
-  email: z.string().email("Enter a valid email"),
-});
-
-type Values = z.infer<typeof schema>;
-
 export function ForgotPasswordForm() {
-  const form = useForm<Values>({
-    resolver: zodResolver(schema),
+  const form = useForm<ForgotPasswordValues>({
+    resolver: zodResolver(forgotPasswordSchema),
     defaultValues: { email: "" },
   });
 
-  async function onSubmit(values: Values) {
+  async function onSubmit(values: ForgotPasswordValues) {
     try {
       await forgotPasswordRequest(values.email);
       toast.success("If an account exists, you will receive reset instructions.");

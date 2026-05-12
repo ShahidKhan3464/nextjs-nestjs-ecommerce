@@ -1,6 +1,5 @@
 "use client";
 
-import { z } from "zod";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { useAuthStore } from "@/store/auth-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Resolver } from "react-hook-form";
 import { updateProfile } from "../services/profile.service";
+import { profileSchema, type ProfileValues } from "../schemas";
 import {
   Form,
   FormItem,
@@ -17,33 +17,19 @@ import {
   FormControl,
 } from "@/components/ui/form";
 
-const schema = z.object({
-  name: z.string().min(2, "Name is too short"),
-  avatarUrl: z
-    .string()
-    .optional()
-    .transform((v) => v?.trim() || undefined)
-    .refine(
-      (v) => v === undefined || v === "" || /^https?:\/\//.test(v),
-      "Enter a valid URL"
-    ),
-});
-
-type Values = z.infer<typeof schema>;
-
 export function ProfileForm() {
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
 
-  const form = useForm<Values>({
-    resolver: zodResolver(schema) as Resolver<Values>,
+  const form = useForm<ProfileValues>({
+    resolver: zodResolver(profileSchema) as Resolver<ProfileValues>,
     defaultValues: {
       name: user?.name ?? "",
       avatarUrl: user?.avatarUrl ?? "",
     },
   });
 
-  async function onSubmit(values: Values) {
+  async function onSubmit(values: ProfileValues) {
     try {
       const next = await updateProfile({
         name: values.name,
