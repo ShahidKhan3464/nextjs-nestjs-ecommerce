@@ -10,7 +10,6 @@ import {
   Store,
   Users,
   Package,
-  PlusCircle,
   ShoppingCart,
   LayoutDashboard,
 } from "lucide-react";
@@ -20,7 +19,6 @@ const nav = [
   { href: ROUTES.users, label: "Users", icon: Users },
   { href: ROUTES.categories, label: "Categories", icon: Store },
   { href: ROUTES.products, label: "Products", icon: Package },
-  { href: ROUTES.productNew, label: "New product", icon: PlusCircle },
   { href: ROUTES.orders, label: "Orders", icon: ShoppingCart },
 ];
 
@@ -36,9 +34,6 @@ function adminNavActive(pathname: string, href: string): boolean {
       pathname === ROUTES.categories ||
       pathname.startsWith(`${ROUTES.categories}/`)
     );
-  }
-  if (href === ROUTES.productNew) {
-    return pathname === ROUTES.productNew;
   }
   if (href === ROUTES.users) {
     return pathname === ROUTES.users || pathname.startsWith(`${ROUTES.users}/`);

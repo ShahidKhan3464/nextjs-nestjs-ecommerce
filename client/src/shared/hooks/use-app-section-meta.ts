@@ -30,6 +30,17 @@ export function useAppSectionMeta(): { title: string; hint?: string } {
         ? { title: "Products", hint: "Inventory" }
         : { title: "Shop", hint: "Browse catalog" };
     }
+    if (pathname === "/categories") {
+      return admin
+        ? { title: "Categories", hint: "Manage product categories" }
+        : { title: "Categories", hint: "Browse categories" };
+    }
+    if (pathname.startsWith("/categories/") && pathname !== "/categories") {
+      if (pathname.startsWith("/categories/new")) {
+        return { title: "New category", hint: "Create category" };
+      }
+      return { title: "Category", hint: "Products in category" };
+    }
     if (pathname.startsWith("/orders/") && pathname !== "/orders") {
       return {
         title: "Order",
