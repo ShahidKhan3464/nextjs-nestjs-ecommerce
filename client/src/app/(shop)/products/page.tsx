@@ -6,7 +6,7 @@ import { ROUTES } from "@/constants/routes";
 import { buttonVariants } from "@/components/ui/button";
 import { getAccessTokenPayload } from "@/lib/session-cookie";
 import { AdminProductsList } from "@/modules/admin/products";
-import { ProductsPageContent } from "@/modules/products/components/products-page-content";
+import { ProductsPageContent } from "@/modules/customer/products/components/products-page-content";
 
 export const metadata: Metadata = {
   title: "Products",

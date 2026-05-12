@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
+import { OrdersList } from "@/modules/customer/orders";
 import { AdminOrdersList } from "@/modules/admin/orders";
 import { getAccessTokenPayload } from "@/lib/session-cookie";
-import { OrdersList } from "@/modules/orders/components/orders-list";
 
 export const metadata: Metadata = {
   title: "Orders",
@@ -21,8 +21,8 @@ export default async function OrdersPage() {
               Orders
             </h1>
             <p className="text-muted-foreground text-sm">
-              Every order placed through checkout, newest first—open one for full
-              line items and totals.
+              Every order placed through checkout, newest first—open one for
+              full line items and totals.
             </p>
           </div>
         </header>

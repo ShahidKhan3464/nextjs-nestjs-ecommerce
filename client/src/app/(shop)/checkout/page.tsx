@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
-import { CheckoutWizard } from "@/modules/checkout/components/checkout-wizard";
+import { CheckoutWizard } from "@/modules/customer/checkout";
 
 export const metadata: Metadata = {
   title: "Checkout",

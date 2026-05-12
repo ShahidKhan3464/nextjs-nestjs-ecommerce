@@ -1,4 +1,4 @@
-import type { User } from "@/types";
+import type { User } from "../types";
 import { api } from "@/services/api/client";
 
 export async function fetchAdminUsers() {

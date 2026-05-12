@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
-import type { Product } from "@/types";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import { queryKeys } from "@/constants/query-keys";
 import { Pagination } from "@/components/ui/pagination";
 import { AdminTableSkeleton } from "@/modules/admin/shared";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import type { Product } from "@/modules/customer/products/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteAdminProduct,
@@ -103,7 +103,9 @@ export function AdminProductsList() {
 
         <div
           className={
-            isFetching && !isPlaceholderData ? "opacity-60 transition-opacity" : ""
+            isFetching && !isPlaceholderData
+              ? "opacity-60 transition-opacity"
+              : ""
           }
         >
           <Table>

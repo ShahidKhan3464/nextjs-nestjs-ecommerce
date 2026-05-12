@@ -1,6 +1,6 @@
-import type { Product } from "@/types";
 import { api } from "@/services/api/client";
 import type { CreateAdminProductInput } from "../types";
+import type { Product } from "@/modules/customer/products/types";
 
 export async function fetchAdminProducts(params?: {
   page?: number;

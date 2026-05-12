@@ -1,4 +1,4 @@
-import type { Order } from "@/types";
+import type { Order } from "../types";
 import { api } from "@/services/api/client";
 
 export async function fetchAdminOrders() {
