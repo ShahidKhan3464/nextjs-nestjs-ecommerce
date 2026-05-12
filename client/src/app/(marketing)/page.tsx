@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
 import { MOCK_PRODUCTS } from "@/lib/mock-data";
 import { Hero } from "@/shared/components/marketing/hero";
-import { ProductCard } from "@/modules/products/components/product-card";
-import { RecentlyViewedStrip } from "@/modules/products/components/recently-viewed-strip";
+import { ProductCard } from "@/modules/customer/products/components/product-card";
+import { RecentlyViewedStrip } from "@/modules/customer/products/components/recently-viewed-strip";
 
 export const dynamic = "force-static";
 

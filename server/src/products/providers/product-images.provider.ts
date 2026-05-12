@@ -1,16 +1,16 @@
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Product } from '../entities/product.entity';
+import { GetProductsProvider } from './get-products.provider';
+import { ProductImage } from '../entities/product-image.entity';
+import { DeleteProductProvider } from './delete-product.provider';
 import {
+  Inject,
   Injectable,
+  forwardRef,
   NotFoundException,
   BadRequestException,
-  Inject,
-  forwardRef,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Product } from '../entities/product.entity';
-import { ProductImage } from '../entities/product-image.entity';
-import { GetProductsProvider } from './get-products.provider';
-import { DeleteProductProvider } from './delete-product.provider';
 
 @Injectable()
 export class ProductImagesProvider {

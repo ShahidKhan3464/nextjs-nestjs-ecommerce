@@ -4,7 +4,12 @@ import { signAccessToken } from "@/lib/server-auth";
 import { jsonMessage, jsonOk } from "@/lib/api-response";
 import type { ApiResponse, User, UserRole } from "@/types";
 import {
+  ACCESS_TOKEN_TTL_SECONDS,
+  REFRESH_TOKEN_TTL_SECONDS,
+} from "@/lib/auth-token-durations";
+import {
   AUTH_SESSION_COOKIE,
+  AUTH_REFRESH_COOKIE,
   AUTH_BACKEND_ACCESS_COOKIE,
 } from "@/lib/auth-cookies";
 
@@ -66,7 +71,10 @@ export async function POST(req: Request) {
   }
 
   if (!res.ok) {
-    return jsonMessage(nestErrorMessage(payload), res.status === 401 ? 401 : res.status);
+    return jsonMessage(
+      nestErrorMessage(payload),
+      res.status === 401 ? 401 : res.status
+    );
   }
 
   const u = payload?.data?.user;
@@ -88,10 +96,10 @@ export async function POST(req: Request) {
         : DEFAULT_ROLE;
 
   const sessionJwt = await signAccessToken({
-    sub: String(u.id),
-    email: u.email,
     role,
+    email: u.email,
     name: u.fullName,
+    sub: String(u.id),
   });
 
   const jar = await cookies();
@@ -99,21 +107,21 @@ export async function POST(req: Request) {
     path: "/",
     httpOnly: true,
     sameSite: "lax",
-    maxAge: 60 * 15,
+    maxAge: ACCESS_TOKEN_TTL_SECONDS,
     secure: process.env.NODE_ENV === "production",
   });
   jar.set(AUTH_BACKEND_ACCESS_COOKIE, u.accessToken, {
     path: "/",
     httpOnly: true,
     sameSite: "lax",
-    maxAge: 60 * 15,
+    maxAge: ACCESS_TOKEN_TTL_SECONDS,
     secure: process.env.NODE_ENV === "production",
   });
-  jar.set("refresh_token", u.refreshToken, {
+  jar.set(AUTH_REFRESH_COOKIE, u.refreshToken, {
     path: "/",
     httpOnly: true,
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: REFRESH_TOKEN_TTL_SECONDS,
     secure: process.env.NODE_ENV === "production",
   });
 
@@ -128,14 +136,12 @@ export async function POST(req: Request) {
   const response: ApiResponse<{
     user: User;
     accessToken: string;
-    refreshToken: string;
-    // expiresIn: number;
+    expiresIn: number;
   }> = {
     data: {
       user,
       accessToken: u.accessToken,
-      refreshToken: u.refreshToken,
-      // expiresIn: 900,
+      expiresIn: ACCESS_TOKEN_TTL_SECONDS,
     },
   };
 

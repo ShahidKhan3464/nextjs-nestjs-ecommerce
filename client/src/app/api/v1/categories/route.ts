@@ -1,20 +1,19 @@
 import type { ApiResponse } from "@/types";
 import { getBackendUrl } from "@/lib/backend-url";
 import { jsonMessage, jsonOk } from "@/lib/api-response";
-import { forwardAuthorization, nestErrorMessage } from "@/lib/nest-http";
-
-type NestCategory = {
-  id: number;
-  name: string;
-  description?: string | null;
-};
+import {
+  nestErrorMessage,
+  forwardAuthorization,
+  type NestCategoryPayload,
+  normalizeNestCategoryPayload,
+} from "@/lib/nest-http";
 
 type NestPagedEnvelope = {
   data?: {
     page?: number;
     limit?: number;
     total?: number;
-    data?: NestCategory[];
+    data?: NestCategoryPayload[];
   };
 };
 
@@ -44,7 +43,7 @@ export async function GET(req: Request) {
   }
 
   const body: ApiResponse<{
-    categories: NestCategory[];
+    categories: NestCategoryPayload[];
     pagination: {
       page: number;
       limit: number;
@@ -60,13 +59,45 @@ export async function GET(req: Request) {
         total: inner.total ?? inner.data.length,
         totalPages: Math.max(
           1,
-          Math.ceil(
-            (inner.total ?? inner.data.length) / (inner.limit ?? 10)
-          )
+          Math.ceil((inner.total ?? inner.data.length) / (inner.limit ?? 10))
         ),
       },
     },
   };
 
   return jsonOk(body);
+}
+
+export async function POST(req: Request) {
+  const payload = await req.json();
+  const backend = getBackendUrl();
+  const res = await fetch(`${backend}/categories`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...forwardAuthorization(req),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  let raw: unknown = null;
+  try {
+    raw = await res.json();
+  } catch {
+    raw = null;
+  }
+
+  if (!res.ok) {
+    return jsonMessage(nestErrorMessage(raw), res.status);
+  }
+
+  const category = normalizeNestCategoryPayload(raw);
+  if (!category) {
+    return jsonMessage("Unexpected category response", 502);
+  }
+
+  const body: ApiResponse<{ category: NestCategoryPayload }> = {
+    data: { category },
+  };
+  return jsonOk(body, { status: 201 });
 }

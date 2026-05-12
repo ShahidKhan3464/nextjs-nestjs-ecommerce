@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
+import { OrdersList } from "@/modules/customer/orders";
+import { AdminOrdersList } from "@/modules/admin/orders";
 import { getAccessTokenPayload } from "@/lib/session-cookie";
-import { OrdersList } from "@/modules/orders/components/orders-list";
-import { AdminOrdersList } from "@/modules/admin/components/admin-orders-list";
 
 export const metadata: Metadata = {
   title: "Orders",
@@ -14,11 +14,18 @@ export default async function OrdersPage() {
 
   if (session?.role === "admin") {
     return (
-      <div className="space-y-6">
-        <p className="text-muted-foreground max-w-2xl text-sm">
-          Every order placed through checkout, newest first—open one for full line
-          items and totals.
-        </p>
+      <div className="space-y-4">
+        <header className="flex items-start justify-between">
+          <div>
+            <h1 className="font-heading text-3xl font-semibold tracking-tight">
+              Orders
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Every order placed through checkout, newest first—open one for
+              full line items and totals.
+            </p>
+          </div>
+        </header>
         <AdminOrdersList />
       </div>
     );

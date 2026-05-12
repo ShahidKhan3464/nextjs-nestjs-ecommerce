@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
-import { CartPageView } from "@/modules/cart/components/cart-page-view";
+import { CartPageView } from "@/modules/customer/cart";
 
 export const metadata: Metadata = {
   title: "Cart",

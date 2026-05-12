@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { ROUTES } from "@/constants/routes";
 import { buttonVariants } from "@/components/ui/button";
-import { AdminProductCreateForm } from "@/modules/admin/components/admin-product-create-form";
+import { AdminProductCreateForm } from "@/modules/admin/products";
 
 export const metadata: Metadata = {
   title: "New product",

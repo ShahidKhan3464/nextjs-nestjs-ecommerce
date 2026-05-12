@@ -37,3 +37,48 @@ export function nestErrorMessage(payload: unknown): string {
   if (typeof o.error === "string") return o.error;
   return "Request failed";
 }
+
+/**
+ * Nest `DataResponseInterceptor` wraps successful JSON as
+ * `{ data: <handler return>, version: string }`.
+ */
+export function unwrapNestDataResponsePayload(raw: unknown): unknown {
+  if (raw === null || typeof raw !== "object") return raw;
+  const r = raw as Record<string, unknown>;
+  if (typeof r.version === "string" && "data" in r) {
+    return r.data;
+  }
+  return raw;
+}
+
+export type NestCategoryPayload = {
+  id: number;
+  name: string;
+  description?: string | null;
+};
+
+export function normalizeNestCategoryPayload(
+  raw: unknown
+): NestCategoryPayload | null {
+  const payload = unwrapNestDataResponsePayload(raw);
+  if (payload === null || typeof payload !== "object") return null;
+  const o = payload as Record<string, unknown>;
+  const name = o.name;
+  const idRaw = o.id;
+  const id =
+    typeof idRaw === "number" && Number.isFinite(idRaw)
+      ? idRaw
+      : typeof idRaw === "string" && /^\d+$/.test(idRaw.trim())
+        ? Number(idRaw.trim())
+        : Number.NaN;
+  if (!Number.isFinite(id) || typeof name !== "string") return null;
+  const description = o.description;
+  return {
+    id,
+    name,
+    description:
+      typeof description === "string" || description === null
+        ? (description as string | null)
+        : undefined,
+  };
+}

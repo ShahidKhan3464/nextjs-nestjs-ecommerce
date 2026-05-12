@@ -1,13 +1,15 @@
 import { create } from "zustand";
-import type { User } from "@/types";
 import { persist } from "zustand/middleware";
+import type { User } from "@/modules/auth/types";
 
 export interface AuthState {
   user: User | null;
   accessToken: string | null;
+  /** Unix timestamp (ms) when the access token expires. */
+  tokenExpiresAt: number | null;
   setUser: (user: User) => void;
-  setAccessToken: (accessToken: string) => void;
-  setSession: (user: User, accessToken: string) => void;
+  setAccessToken: (accessToken: string, expiresIn?: number) => void;
+  setSession: (user: User, accessToken: string, expiresIn?: number) => void;
   clearSession: () => void;
 }
 
@@ -16,16 +18,28 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       accessToken: null,
+      tokenExpiresAt: null,
       setUser: (user) => set({ user }),
-      setAccessToken: (accessToken) => set({ accessToken }),
-      setSession: (user, accessToken) => set({ user, accessToken }),
-      clearSession: () => set({ user: null, accessToken: null }),
+      setAccessToken: (accessToken, expiresIn) =>
+        set({
+          accessToken,
+          tokenExpiresAt: expiresIn ? Date.now() + expiresIn * 1000 : null,
+        }),
+      setSession: (user, accessToken, expiresIn) =>
+        set({
+          user,
+          accessToken,
+          tokenExpiresAt: expiresIn ? Date.now() + expiresIn * 1000 : null,
+        }),
+      clearSession: () =>
+        set({ user: null, accessToken: null, tokenExpiresAt: null }),
     }),
     {
       name: "auth-storage",
       partialize: (state) => ({
         user: state.user,
         accessToken: state.accessToken,
+        tokenExpiresAt: state.tokenExpiresAt,
       }),
     }
   )
@@ -33,4 +47,12 @@ export const useAuthStore = create<AuthState>()(
 
 export function getAccessToken(): string | null {
   return useAuthStore.getState().accessToken;
+}
+
+/** Returns true if the stored access token is expired or about to expire (within 30s buffer). */
+export function isTokenExpired(): boolean {
+  const { accessToken, tokenExpiresAt } = useAuthStore.getState();
+  if (!accessToken) return false; // no token at all — nothing to refresh
+  if (!tokenExpiresAt) return true; // token exists but no expiry info — treat as expired
+  return Date.now() >= tokenExpiresAt - 30_000;
 }

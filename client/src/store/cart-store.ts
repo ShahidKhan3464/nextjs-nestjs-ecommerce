@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { CartItem } from "@/types";
 import { persist } from "zustand/middleware";
+import type { CartItem } from "@/modules/customer/cart/types";
 
 export interface CartState {
   items: CartItem[];
@@ -15,7 +15,9 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
       addItem: (item) => {
-        const existing = get().items.find((i) => i.variantId === item.variantId);
+        const existing = get().items.find(
+          (i) => i.variantId === item.variantId
+        );
         if (existing) {
           const qty = Math.min(
             existing.quantity + item.quantity,
