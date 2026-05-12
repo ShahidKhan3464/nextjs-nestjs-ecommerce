@@ -136,7 +136,7 @@ export function AdminOrdersList() {
                       size="icon"
                       variant="outline"
                       onClick={() => {
-                        console.log(o.id);
+                        // console.log(o.id);
                       }}
                     >
                       <EyeIcon className="h-4 w-4" />

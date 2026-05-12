@@ -32,7 +32,7 @@ export function LoginForm() {
   async function onSubmit(values: LoginValues) {
     try {
       const data = await loginRequest(values.email, values.password);
-      setSession(data.user, data.accessToken);
+      setSession(data.user, data.accessToken, data.expiresIn);
       toast.success("Signed in");
       const next =
         safeProtectedRedirectPath(searchParams.get("next")) ?? ROUTES.dashboard;

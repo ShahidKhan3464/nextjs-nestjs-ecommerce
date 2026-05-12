@@ -17,7 +17,7 @@ export async function signAccessToken(payload: Omit<JwtPayload, "typ">) {
   const token = await new SignJWT({ ...payload, typ: "access" })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("15m")
+    .setExpirationTime("2d")
     .sign(secret);
   return token;
 }

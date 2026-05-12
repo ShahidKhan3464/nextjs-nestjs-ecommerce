@@ -9,7 +9,7 @@ export default Joi.object({
   DATABASE_USERNAME: Joi.string().required(),
   DATABASE_PASSWORD: Joi.string().required(),
   JWT_SECRET: Joi.string().required(),
-  JWT_EXPIRATION_TIME: Joi.string().default('1hr'),
+  JWT_ACCESS_TOKEN_TTL: Joi.string().default('2d'),
   JWT_REFRESH_TOKEN_TTL: Joi.string().default('7d'),
   API_VERSION: Joi.string().default('v1'),
   FRONTEND_URL: Joi.string().optional(),

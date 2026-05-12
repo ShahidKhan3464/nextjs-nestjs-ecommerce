@@ -36,7 +36,6 @@ export class CategoriesController {
   @Post()
   @Roles(UserRole.ADMIN)
   create(@Body() dto: CreateCategoryDto) {
-    console.log(dto);
     return this.categoriesService.create(dto);
   }
 

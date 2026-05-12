@@ -6,9 +6,8 @@ export async function loginRequest(email: string, password: string) {
   const res = await api.post<
     ApiResponse<{
       user: User;
-      // expiresIn: number;
+      expiresIn: number;
       accessToken: string;
-      refreshToken: string;
     }>
   >("/api/v1/auth/login", { email, password });
   return res.data.data;

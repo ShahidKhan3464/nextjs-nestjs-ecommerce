@@ -6,7 +6,12 @@ import { nestErrorMessage } from "@/lib/nest-http";
 import { signAccessToken } from "@/lib/server-auth";
 import { jsonMessage, jsonOk } from "@/lib/api-response";
 import {
+  ACCESS_TOKEN_TTL_SECONDS,
+  REFRESH_TOKEN_TTL_SECONDS,
+} from "@/lib/auth-token-durations";
+import {
   AUTH_SESSION_COOKIE,
+  AUTH_REFRESH_COOKIE,
   AUTH_BACKEND_ACCESS_COOKIE,
 } from "@/lib/auth-cookies";
 
@@ -24,9 +29,14 @@ type NestRefreshPayload = {
   message?: string | string[];
 };
 
+/**
+ * Exchanges the httpOnly Nest refresh cookie for new tokens. The browser POSTs `{}` with
+ * credentials; this handler reads `AUTH_REFRESH_COOKIE` and calls Nest with
+ * `JSON.stringify({ refreshToken })` — same body shape as `RefreshTokenDto` on the server.
+ */
 export async function POST() {
   const jar = await cookies();
-  const refresh = jar.get("refresh_token")?.value;
+  const refresh = jar.get(AUTH_REFRESH_COOKIE)?.value;
   if (!refresh) {
     return jsonMessage("No refresh token", 401);
   }
@@ -68,7 +78,7 @@ export async function POST() {
   const displayName =
     typeof u.fullName === "string" && u.fullName.trim().length > 0
       ? u.fullName.trim()
-      : u.email.split("@")[0] ?? "User";
+      : (u.email.split("@")[0] ?? "User");
 
   const sessionJwt = await signAccessToken({
     sub: String(u.id),
@@ -81,26 +91,26 @@ export async function POST() {
     path: "/",
     httpOnly: true,
     sameSite: "lax",
-    maxAge: 60 * 15,
+    maxAge: ACCESS_TOKEN_TTL_SECONDS,
     secure: process.env.NODE_ENV === "production",
   });
   jar.set(AUTH_BACKEND_ACCESS_COOKIE, u.accessToken, {
     path: "/",
     httpOnly: true,
     sameSite: "lax",
-    maxAge: 60 * 15,
+    maxAge: ACCESS_TOKEN_TTL_SECONDS,
     secure: process.env.NODE_ENV === "production",
   });
-  jar.set("refresh_token", u.refreshToken, {
+  jar.set(AUTH_REFRESH_COOKIE, u.refreshToken, {
     path: "/",
     httpOnly: true,
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: REFRESH_TOKEN_TTL_SECONDS,
     secure: process.env.NODE_ENV === "production",
   });
 
   const body: ApiResponse<{ accessToken: string; expiresIn: number }> = {
-    data: { accessToken: u.accessToken, expiresIn: 900 },
+    data: { accessToken: u.accessToken, expiresIn: ACCESS_TOKEN_TTL_SECONDS },
   };
   return jsonOk(body);
 }

@@ -13,7 +13,6 @@ export class CreateCategoryProvider {
 
   public async create(dto: CreateCategoryDto): Promise<Category> {
     const entity = this.categoryRepository.create(dto);
-    console.log(entity);
     return await this.categoryRepository.save(entity);
   }
 }
