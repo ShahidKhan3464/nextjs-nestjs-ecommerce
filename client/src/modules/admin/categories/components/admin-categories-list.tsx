@@ -127,7 +127,7 @@ export function AdminCategoriesList() {
                     colSpan={3}
                     className="text-muted-foreground py-10 text-center text-sm"
                   >
-                    No categories match your search.
+                    No categories found.
                   </TableCell>
                 </TableRow>
               ) : (

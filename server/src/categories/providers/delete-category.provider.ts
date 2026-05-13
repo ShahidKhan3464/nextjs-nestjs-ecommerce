@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from '../entities/category.entity';
 import { Product } from 'src/products/entities/product.entity';
@@ -26,9 +26,8 @@ export class DeleteCategoryProvider {
 
     const hasProducts = await this.productRepository.exists({
       where: {
-        category: {
-          id,
-        },
+        category: { id },
+        deletedAt: IsNull(),
       },
     });
 
@@ -38,6 +37,7 @@ export class DeleteCategoryProvider {
       );
     }
 
-    await this.categoryRepository.remove(category);
+    // await this.categoryRepository.remove(category);
+    await this.categoryRepository.softDelete(id);
   }
 }

@@ -27,9 +27,9 @@ export default function EditCategoryPage() {
     );
   }
 
-  if (isPending) {
-    return <AdminTableSkeleton withToolbar={false} rows={4} />;
-  }
+  // if (isPending) {
+  //   return <AdminTableSkeleton withToolbar={false} rows={4} />;
+  // }
 
   if (isError || !data) {
     return (
