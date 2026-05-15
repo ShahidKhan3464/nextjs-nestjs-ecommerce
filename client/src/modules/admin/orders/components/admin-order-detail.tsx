@@ -23,7 +23,12 @@ export function AdminOrderDetail({ orderId }: Props) {
   });
 
   if (isPending) {
-    return <Skeleton className="h-64 w-full rounded-xl" />;
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-14 w-72" />
+        <Skeleton className="h-64 w-full rounded-xl" />
+      </div>
+    );
   }
 
   if (isError || !data) {
@@ -71,7 +76,10 @@ export function AdminOrderDetail({ orderId }: Props) {
         <h3 className="text-sm font-medium tracking-wide uppercase">Items</h3>
         <ul className="divide-y rounded-xl border">
           {order.items.map((item) => (
-            <li key={`${item.variantId}-${item.priceAtPurchase}`} className="flex gap-4 p-4">
+            <li
+              key={`${item.variantId}-${item.priceAtPurchase}`}
+              className="flex gap-4 p-4"
+            >
               <div className="relative size-16 shrink-0 overflow-hidden rounded-md bg-muted">
                 {item.image && (
                   <Image
@@ -125,7 +133,9 @@ export function AdminOrderDetail({ orderId }: Props) {
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Discount</span>
-              <span className="tabular-nums">-${order.discount.toFixed(2)}</span>
+              <span className="tabular-nums">
+                -${order.discount.toFixed(2)}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Tax</span>

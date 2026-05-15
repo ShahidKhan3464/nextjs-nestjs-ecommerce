@@ -25,7 +25,12 @@ export function OrderDetailView({ orderId }: Props) {
   });
 
   if (isPending) {
-    return <Skeleton className="h-48 w-full rounded-xl" />;
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-14 w-72" />
+        <Skeleton className="h-64 w-full rounded-xl" />
+      </div>
+    );
   }
 
   if (isError || !data) {

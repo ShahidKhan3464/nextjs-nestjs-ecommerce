@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 const nav = [
-  { href: ROUTES.dashboard, label: "Overview", icon: LayoutDashboard },
+  { href: ROUTES.dashboard, label: "Dashboard", icon: LayoutDashboard },
   { href: ROUTES.users, label: "Users", icon: Users },
   { href: ROUTES.categories, label: "Categories", icon: Store },
   { href: ROUTES.products, label: "Products", icon: Package },
@@ -27,7 +27,10 @@ function adminNavActive(pathname: string, href: string): boolean {
     return pathname === ROUTES.dashboard || pathname === `${ROUTES.dashboard}/`;
   }
   if (href === ROUTES.products) {
-    return pathname === ROUTES.products;
+    return (
+      pathname === ROUTES.products ||
+      pathname.startsWith(`${ROUTES.products}/`)
+    );
   }
   if (href === ROUTES.categories) {
     return (
@@ -61,7 +64,7 @@ export function AdminAppShell({ children }: { children: React.ReactNode }) {
           <div className="bg-primary flex size-6 items-center justify-center rounded-md">
             <Store className="text-primary-foreground size-4" />
           </div>
-          <span className="font-heading text-sm font-semibold tracking-tight">
+          <span className="font-heading font-semibold tracking-tight">
             Admin Portal
           </span>
         </div>
@@ -90,7 +93,7 @@ export function AdminAppShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <AppChromeHeader sectionTitle={meta.title} sectionHint={meta.hint} />
-        <div id="main-content" className="flex-1 p-4 lg:p-6">
+        <div id="main-content" className="flex-1 px-4 py-4 lg:px-6 lg:py-4">
           {children}
         </div>
       </div>

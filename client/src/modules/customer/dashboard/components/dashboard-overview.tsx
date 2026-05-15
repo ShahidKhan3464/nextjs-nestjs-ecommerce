@@ -22,15 +22,15 @@ export function DashboardOverview() {
     data?.reduce((s, o) => s + o.total, 0) ?? 0;
 
   return (
-    <div className="space-y-8">
-      <div>
+    <div className="space-y-4">
+      <header className="space-y-0.5">
         <h1 className="font-heading text-3xl font-semibold tracking-tight">
           Hello{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
         </h1>
-        <p className="text-muted-foreground mt-2 text-sm">
+        <p className="text-muted-foreground text-sm">
           A quick snapshot of your spending and recent orders with us.
         </p>
-      </div>
+      </header>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>

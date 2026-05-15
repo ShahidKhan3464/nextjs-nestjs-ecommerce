@@ -23,10 +23,7 @@ export function CartPageView() {
         title="Your cart is empty"
         description="Browse the catalog and add items you love."
         action={
-          <Link
-            href={ROUTES.products}
-            className={cn(buttonVariants())}
-          >
+          <Link href={ROUTES.products} className={cn(buttonVariants())}>
             Browse products
           </Link>
         }
@@ -35,11 +32,17 @@ export function CartPageView() {
   }
 
   return (
-    <div className="mx-auto grid max-w-5xl gap-10 px-4 py-10 lg:grid-cols-[1fr_320px] lg:px-6">
-      <div className="space-y-6">
-        <h1 className="font-heading text-3xl font-semibold tracking-tight">
-          Cart
-        </h1>
+    <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+      <div className="space-y-4">
+        <header className="space-y-0.5">
+          <h1 className="font-heading text-3xl font-semibold tracking-tight">
+            Cart
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Keep your name and contact information current for orders and
+            receipts.
+          </p>
+        </header>
         <ul className="divide-y rounded-xl border">
           {items.map((item) => (
             <li
