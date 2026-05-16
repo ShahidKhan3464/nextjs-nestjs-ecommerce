@@ -7,10 +7,7 @@ import {
   forwardAuthorization,
   unwrapNestDataResponsePayload,
 } from "@/lib/nest-http";
-import {
-  type NestUserDto,
-  mapNestUserToClient,
-} from "@/lib/nest-user-mapper";
+import { type NestUserDto, mapNestUserToClient } from "@/lib/nest-user-mapper";
 
 type NestPagedUsers = {
   data?: NestUserDto[];

@@ -7,7 +7,9 @@ export function SiteFooter() {
     <footer className="border-border bg-muted/30 mt-auto border-t">
       <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-12 sm:flex-row sm:items-start sm:justify-between sm:px-6">
         <div className="max-w-sm space-y-3">
-          <p className="font-heading text-lg font-semibold">{siteConfig.name}</p>
+          <p className="font-heading text-lg font-semibold">
+            {siteConfig.name}
+          </p>
           <p className="text-muted-foreground text-sm leading-relaxed">
             {siteConfig.description}
           </p>

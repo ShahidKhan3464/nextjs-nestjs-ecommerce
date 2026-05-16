@@ -18,8 +18,7 @@ export function DashboardOverview() {
     queryFn: fetchOrders,
   });
 
-  const revenue =
-    data?.reduce((s, o) => s + o.total, 0) ?? 0;
+  const revenue = data?.reduce((s, o) => s + o.total, 0) ?? 0;
 
   return (
     <div className="space-y-4">

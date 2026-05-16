@@ -28,8 +28,7 @@ function adminNavActive(pathname: string, href: string): boolean {
   }
   if (href === ROUTES.products) {
     return (
-      pathname === ROUTES.products ||
-      pathname.startsWith(`${ROUTES.products}/`)
+      pathname === ROUTES.products || pathname.startsWith(`${ROUTES.products}/`)
     );
   }
   if (href === ROUTES.categories) {

@@ -19,8 +19,7 @@ export async function GET(req: Request) {
     avatarUrl: u.avatarUrl,
   }));
   users.sort(
-    (a, b) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
   const body: ApiResponse<{ users: User[] }> = { data: { users } };

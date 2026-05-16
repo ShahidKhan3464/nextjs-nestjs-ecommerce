@@ -1,18 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { Product } from "../types";
 import { ProductCard } from "./product-card";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/constants/query-keys";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { Product, ProductListParams } from "../types";
+import { fetchProducts } from "../services/products.service";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
 import { useProductSearchParams } from "../hooks/use-product-search-params";
-import {
-  fetchProducts,
-  type ProductListParams,
-} from "../services/products.service";
 
 function toParams(
   values: ReturnType<typeof useProductSearchParams>["values"]

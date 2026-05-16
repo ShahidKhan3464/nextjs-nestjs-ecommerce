@@ -14,10 +14,9 @@ export async function GET(
 ) {
   const { id } = await ctx.params;
   const backend = getBackendUrl();
-  const res = await fetch(
-    `${backend}/categories/${encodeURIComponent(id)}`,
-    { headers: { ...forwardAuthorization(req) } }
-  );
+  const res = await fetch(`${backend}/categories/${encodeURIComponent(id)}`, {
+    headers: { ...forwardAuthorization(req) },
+  });
 
   let raw: unknown = null;
   try {
@@ -48,17 +47,14 @@ export async function PATCH(
   const { id } = await ctx.params;
   const payload = await req.json();
   const backend = getBackendUrl();
-  const res = await fetch(
-    `${backend}/categories/${encodeURIComponent(id)}`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        ...forwardAuthorization(req),
-      },
-      body: JSON.stringify(payload),
-    }
-  );
+  const res = await fetch(`${backend}/categories/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...forwardAuthorization(req),
+    },
+    body: JSON.stringify(payload),
+  });
 
   let raw: unknown = null;
   try {
@@ -88,13 +84,10 @@ export async function DELETE(
 ) {
   const { id } = await ctx.params;
   const backend = getBackendUrl();
-  const res = await fetch(
-    `${backend}/categories/${encodeURIComponent(id)}`,
-    {
-      method: "DELETE",
-      headers: { ...forwardAuthorization(req) },
-    }
-  );
+  const res = await fetch(`${backend}/categories/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { ...forwardAuthorization(req) },
+  });
 
   const text = await res.text();
   let raw: unknown = null;

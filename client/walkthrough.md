@@ -6,17 +6,17 @@ This document describes how the **Next.js 15** storefront under `client/` is org
 
 ## Quick orientation
 
-| Piece | Role |
-|--------|------|
-| `src/app/` | App Router: pages, layouts, loading/error boundaries, Route Handlers (`api/`) |
-| `src/modules/` | Feature-oriented UI + wiring (products, cart, checkout, auth, admin, …) |
-| `src/components/ui/` | Reusable primitives from **shadcn/ui** (buttons, forms, sheets, …) |
-| `src/shared/` | Cross-cutting layout, providers, marketing blocks, shared hooks |
-| `src/store/` | **Zustand** stores (auth, cart, wishlist, recently viewed) |
-| `src/lib/` | Utilities, mock/product data, API helpers, `session-cookie.ts` (JWT from cookies), server-side order memory |
-| `src/config/` | `site.ts` — brand name, description, URL, locale |
-| `src/constants/` | `routes.ts`, `query-keys.ts`, shared constants |
-| `components.json` | **shadcn** CLI config (do not delete; see below) |
+| Piece                | Role                                                                                                        |
+| -------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `src/app/`           | App Router: pages, layouts, loading/error boundaries, Route Handlers (`api/`)                               |
+| `src/modules/`       | Feature-oriented UI + wiring (products, cart, checkout, auth, admin, …)                                     |
+| `src/components/ui/` | Reusable primitives from **shadcn/ui** (buttons, forms, sheets, …)                                          |
+| `src/shared/`        | Cross-cutting layout, providers, marketing blocks, shared hooks                                             |
+| `src/store/`         | **Zustand** stores (auth, cart, wishlist, recently viewed)                                                  |
+| `src/lib/`           | Utilities, mock/product data, API helpers, `session-cookie.ts` (JWT from cookies), server-side order memory |
+| `src/config/`        | `site.ts` — brand name, description, URL, locale                                                            |
+| `src/constants/`     | `routes.ts`, `query-keys.ts`, shared constants                                                              |
+| `components.json`    | **shadcn** CLI config (do not delete; see below)                                                            |
 
 ---
 
@@ -37,11 +37,11 @@ It is **not** a runtime dependency for your app at build time beyond documenting
 
 Parentheses in folder names are **route groups**: they organize files **without** appearing in the URL.
 
-| Folder under `src/app/` | URL examples | Layout / shell |
-|-------------------------|--------------|----------------|
-| `(marketing)/` | `/` | `SiteShell` — marketing header/footer |
-| `(auth)/` | `/login`, `/register`, `/forgot-password` | `SiteShell` + centered card |
-| `(shop)/` | `/products`, `/products/[slug]`, `/cart`, `/checkout`, `/orders`, `/dashboard`, `/profile`, `/wishlist`, `/users`, … | `ShopRoleShell` → `CustomerAppShell` or `AdminAppShell` |
+| Folder under `src/app/` | URL examples                                                                                                         | Layout / shell                                          |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `(marketing)/`          | `/`                                                                                                                  | `SiteShell` — marketing header/footer                   |
+| `(auth)/`               | `/login`, `/register`, `/forgot-password`                                                                            | `SiteShell` + centered card                             |
+| `(shop)/`               | `/products`, `/products/[slug]`, `/cart`, `/checkout`, `/orders`, `/dashboard`, `/profile`, `/wishlist`, `/users`, … | `ShopRoleShell` → `CustomerAppShell` or `AdminAppShell` |
 
 ### Auth, middleware, and `ShopRoleShell`
 
@@ -112,13 +112,13 @@ Routes without `dynamic` or `revalidate` follow Next defaults (often static wher
 
 ## `src/app` special files
 
-| File | Purpose |
-|------|---------|
-| `layout.tsx` | Shared UI wrapper for a segment and children |
-| `page.tsx` | Page UI for a route |
-| `loading.tsx` | Instant loading UI while segment suspends |
-| `error.tsx` | Error boundary UI |
-| `not-found.tsx` | Local 404 UI |
+| File            | Purpose                                      |
+| --------------- | -------------------------------------------- |
+| `layout.tsx`    | Shared UI wrapper for a segment and children |
+| `page.tsx`      | Page UI for a route                          |
+| `loading.tsx`   | Instant loading UI while segment suspends    |
+| `error.tsx`     | Error boundary UI                            |
+| `not-found.tsx` | Local 404 UI                                 |
 
 ---
 
@@ -142,15 +142,15 @@ Each module usually contains `components/` and sometimes `services/` for API cal
 
 ## State and data
 
-| Concern | Implementation |
-|---------|----------------|
-| Auth session (client) | `src/store/auth-store.ts` + API routes under `api/v1/auth/` |
-| Cart | `src/store/cart-store.ts` |
-| Wishlist | `src/store/wishlist-store.ts` |
-| Recently viewed | `src/store/recently-viewed-store.ts` |
+| Concern                    | Implementation                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------------ |
+| Auth session (client)      | `src/store/auth-store.ts` + API routes under `api/v1/auth/`                          |
+| Cart                       | `src/store/cart-store.ts`                                                            |
+| Wishlist                   | `src/store/wishlist-store.ts`                                                        |
+| Recently viewed            | `src/store/recently-viewed-store.ts`                                                 |
 | Server-side catalog source | `src/lib/product-store.ts`, `src/lib/mock-data.ts` (replace with real backend later) |
-| Orders (demo persistence) | `src/lib/order-memory.ts` |
-| Query cache keys | `src/constants/query-keys.ts` |
+| Orders (demo persistence)  | `src/lib/order-memory.ts`                                                            |
+| Query cache keys           | `src/constants/query-keys.ts`                                                        |
 
 ---
 

@@ -72,14 +72,8 @@ export function CustomerAppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <AppChromeHeader
-          sectionHint={meta.hint}
-          sectionTitle={meta.title}
-        />
-        <div
-          id="main-content"
-          className="flex-1 px-4 py-4 lg:px-6 lg:py-4"
-        >
+        <AppChromeHeader sectionHint={meta.hint} sectionTitle={meta.title} />
+        <div id="main-content" className="flex-1 px-4 py-4 lg:px-6 lg:py-4">
           {children}
         </div>
       </div>
@@ -92,8 +86,7 @@ export function CustomerAppShell({ children }: { children: React.ReactNode }) {
           const active =
             item.href === ROUTES.dashboard
               ? pathname === ROUTES.dashboard
-              : pathname === item.href ||
-                pathname.startsWith(`${item.href}/`);
+              : pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;
           return (
             <Link

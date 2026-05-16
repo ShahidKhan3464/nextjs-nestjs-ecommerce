@@ -15,7 +15,8 @@ export default function RegisterPage() {
           Create your account
         </h1>
         <p className="text-muted-foreground text-sm">
-          Save your details for faster checkout, order updates, and your wishlist.
+          Save your details for faster checkout, order updates, and your
+          wishlist.
         </p>
       </div>
       <RegisterForm />

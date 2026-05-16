@@ -38,15 +38,12 @@ export function AdminProductCreateForm() {
     queryFn: () => fetchAdminCategories({ limit: 200 }),
   });
 
-  const categories = categoriesResp?.categories ?? [];
-
-  const categoryOptions = useMemo(
-    () =>
-      [...categories].sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
-      ),
-    [categories]
-  );
+  const categoryOptions = useMemo(() => {
+    const categories = categoriesResp?.categories ?? [];
+    return [...categories].sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+    );
+  }, [categoriesResp?.categories]);
 
   useEffect(() => {
     const map = objectUrlsRef.current;
@@ -101,7 +98,7 @@ export function AdminProductCreateForm() {
     name: "variants",
   });
 
-  async function onSubmit(values: Values) {
+  async function onSubmit(values: ProductValues) {
     if (files.length === 0) {
       toast.error("Add at least one product image");
       return;
@@ -128,15 +125,11 @@ export function AdminProductCreateForm() {
       });
       toast.success("Product created");
       await qc.invalidateQueries({ queryKey: queryKeys.admin.products });
-    } catch (err) {
+    } catch (err: unknown) {
       const msg = isAxiosError(err)
         ? ((err.response?.data as { message?: string })?.message ?? err.message)
         : "Something went wrong";
       toast.error(typeof msg === "string" ? msg : "Could not create product");
-      toast.error(
-        (err.response?.data as { message?: string })?.message ??
-          "Could not create product"
-      );
     }
   }
 
@@ -236,7 +229,7 @@ export function AdminProductCreateForm() {
               Add Variant
             </Button>
           </div>
-          
+
           {fields.map((field, index) => (
             <div
               key={field.id}

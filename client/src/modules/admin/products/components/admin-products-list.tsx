@@ -3,14 +3,15 @@
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { ROUTES } from "@/constants/routes";
 import { Trash2, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { queryKeys } from "@/constants/query-keys";
 import { Pagination } from "@/components/ui/pagination";
 import { AdminTableSkeleton } from "@/modules/admin/shared";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import type { Product } from "@/modules/customer/products/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -102,7 +103,9 @@ export function AdminProductsList() {
           <div className="w-40">
             <Select
               value={statusFilter}
-              onValueChange={(val: any) => setStatusFilter(val)}
+              onValueChange={(val) => {
+                if (val) setStatusFilter(val);
+              }}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Status" />
@@ -179,16 +182,18 @@ export function AdminProductsList() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center gap-2">
-                        <Button
-                          asChild
-                          size="icon"
-                          variant="secondary"
+                        <Link
+                          href={ROUTES.productEdit(p.id)}
+                          className={cn(
+                            buttonVariants({
+                              variant: "secondary",
+                              size: "icon",
+                            })
+                          )}
                           aria-label={`Edit ${p.name}`}
                         >
-                          <Link href={ROUTES.productEdit(p.id)}>
-                            <Pencil className="size-4" />
-                          </Link>
-                        </Button>
+                          <Pencil className="size-4" />
+                        </Link>
                         <Button
                           size="icon"
                           variant="destructive"

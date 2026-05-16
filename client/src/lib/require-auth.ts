@@ -13,6 +13,8 @@ export function userFromSessionPayload(payload: JwtPayload): User {
       name: mock.name,
       role: mock.role,
       email: mock.email,
+      fullName: mock.fullName,
+      isBlocked: mock.isBlocked,
       createdAt: mock.createdAt,
       avatarUrl: mock.avatarUrl,
     };
@@ -22,8 +24,9 @@ export function userFromSessionPayload(payload: JwtPayload): User {
     role: payload.role,
     email: payload.email,
     name: payload.name ?? payload.email.split("@")[0] ?? "User",
-    fullName: payload.fullName,
-    isBlocked: payload.isBlocked,
+    fullName:
+      payload.fullName ?? payload.name ?? payload.email.split("@")[0] ?? "User",
+    isBlocked: payload.isBlocked ?? false,
     createdAt: new Date().toISOString(),
   };
 }

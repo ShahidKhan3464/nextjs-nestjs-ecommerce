@@ -43,10 +43,7 @@ import {
   AlertDialogDescription,
 } from "@/components/ui/alert-dialog";
 
-
-function blockedFilterParam(
-  statusFilter: string
-): boolean | undefined {
+function blockedFilterParam(statusFilter: string): boolean | undefined {
   if (statusFilter === "blocked") return true;
   if (statusFilter === "active") return false;
   return undefined;
@@ -87,8 +84,13 @@ export function AdminUsersList() {
   });
 
   const blockMutation = useMutation({
-    mutationFn: ({ id, isBlocked }: { id: string | number; isBlocked: boolean }) =>
-      blockAdminUser(id, isBlocked),
+    mutationFn: ({
+      id,
+      isBlocked,
+    }: {
+      id: string | number;
+      isBlocked: boolean;
+    }) => blockAdminUser(id, isBlocked),
     onSuccess: async (_, vars) => {
       toast.success(`User ${vars.isBlocked ? "blocked" : "unblocked"}`);
       setBlockTarget(null);

@@ -17,7 +17,7 @@ const PUBLIC_AUTH_PREFIXES = [
 
 function isPublicAuthPath(pathname: string): boolean {
   return PUBLIC_AUTH_PREFIXES.some(
-    (p) => pathname === p || pathname.startsWith(`${p}/`),
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
   );
 }
 
@@ -44,15 +44,16 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get(AUTH_SESSION_COOKIE)?.value;
   const payload = token ? await verifyToken(token) : null;
 
-  const wantsPublicOnly = isPublicAuthPath(pathname) || isMarketingPath(pathname);
+  const wantsPublicOnly =
+    isPublicAuthPath(pathname) || isMarketingPath(pathname);
 
   if (wantsPublicOnly) {
     if (payload && payload.typ === "access") {
       const back = safeProtectedRedirectPath(
-        request.cookies.get(RETURN_PATH_COOKIE)?.value,
+        request.cookies.get(RETURN_PATH_COOKIE)?.value
       );
       return NextResponse.redirect(
-        new URL(back ?? ROUTES.dashboard, request.url),
+        new URL(back ?? ROUTES.dashboard, request.url)
       );
     }
     return NextResponse.next();
@@ -64,10 +65,7 @@ export async function middleware(request: NextRequest) {
 
   if (!token || !payload || payload.typ !== "access") {
     const login = new URL(ROUTES.login, request.url);
-    login.searchParams.set(
-      "next",
-      `${pathname}${request.nextUrl.search}`,
-    );
+    login.searchParams.set("next", `${pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(login);
   }
 
@@ -82,22 +80,16 @@ export async function middleware(request: NextRequest) {
   }
 
   const res = NextResponse.next();
-  res.cookies.set(
-    RETURN_PATH_COOKIE,
-    `${pathname}${request.nextUrl.search}`,
-    {
-      path: "/",
-      httpOnly: true,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30,
-      secure: process.env.NODE_ENV === "production",
-    },
-  );
+  res.cookies.set(RETURN_PATH_COOKIE, `${pathname}${request.nextUrl.search}`, {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 30,
+    secure: process.env.NODE_ENV === "production",
+  });
   return res;
 }
 
 export const config = {
-  matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

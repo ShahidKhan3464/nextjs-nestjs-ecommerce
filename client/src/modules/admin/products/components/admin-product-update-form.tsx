@@ -41,7 +41,9 @@ export function AdminProductUpdateForm({ initial }: { initial: Product }) {
   const qc = useQueryClient();
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const objectUrlsRef = useRef<Map<File, string>>(new Map());
-  const [existingImages, setExistingImages] = useState<string[]>(initial.images);
+  const [existingImages, setExistingImages] = useState<string[]>(
+    initial.images
+  );
 
   const { data: categoriesResp, isPending: categoriesLoading } = useQuery({
     queryKey: queryKeys.admin.categories,

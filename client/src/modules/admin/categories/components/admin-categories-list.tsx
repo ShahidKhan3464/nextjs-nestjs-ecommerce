@@ -73,7 +73,11 @@ export function AdminCategoriesList() {
       setDeleteTarget(null);
       await qc.invalidateQueries({ queryKey: queryKeys.admin.categories });
     },
-    onError: (error: AxiosError) => toast.error((error.response?.data as { message?: string })?.message ?? "Could not delete category"),
+    onError: (error: AxiosError) =>
+      toast.error(
+        (error.response?.data as { message?: string })?.message ??
+          "Could not delete category"
+      ),
   });
 
   const showInitialSkeleton = isPending && !data;
@@ -109,7 +113,9 @@ export function AdminCategoriesList() {
 
         <div
           className={
-            isFetching && !isPlaceholderData ? "opacity-60 transition-opacity" : ""
+            isFetching && !isPlaceholderData
+              ? "opacity-60 transition-opacity"
+              : ""
           }
         >
           <Table>
@@ -141,7 +147,9 @@ export function AdminCategoriesList() {
                       <Link
                         aria-label={`Edit ${c.name}`}
                         href={ROUTES.category(String(c.id))}
-                        className={cn(buttonVariants({ size: "icon", variant: "outline" }))}
+                        className={cn(
+                          buttonVariants({ size: "icon", variant: "outline" })
+                        )}
                       >
                         <Pencil />
                       </Link>

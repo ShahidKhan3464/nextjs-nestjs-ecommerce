@@ -7,12 +7,8 @@ import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import { siteConfig } from "@/config/site";
 import { ROUTES } from "@/constants/routes";
+import { Sun, Menu, Moon } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
-import {
-  Sun,
-  Menu,
-  Moon
-} from "lucide-react";
 
 export function SiteHeader() {
   const { theme, setTheme } = useTheme();

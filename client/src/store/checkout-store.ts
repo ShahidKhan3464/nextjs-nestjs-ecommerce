@@ -22,8 +22,7 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
   shippingAddress: null,
   setStep: (step) => set({ step }),
   setCoupon: (couponCode) => set({ couponCode }),
-  setShipping: (shippingAddress) =>
-    set({ shippingAddress, step: "payment" }),
+  setShipping: (shippingAddress) => set({ shippingAddress, step: "payment" }),
   setPaymentSummary: (paymentSummary) =>
     set({ paymentSummary, step: "review" }),
   reset: () =>

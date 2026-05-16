@@ -26,7 +26,9 @@ type Props = {
 export function ProductDetailView({ product }: Props) {
   const addItem = useCartStore((s) => s.addItem);
   const recordView = useRecentlyViewedStore((s) => s.recordView);
-  const [variantId, setVariantId] = React.useState(product.variants[0]?.id ?? "");
+  const [variantId, setVariantId] = React.useState(
+    product.variants[0]?.id ?? ""
+  );
 
   React.useEffect(() => {
     recordView(product.slug);
@@ -90,7 +92,13 @@ export function ProductDetailView({ product }: Props) {
               onClick={() => setActiveImage(src)}
               className="border-border relative size-16 shrink-0 overflow-hidden rounded-md border data-[active=true]:ring-2 data-[active=true]:ring-ring"
             >
-              <Image src={src} alt="" fill className="object-cover" sizes="64px" />
+              <Image
+                src={src}
+                alt=""
+                fill
+                className="object-cover"
+                sizes="64px"
+              />
             </button>
           ))}
         </div>
@@ -110,7 +118,9 @@ export function ProductDetailView({ product }: Props) {
           </p>
         </div>
 
-        <p className="text-muted-foreground leading-relaxed">{product.description}</p>
+        <p className="text-muted-foreground leading-relaxed">
+          {product.description}
+        </p>
 
         <Separator />
 

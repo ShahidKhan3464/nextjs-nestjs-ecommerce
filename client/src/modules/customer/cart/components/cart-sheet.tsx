@@ -147,7 +147,10 @@ export function CartSheet({ open, onOpenChange }: Props) {
               <Link
                 href={ROUTES.checkout}
                 onClick={() => onOpenChange(false)}
-                className={cn(buttonVariants(), "inline-flex w-full justify-center")}
+                className={cn(
+                  buttonVariants(),
+                  "inline-flex w-full justify-center"
+                )}
               >
                 Checkout
               </Link>

@@ -65,9 +65,7 @@ export function ProductCard({ product, className }: Props) {
             variant="ghost"
             className="shrink-0"
             aria-pressed={wishlisted}
-            aria-label={
-              wishlisted ? "Remove from wishlist" : "Add to wishlist"
-            }
+            aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
             onClick={(e) => {
               e.preventDefault();
               toggleWishlist(product.id);

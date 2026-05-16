@@ -11,6 +11,8 @@ export interface JwtPayload {
   typ: "access" | "refresh";
   /** Session tokens may carry display name from Nest login/refresh. */
   name?: string;
+  fullName?: string;
+  isBlocked?: boolean;
 }
 
 export async function signAccessToken(payload: Omit<JwtPayload, "typ">) {
@@ -64,7 +66,13 @@ export async function verifyToken(token: string): Promise<JwtPayload | null> {
         ? nameRaw.trim()
         : undefined;
 
-    return { sub, email, role, typ, name };
+    const fullNameRaw = payload.fullName;
+    const fullName = typeof fullNameRaw === "string" ? fullNameRaw : undefined;
+
+    const isBlocked =
+      typeof payload.isBlocked === "boolean" ? payload.isBlocked : false;
+
+    return { sub, email, role, typ, name, fullName, isBlocked };
   } catch {
     return null;
   }

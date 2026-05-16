@@ -16,7 +16,10 @@ export async function GET(req: Request) {
   const minRating = parseNumber(searchParams.get("minRating"), NaN);
   const sort = searchParams.get("sort") ?? "featured";
   const page = Math.max(1, parseNumber(searchParams.get("page"), 1));
-  const limit = Math.min(48, Math.max(1, parseNumber(searchParams.get("limit"), 12)));
+  const limit = Math.min(
+    48,
+    Math.max(1, parseNumber(searchParams.get("limit"), 12))
+  );
 
   let items = [...getProductCatalog()];
 

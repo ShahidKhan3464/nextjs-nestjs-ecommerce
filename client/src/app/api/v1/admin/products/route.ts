@@ -2,10 +2,7 @@ import type { Product } from "@/types";
 import type { ApiResponse } from "@/types";
 import { getBackendUrl } from "@/lib/backend-url";
 import { jsonMessage, jsonOk } from "@/lib/api-response";
-import {
-  nestErrorMessage,
-  forwardAuthorization,
-} from "@/lib/nest-http";
+import { nestErrorMessage, forwardAuthorization } from "@/lib/nest-http";
 import {
   type NestProductDto,
   mapNestProductToAdminProduct,

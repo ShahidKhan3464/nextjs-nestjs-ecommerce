@@ -25,7 +25,9 @@ export function ForgotPasswordForm() {
   async function onSubmit(values: ForgotPasswordValues) {
     try {
       await forgotPasswordRequest(values.email);
-      toast.success("If an account exists, you will receive reset instructions.");
+      toast.success(
+        "If an account exists, you will receive reset instructions."
+      );
       form.reset();
     } catch {
       toast.error("Something went wrong");

@@ -60,7 +60,9 @@ export async function POST(req: Request) {
   let subtotal = 0;
 
   for (const line of items) {
-    const product = getProductCatalog().find((p) => p.slug === line.productSlug);
+    const product = getProductCatalog().find(
+      (p) => p.slug === line.productSlug
+    );
     if (!product) {
       return jsonMessage(`Product not found: ${line.productSlug}`, 400);
     }

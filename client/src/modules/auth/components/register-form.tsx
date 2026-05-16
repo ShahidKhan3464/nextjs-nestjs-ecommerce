@@ -75,7 +75,12 @@ export function RegisterForm() {
             <FormItem>
               <FormLabel>Phone Number (optional)</FormLabel>
               <FormControl>
-                <Input type="tel" autoComplete="tel" placeholder="+1234567890" {...field} />
+                <Input
+                  type="tel"
+                  autoComplete="tel"
+                  placeholder="+1234567890"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

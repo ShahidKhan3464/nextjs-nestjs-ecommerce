@@ -25,7 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-function buildCategoryPayload(values: Values) {
+function buildCategoryPayload(values: CategoryValues) {
   const name = values.name.trim();
   const desc = values.description?.trim();
   const payload: { name: string; description?: string } = { name };
