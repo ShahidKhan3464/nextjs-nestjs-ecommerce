@@ -56,9 +56,6 @@ export function AdminCategoryForm({
       if (initial) {
         await updateAdminCategory(initial.id, payload);
         toast.success("Category updated");
-        await qc.invalidateQueries({
-          queryKey: queryKeys.admin.category(initial.id),
-        });
       } else {
         await createAdminCategory(payload);
         toast.success("Category created");

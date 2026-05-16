@@ -26,6 +26,14 @@ export class QueryProductDto extends PaginationQueryDto {
   status?: ProductStatus;
 
   @ApiPropertyOptional({
+    enum: ['active', 'removed', 'all'],
+    default: 'active',
+  })
+  @IsOptional()
+  @IsIn(['active', 'removed', 'all'])
+  lifeCycle?: 'active' | 'removed' | 'all' = 'active';
+
+  @ApiPropertyOptional({
     description: 'Search in product name and description (case-insensitive)',
   })
   @IsOptional()

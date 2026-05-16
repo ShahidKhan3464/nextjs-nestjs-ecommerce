@@ -25,6 +25,7 @@ export function RegisterForm() {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       fullName: "",
+      phoneNumber: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -34,10 +35,11 @@ export function RegisterForm() {
   async function onSubmit(values: RegisterValues) {
     try {
       await registerRequest({
-        fullName: values.fullName,
         email: values.email,
+        fullName: values.fullName,
         password: values.password,
         confirmPassword: values.confirmPassword,
+        phoneNumber: values.phoneNumber || undefined,
       });
       toast.success("Account created. Sign in to continue.");
       router.push(ROUTES.login);
@@ -61,6 +63,19 @@ export function RegisterForm() {
               <FormLabel>Full name</FormLabel>
               <FormControl>
                 <Input autoComplete="name" placeholder="Alex Doe" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          name="phoneNumber"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone Number (optional)</FormLabel>
+              <FormControl>
+                <Input type="tel" autoComplete="tel" placeholder="+1234567890" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

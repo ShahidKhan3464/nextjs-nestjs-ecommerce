@@ -48,6 +48,8 @@ export async function PATCH(req: Request) {
     email: record.email,
     name: record.name,
     role: record.role,
+    fullName: record.fullName,
+    isBlocked: record.isBlocked,
     createdAt: record.createdAt,
     avatarUrl: record.avatarUrl,
   };

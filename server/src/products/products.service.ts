@@ -7,7 +7,6 @@ import { GetProductsProvider } from './providers/get-products.provider';
 import { CreateProductProvider } from './providers/create-product.provider';
 import { UpdateProductProvider } from './providers/update-product.provider';
 import { DeleteProductProvider } from './providers/delete-product.provider';
-import { ProductImagesProvider } from './providers/product-images.provider';
 import { PaginateQueryResult } from 'src/common/pagination/interfaces/paginated.interfaces';
 
 @Injectable()
@@ -17,7 +16,6 @@ export class ProductsService {
     private readonly createProductProvider: CreateProductProvider,
     private readonly updateProductProvider: UpdateProductProvider,
     private readonly deleteProductProvider: DeleteProductProvider,
-    private readonly productImagesProvider: ProductImagesProvider,
   ) {}
 
   public async findAllPaginated(
@@ -37,22 +35,15 @@ export class ProductsService {
     return await this.createProductProvider.create(dto, files);
   }
 
-  public async update(id: number, dto: UpdateProductDto): Promise<Product> {
-    return await this.updateProductProvider.update(id, dto);
+  public async update(
+    id: number,
+    dto: UpdateProductDto,
+    files: Express.Multer.File[] = [],
+  ): Promise<Product> {
+    return await this.updateProductProvider.update(id, dto, files);
   }
 
   public async remove(id: number): Promise<void> {
     return await this.deleteProductProvider.remove(id);
-  }
-
-  public async addImages(
-    productId: number,
-    files: Express.Multer.File[],
-  ): Promise<Product> {
-    return await this.productImagesProvider.addImages(productId, files);
-  }
-
-  public async removeImage(productId: number, imageId: number): Promise<void> {
-    return await this.productImagesProvider.removeImage(productId, imageId);
   }
 }

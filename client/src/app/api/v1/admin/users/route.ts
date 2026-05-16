@@ -13,6 +13,8 @@ export async function GET(req: Request) {
     email: u.email,
     name: u.name,
     role: u.role,
+    fullName: u.fullName,
+    isBlocked: u.isBlocked,
     createdAt: u.createdAt,
     avatarUrl: u.avatarUrl,
   }));

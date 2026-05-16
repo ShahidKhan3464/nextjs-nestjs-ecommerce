@@ -23,6 +23,7 @@ export const registerSchema = z
       .string()
       .min(5, "Name is too short")
       .max(30, "Name is too long"),
+    phoneNumber: z.string().max(20).optional(),
     email: z.string().email("Enter a valid email"),
     password: passwordField,
     confirmPassword: passwordField,

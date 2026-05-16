@@ -54,11 +54,21 @@ export function AdminUserDetail({ userId }: Props) {
         <div>
           <p className="text-muted-foreground text-sm">User</p>
           <h2 className="font-heading text-2xl font-semibold tracking-tight">
-            {data.name}
+            {data.fullName}
           </h2>
           <p className="text-muted-foreground mt-1 text-sm">{data.email}</p>
+          {data.phoneNumber && (
+            <p className="text-muted-foreground mt-1 text-sm">{data.phoneNumber}</p>
+          )}
         </div>
-        <Badge>{data.role}</Badge>
+        <div className="flex items-center gap-2">
+          {data.isBlocked ? (
+            <Badge variant="destructive">Blocked</Badge>
+          ) : (
+            <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900 dark:text-green-300">Active</Badge>
+          )}
+          <Badge>{data.role}</Badge>
+        </div>
       </div>
 
       <dl className="grid gap-4 sm:grid-cols-2">

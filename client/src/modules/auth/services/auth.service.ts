@@ -15,6 +15,7 @@ export async function loginRequest(email: string, password: string) {
 
 export async function registerRequest(body: {
   fullName: string;
+  phoneNumber?: string;
   email: string;
   password: string;
   confirmPassword: string;

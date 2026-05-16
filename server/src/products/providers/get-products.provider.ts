@@ -17,6 +17,15 @@ export class GetProductsProvider {
 
   private buildFilteredProductQb(query: QueryProductDto) {
     const qb = this.productRepository.createQueryBuilder('product');
+
+    if (query.lifeCycle === 'all' || query.lifeCycle === 'removed') {
+      qb.withDeleted();
+    }
+
+    if (query.lifeCycle === 'removed') {
+      qb.andWhere('product.deletedAt IS NOT NULL');
+    }
+
     if (query.categoryId) {
       qb.andWhere('product.categoryId = :categoryId', {
         categoryId: query.categoryId,

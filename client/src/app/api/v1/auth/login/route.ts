@@ -23,6 +23,7 @@ type NestLoginPayload = {
       role: string;
       email: string;
       fullName: string;
+      isBlocked: boolean;
       accessToken: string;
       refreshToken: string;
     };
@@ -130,6 +131,8 @@ export async function POST(req: Request) {
     email: u.email,
     name: u.fullName,
     id: String(u.id),
+    fullName: u.fullName,
+    isBlocked: u.isBlocked,
     createdAt: new Date().toISOString(),
   };
 

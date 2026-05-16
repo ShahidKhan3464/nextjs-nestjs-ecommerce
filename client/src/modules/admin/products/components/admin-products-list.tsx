@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { ROUTES } from "@/constants/routes";
+import { Trash2, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { queryKeys } from "@/constants/query-keys";
@@ -17,10 +19,18 @@ import {
   fetchAdminProducts,
 } from "../services/products.service";
 import {
+  Select,
+  SelectItem,
+  SelectValue,
+  SelectContent,
+  SelectTrigger,
+} from "@/components/ui/select";
+
+import {
   Table,
+  TableRow,
   TableBody,
   TableCell,
-  TableRow,
   TableHead,
   TableHeader,
 } from "@/components/ui/table";
@@ -29,10 +39,10 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
+  AlertDialogTitle,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogDescription,
 } from "@/components/ui/alert-dialog";
 
 export function AdminProductsList() {
@@ -40,22 +50,26 @@ export function AdminProductsList() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [searchInput, setSearchInput] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "active" | "removed" | "all"
+  >("active");
   const debouncedSearch = useDebouncedValue(searchInput, 350);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, statusFilter]);
 
   const { data, isPending, isFetching, isPlaceholderData } = useQuery({
     queryKey: [
       ...queryKeys.admin.products,
-      { search: debouncedSearch, page, perPage },
+      { page, perPage, search: debouncedSearch, lifeCycle: statusFilter },
     ] as const,
     queryFn: () =>
       fetchAdminProducts({
-        limit: perPage,
         page,
+        limit: perPage,
+        lifeCycle: statusFilter,
         search: debouncedSearch || undefined,
       }),
     placeholderData: (prev) => prev,
@@ -85,10 +99,25 @@ export function AdminProductsList() {
     <>
       <div className="space-y-4">
         <div className="flex items-center justify-end gap-2">
+          <div className="w-40">
+            <Select
+              value={statusFilter}
+              onValueChange={(val: any) => setStatusFilter(val)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="removed">Removed</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="w-72">
             <Input
               value={searchInput}
-              placeholder="Search products"
+              placeholder="Search products..."
               onChange={(e) => setSearchInput(e.target.value)}
             />
           </div>
@@ -100,7 +129,6 @@ export function AdminProductsList() {
             Refresh
           </Button>
         </div>
-
         <div
           className={
             isFetching && !isPlaceholderData
@@ -149,15 +177,27 @@ export function AdminProductsList() {
                     <TableCell className="tabular-nums">
                       {p.variants.length}
                     </TableCell>
-                    <TableCell className="text-center">
-                      <Button
-                        size="icon"
-                        variant="destructive"
-                        aria-label={`Delete ${p.name}`}
-                        onClick={() => setDeleteTarget(p)}
-                      >
-                        <Trash2 />
-                      </Button>
+                    <TableCell>
+                      <div className="flex items-center justify-center gap-2">
+                        <Button
+                          asChild
+                          size="icon"
+                          variant="secondary"
+                          aria-label={`Edit ${p.name}`}
+                        >
+                          <Link href={ROUTES.productEdit(p.id)}>
+                            <Pencil className="size-4" />
+                          </Link>
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="destructive"
+                          aria-label={`Delete ${p.name}`}
+                          onClick={() => setDeleteTarget(p)}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))

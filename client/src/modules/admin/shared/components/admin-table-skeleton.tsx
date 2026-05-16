@@ -9,6 +9,7 @@ export function AdminTableSkeleton({
     <div className="space-y-4">
       {withToolbar ? (
         <div className="flex items-center justify-end gap-2">
+          <Skeleton className="h-10 w-40 rounded-md" />
           <Skeleton className="h-10 w-72 rounded-md" />
           <Skeleton className="h-10 w-24 rounded-md" />
         </div>

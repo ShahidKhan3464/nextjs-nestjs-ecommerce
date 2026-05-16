@@ -22,6 +22,8 @@ export function userFromSessionPayload(payload: JwtPayload): User {
     role: payload.role,
     email: payload.email,
     name: payload.name ?? payload.email.split("@")[0] ?? "User",
+    fullName: payload.fullName,
+    isBlocked: payload.isBlocked,
     createdAt: new Date().toISOString(),
   };
 }

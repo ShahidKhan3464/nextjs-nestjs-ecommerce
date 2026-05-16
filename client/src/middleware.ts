@@ -74,7 +74,8 @@ export async function middleware(request: NextRequest) {
   const adminOnly =
     pathname.startsWith("/users") ||
     pathname === "/products/new" ||
-    pathname.startsWith("/products/new/");
+    pathname.startsWith("/products/new/") ||
+    pathname.startsWith("/products/edit/");
 
   if (adminOnly && payload.role !== "admin") {
     return NextResponse.redirect(new URL(ROUTES.dashboard, request.url));

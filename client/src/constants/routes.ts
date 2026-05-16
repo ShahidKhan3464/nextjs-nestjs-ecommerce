@@ -19,4 +19,5 @@ export const ROUTES = {
   order: (id: string) => `/orders/${id}`,
   product: (slug: string) => `/products/${slug}`,
   category: (id: string | number) => `/categories/${id}`,
+  productEdit: (id: string | number) => `/products/edit/${id}`,
 } as const;

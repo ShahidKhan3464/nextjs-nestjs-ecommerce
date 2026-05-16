@@ -3,19 +3,26 @@
 import { toast } from "sonner";
 import Image from "next/image";
 import { isAxiosError } from "axios";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "@/constants/routes";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useFieldArray } from "react-hook-form";
+import { Button } from "@/components/ui/button";
 import { queryKeys } from "@/constants/query-keys";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Resolver } from "react-hook-form";
-import { XIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { PlusIcon, Trash2Icon, XIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { productSchema, type ProductValues } from "../schemas";
+import { type Product } from "@/modules/customer/products/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createAdminProduct } from "../services/products.service";
+import { updateAdminProduct } from "../services/products.service";
 import { fetchAdminCategories } from "../../categories/services/categories.service";
+import {
+  mapProductImagesToRetainPaths,
+  mapProductVariantsToFormValues,
+} from "../lib/product-form";
 import {
   Form,
   FormItem,
@@ -29,24 +36,38 @@ function previewKey(file: File, index: number) {
   return `${file.name}-${file.size}-${file.lastModified}-${index}`;
 }
 
-export function AdminProductCreateForm() {
+export function AdminProductUpdateForm({ initial }: { initial: Product }) {
+  const router = useRouter();
   const qc = useQueryClient();
-  const [files, setFiles] = useState<File[]>([]);
+  const [newFiles, setNewFiles] = useState<File[]>([]);
   const objectUrlsRef = useRef<Map<File, string>>(new Map());
+  const [existingImages, setExistingImages] = useState<string[]>(initial.images);
+
   const { data: categoriesResp, isPending: categoriesLoading } = useQuery({
     queryKey: queryKeys.admin.categories,
     queryFn: () => fetchAdminCategories({ limit: 200 }),
   });
 
-  const categories = categoriesResp?.categories ?? [];
+  const categoryOptions = useMemo(() => {
+    const cats = categoriesResp?.categories ?? [];
+    return [...cats].sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+    );
+  }, [categoriesResp?.categories]);
 
-  const categoryOptions = useMemo(
-    () =>
-      [...categories].sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
-      ),
-    [categories]
-  );
+  const form = useForm<ProductValues>({
+    resolver: zodResolver(productSchema) as Resolver<ProductValues>,
+    defaultValues: {
+      categoryId: "",
+      name: initial.name,
+      description: initial.description || "",
+      variants: mapProductVariantsToFormValues(initial.variants),
+    },
+  });
+
+  useEffect(() => {
+    setExistingImages(initial.images);
+  }, [initial.images]);
 
   useEffect(() => {
     const map = objectUrlsRef.current;
@@ -55,6 +76,22 @@ export function AdminProductCreateForm() {
       map.clear();
     };
   }, []);
+
+  useEffect(() => {
+    const categories = categoriesResp?.categories ?? [];
+    const found = categories.find((c) => c.name === initial.category);
+    form.reset({
+      name: initial.name,
+      description: initial.description || "",
+      categoryId: found ? String(found.id) : "",
+      variants: mapProductVariantsToFormValues(initial.variants),
+    });
+  }, [initial, categoriesResp?.categories, form]);
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "variants",
+  });
 
   function objectUrlFor(file: File): string {
     const map = objectUrlsRef.current;
@@ -68,11 +105,11 @@ export function AdminProductCreateForm() {
 
   function addFiles(incoming: File[]) {
     if (incoming.length === 0) return;
-    setFiles((prev) => [...prev, ...incoming]);
+    setNewFiles((prev) => [...prev, ...incoming]);
   }
 
-  function removeFileAt(index: number) {
-    setFiles((prev) => {
+  function removeNewFileAt(index: number) {
+    setNewFiles((prev) => {
       const next = [...prev];
       const [removed] = next.splice(index, 1);
       if (removed) {
@@ -86,24 +123,13 @@ export function AdminProductCreateForm() {
     });
   }
 
-  const form = useForm<ProductValues>({
-    resolver: zodResolver(productSchema) as Resolver<ProductValues>,
-    defaultValues: {
-      name: "",
-      description: "",
-      categoryId: "",
-      variants: [{ size: "M", color: "Black", sku: "", stock: 20, price: 99 }],
-    },
-  });
+  function removeExistingImageAt(index: number) {
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
+  }
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "variants",
-  });
-
-  async function onSubmit(values: Values) {
-    if (files.length === 0) {
-      toast.error("Add at least one product image");
+  async function onSubmit(values: ProductValues) {
+    if (existingImages.length === 0 && newFiles.length === 0) {
+      toast.error("Keep at least one product image");
       return;
     }
 
@@ -113,11 +139,12 @@ export function AdminProductCreateForm() {
         toast.error("Pick a valid category");
         return;
       }
-      await createAdminProduct({
+      await updateAdminProduct(initial.id, {
         categoryId,
-        images: files,
         name: values.name.trim(),
         description: values.description?.trim() || undefined,
+        retainImagePaths: mapProductImagesToRetainPaths(existingImages),
+        newImages: newFiles,
         variants: values.variants.map((v) => ({
           stock: v.stock,
           price: v.price,
@@ -126,19 +153,25 @@ export function AdminProductCreateForm() {
           color: v.color.trim(),
         })),
       });
-      toast.success("Product created");
+      toast.success("Product updated");
       await qc.invalidateQueries({ queryKey: queryKeys.admin.products });
-    } catch (err) {
-      const msg = isAxiosError(err)
-        ? ((err.response?.data as { message?: string })?.message ?? err.message)
-        : "Something went wrong";
-      toast.error(typeof msg === "string" ? msg : "Could not create product");
-      toast.error(
-        (err.response?.data as { message?: string })?.message ??
-          "Could not create product"
-      );
+      await qc.invalidateQueries({
+        queryKey: ["admin", "products", "detail", initial.id],
+      });
+      router.push(ROUTES.products);
+    } catch (err: unknown) {
+      let msg = "Something went wrong";
+      if (isAxiosError(err)) {
+        msg =
+          (err.response?.data as { message?: string })?.message ?? err.message;
+      } else if (err instanceof Error) {
+        msg = err.message;
+      }
+      toast.error(msg);
     }
   }
+
+  const totalImages = existingImages.length + newFiles.length;
 
   return (
     <Form {...form}>
@@ -236,7 +269,7 @@ export function AdminProductCreateForm() {
               Add Variant
             </Button>
           </div>
-          
+
           {fields.map((field, index) => (
             <div
               key={field.id}
@@ -247,7 +280,7 @@ export function AdminProductCreateForm() {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-2 text-destructive"
+                  className="text-destructive absolute top-2 right-2"
                   onClick={() => remove(index)}
                 >
                   <Trash2Icon className="size-4" />
@@ -258,11 +291,11 @@ export function AdminProductCreateForm() {
                 <FormField
                   name={`variants.${index}.size`}
                   control={form.control}
-                  render={({ field }) => (
+                  render={({ field: f }) => (
                     <FormItem>
                       <FormLabel>Size</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...f} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -271,11 +304,11 @@ export function AdminProductCreateForm() {
                 <FormField
                   name={`variants.${index}.color`}
                   control={form.control}
-                  render={({ field }) => (
+                  render={({ field: f }) => (
                     <FormItem>
                       <FormLabel>Color</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...f} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -284,11 +317,11 @@ export function AdminProductCreateForm() {
                 <FormField
                   name={`variants.${index}.sku`}
                   control={form.control}
-                  render={({ field }) => (
+                  render={({ field: f }) => (
                     <FormItem>
                       <FormLabel>SKU</FormLabel>
                       <FormControl>
-                        <Input placeholder="UNIQUE-SKU-001" {...field} />
+                        <Input placeholder="UNIQUE-SKU-001" {...f} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -300,11 +333,11 @@ export function AdminProductCreateForm() {
                 <FormField
                   name={`variants.${index}.price`}
                   control={form.control}
-                  render={({ field }) => (
+                  render={({ field: f }) => (
                     <FormItem>
                       <FormLabel>Price</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.01" min={0} {...field} />
+                        <Input type="number" step="0.01" min={0} {...f} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -313,11 +346,11 @@ export function AdminProductCreateForm() {
                 <FormField
                   name={`variants.${index}.stock`}
                   control={form.control}
-                  render={({ field }) => (
+                  render={({ field: f }) => (
                     <FormItem>
                       <FormLabel>Stock</FormLabel>
                       <FormControl>
-                        <Input type="number" min={0} {...field} />
+                        <Input type="number" min={0} {...f} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -331,14 +364,14 @@ export function AdminProductCreateForm() {
         <div className="space-y-3">
           <label
             className="text-sm leading-none font-medium"
-            htmlFor="product-images"
+            htmlFor="product-images-update"
           >
             Images
           </label>
           <Input
             multiple
             type="file"
-            id="product-images"
+            id="product-images-update"
             accept="image/jpeg,image/png,image/gif,image/webp"
             onChange={(e) => {
               addFiles(Array.from(e.target.files ?? []));
@@ -346,29 +379,54 @@ export function AdminProductCreateForm() {
             }}
           />
           <p className="text-muted-foreground text-xs">
-            Add one or more images (JPEG, PNG, GIF, or Webp). Max 5 MB each.
+            Current images are shown below. Remove any you do not want to keep,
+            then add new ones if needed ({totalImages} total).
           </p>
 
-          {files.length > 0 ? (
+          {existingImages.length > 0 || newFiles.length > 0 ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-              {files.map((file, index) => (
+              {existingImages.map((src, index) => (
                 <div
-                  key={previewKey(file, index)}
+                  key={`existing-${src}-${index}`}
                   className="bg-muted relative aspect-square overflow-hidden rounded-lg border"
                 >
                   <Image
-                    alt=""
                     fill
+                    alt=""
+                    src={src}
                     unoptimized
                     className="object-cover"
-                    src={objectUrlFor(file)}
                   />
                   <Button
                     size="icon"
                     type="button"
                     variant="secondary"
-                    onClick={() => removeFileAt(index)}
-                    aria-label={`Remove image ${index + 1}`}
+                    onClick={() => removeExistingImageAt(index)}
+                    aria-label={`Remove existing image ${index + 1}`}
+                    className="absolute top-1 right-1 size-8 rounded-full shadow-sm"
+                  >
+                    <XIcon className="size-4" />
+                  </Button>
+                </div>
+              ))}
+              {newFiles.map((file, index) => (
+                <div
+                  key={previewKey(file, index)}
+                  className="bg-muted relative aspect-square overflow-hidden rounded-lg border"
+                >
+                  <Image
+                    fill
+                    alt=""
+                    unoptimized
+                    src={objectUrlFor(file)}
+                    className="object-cover"
+                  />
+                  <Button
+                    size="icon"
+                    type="button"
+                    variant="secondary"
+                    onClick={() => removeNewFileAt(index)}
+                    aria-label={`Remove new image ${index + 1}`}
                     className="absolute top-1 right-1 size-8 rounded-full shadow-sm"
                   >
                     <XIcon className="size-4" />
@@ -379,9 +437,14 @@ export function AdminProductCreateForm() {
           ) : null}
         </div>
 
-        <Button type="submit" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? "Creating…" : "Create product"}
-        </Button>
+        <div className="flex gap-2">
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? "Updating…" : "Update product"}
+          </Button>
+          <Button type="button" variant="ghost" onClick={() => router.back()}>
+            Cancel
+          </Button>
+        </div>
       </form>
     </Form>
   );
