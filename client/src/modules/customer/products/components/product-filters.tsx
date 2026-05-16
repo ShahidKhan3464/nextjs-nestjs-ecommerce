@@ -92,26 +92,6 @@ export function ProductFilters() {
           </Select>
         </div>
 
-        <div className="w-full min-w-[140px] space-y-2 sm:w-auto">
-          <Label>Minimum rating</Label>
-          <Select
-            value={values.minRating || "any"}
-            onValueChange={(v) => {
-              if (v == null) return;
-              setParams({ minRating: v === "any" ? "" : v, page: 1 });
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Any" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="any">Any</SelectItem>
-              <SelectItem value="4">4+ stars</SelectItem>
-              <SelectItem value="4.5">4.5+ stars</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
         <div className="w-full min-w-[140px] space-y-2 sm:w-auto sm:min-w-[160px]">
           <Label>Sort</Label>
           <Select
@@ -128,7 +108,6 @@ export function ProductFilters() {
               <SelectItem value="featured">Featured</SelectItem>
               <SelectItem value="price-asc">Price: Low to High</SelectItem>
               <SelectItem value="price-desc">Price: High to Low</SelectItem>
-              <SelectItem value="rating">Rating</SelectItem>
               <SelectItem value="newest">Newest</SelectItem>
             </SelectContent>
           </Select>
