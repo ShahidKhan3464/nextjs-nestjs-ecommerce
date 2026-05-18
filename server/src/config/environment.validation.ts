@@ -20,5 +20,6 @@ export default Joi.object({
   MAIL_PORT: Joi.number().integer().min(1).max(65535).default(2525),
   ADMIN_EMAIL: Joi.string().email().optional(),
   ADMIN_NAME: Joi.string().min(5).max(30).optional(),
+  ADMIN_PHONE: Joi.string().min(10).max(15).optional(),
   ADMIN_PASSWORD: Joi.string().min(8).max(30).optional(),
 });

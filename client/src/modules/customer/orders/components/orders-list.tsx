@@ -40,7 +40,7 @@ export function OrdersList() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [searchInput, setSearchInput] = useState("");
-  const debouncedSearch = useDebouncedValue(searchInput, 350);
+  const debouncedSearch = useDebouncedValue(searchInput, 500);
 
   useEffect(() => {
     setPage(1);

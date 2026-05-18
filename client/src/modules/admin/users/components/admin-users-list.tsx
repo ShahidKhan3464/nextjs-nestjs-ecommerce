@@ -57,7 +57,7 @@ export function AdminUsersList() {
   const [searchInput, setSearchInput] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const isBlockedFilter = blockedFilterParam(statusFilter);
-  const debouncedSearch = useDebouncedValue(searchInput, 350);
+  const debouncedSearch = useDebouncedValue(searchInput, 500);
   const [blockTarget, setBlockTarget] = useState<BlockTarget | null>(null);
 
   useEffect(() => {
