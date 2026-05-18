@@ -28,6 +28,10 @@ export class ProductsService {
     return await this.getProductsProvider.findOne(id);
   }
 
+  public async findBySlug(slug: string): Promise<Product> {
+    return await this.getProductsProvider.findBySlug(slug);
+  }
+
   public async create(
     dto: CreateProductDto,
     files: Express.Multer.File[],

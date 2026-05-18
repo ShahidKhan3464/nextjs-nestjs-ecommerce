@@ -44,6 +44,11 @@ export class ProductsController {
     return this.productsService.findOne(id);
   }
 
+  @Get('detail/:slug')
+  findBySlug(@Param('slug') slug: string) {
+    return this.productsService.findBySlug(slug);
+  }
+
   @Post()
   @Roles(UserRole.ADMIN)
   @ApiConsumes('multipart/form-data')

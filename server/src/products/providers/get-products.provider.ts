@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from '../entities/product.entity';
 import { QueryProductDto } from '../dto/query-product.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ProductImage } from '../entities/product-image.entity';
 import { PaginationProviders } from 'src/common/pagination/providers/pagination.providers';
 import { PaginateQueryResult } from 'src/common/pagination/interfaces/paginated.interfaces';
 
@@ -27,9 +26,15 @@ export class GetProductsProvider {
     }
 
     if (query.categoryId) {
-      qb.andWhere('product.categoryId = :categoryId', {
-        categoryId: query.categoryId,
-      });
+      // Use join to ensure categoryId filtering works reliably regardless of virtual column naming
+      qb.innerJoin(
+        'product.category',
+        'cat_filter',
+        'cat_filter.id = :categoryId',
+        {
+          categoryId: query.categoryId,
+        },
+      );
     }
     if (query.status) {
       qb.andWhere('product.status = :status', { status: query.status });
@@ -40,6 +45,29 @@ export class GetProductsProvider {
         { search: `%${query.search.trim()}%` },
       );
     }
+
+    if (query.minPrice !== undefined || query.maxPrice !== undefined) {
+      qb.innerJoin('product.variants', 'price_filter');
+
+      if (query.minPrice !== undefined && query.minPrice !== null) {
+        qb.andWhere('price_filter.price >= :minPrice', {
+          minPrice: query.minPrice,
+        });
+      }
+
+      if (query.maxPrice !== undefined && query.maxPrice !== null) {
+        qb.andWhere('price_filter.price <= :maxPrice', {
+          maxPrice: query.maxPrice,
+        });
+      }
+    }
+
+    if (query.minRating !== undefined && query.minRating !== null) {
+      qb.andWhere('product.rating >= :minRating', {
+        minRating: query.minRating,
+      });
+    }
+
     return qb;
   }
 
@@ -47,22 +75,15 @@ export class GetProductsProvider {
     query: QueryProductDto,
   ): Promise<PaginateQueryResult<Product>> {
     const { page, limit, skip } = this.paginationProviders.resolvePaging(query);
-    const sortBy = query.sortBy ?? 'createdAt';
-    const sortOrder = query.sortOrder ?? 'DESC';
 
     const total = await this.buildFilteredProductQb(query).getCount();
 
     const data = await this.buildFilteredProductQb(query)
       .leftJoinAndSelect('product.category', 'category')
       .leftJoinAndSelect('product.variants', 'variants')
-      .leftJoinAndMapMany(
-        'product.images',
-        ProductImage,
-        'img',
-        'img.productId = product.id',
-      )
-      .orderBy(`product.${sortBy}`, sortOrder)
-      .addOrderBy('img.sortOrder', 'ASC')
+      .leftJoinAndSelect('product.images', 'images')
+      .orderBy('product.createdAt', 'DESC')
+      .addOrderBy('images.sortOrder', 'ASC')
       .skip(skip)
       .take(limit)
       .getMany();
@@ -76,12 +97,23 @@ export class GetProductsProvider {
       .where('product.id = :id', { id })
       .leftJoinAndSelect('product.category', 'category')
       .leftJoinAndSelect('product.variants', 'variants')
-      .leftJoinAndMapMany(
-        'product.images',
-        ProductImage,
-        'img',
-        'img.productId = product.id',
-      )
+      .leftJoinAndSelect('product.images', 'images')
+      .orderBy('images.sortOrder', 'ASC')
+      .getOne();
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+    return product;
+  }
+
+  public async findBySlug(slug: string): Promise<Product> {
+    const product = await this.productRepository
+      .createQueryBuilder('product')
+      .where('product.slug = :slug', { slug })
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.variants', 'variants')
+      .leftJoinAndSelect('product.images', 'img')
       .orderBy('img.sortOrder', 'ASC')
       .getOne();
 

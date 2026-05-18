@@ -5,11 +5,18 @@ import { UsersService } from '../../users/users.service';
 import { GenerateTokensProvider } from './generate-tokens.provider';
 import {
   Injectable,
+  ForbiddenException,
   UnauthorizedException,
   RequestTimeoutException,
 } from '@nestjs/common';
 
-export type LoggedInUser = Pick<User, 'id' | 'fullName' | 'email' | 'role'> & {
+export const ACCOUNT_BLOCKED_MESSAGE =
+  'Your account has been blocked. Please contact support.';
+
+export type LoggedInUser = Pick<
+  User,
+  'id' | 'fullName' | 'email' | 'role' | 'isBlocked'
+> & {
   accessToken: string;
   refreshToken: string;
 };
@@ -41,6 +48,10 @@ export class LoginProvider {
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (user.isBlocked) {
+      throw new ForbiddenException(ACCOUNT_BLOCKED_MESSAGE);
     }
 
     const {

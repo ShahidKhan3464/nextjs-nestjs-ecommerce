@@ -58,6 +58,7 @@ export class UpdateProductProvider {
       product.variants = dto.variants.map((v) =>
         this.productVariantRepository.create({ ...v, product }),
       );
+      product.basePrice = Math.min(...dto.variants.map((v) => v.price));
     }
 
     await this.productRepository.save(product);

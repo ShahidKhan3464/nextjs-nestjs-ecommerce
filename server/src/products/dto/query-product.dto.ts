@@ -41,16 +41,21 @@ export class QueryProductDto extends PaginationQueryDto {
   @MaxLength(255)
   search?: string;
 
-  @ApiPropertyOptional({
-    enum: ['createdAt', 'updatedAt', 'name'],
-    default: 'createdAt',
-  })
+  @ApiPropertyOptional({ description: 'Filter by minimum price' })
   @IsOptional()
-  @IsIn(['createdAt', 'updatedAt', 'name'])
-  sortBy?: 'createdAt' | 'updatedAt' | 'name' = 'createdAt';
+  @Type(() => Number)
+  @Min(0)
+  minPrice?: number;
 
-  @ApiPropertyOptional({ enum: ['ASC', 'DESC'], default: 'DESC' })
+  @ApiPropertyOptional({ description: 'Filter by maximum price' })
   @IsOptional()
-  @IsIn(['ASC', 'DESC'])
-  sortOrder?: 'ASC' | 'DESC' = 'DESC';
+  @Type(() => Number)
+  @Min(0)
+  maxPrice?: number;
+
+  @ApiPropertyOptional({ description: 'Filter by minimum rating' })
+  @IsOptional()
+  @Type(() => Number)
+  @Min(0)
+  minRating?: number;
 }

@@ -48,10 +48,11 @@ export class CreateProductProvider {
        * 3. Create Product
        */
       const product = manager.create(Product, {
-        name: dto.name,
-        description: dto.description?.trim() || null,
-        status: dto.status ?? ProductStatus.ACTIVE,
         category,
+        name: dto.name,
+        status: dto.status ?? ProductStatus.ACTIVE,
+        description: dto.description?.trim() || null,
+        basePrice: Math.min(...dto.variants.map((v) => v.price)),
       });
 
       await manager.save(product);
@@ -61,12 +62,12 @@ export class CreateProductProvider {
        */
       const variantEntities = dto.variants.map((variant) =>
         manager.create(ProductVariant, {
+          product,
+          sku: variant.sku,
           size: variant.size,
           color: variant.color,
-          sku: variant.sku,
           stock: variant.stock,
           price: variant.price,
-          product,
         }),
       );
 

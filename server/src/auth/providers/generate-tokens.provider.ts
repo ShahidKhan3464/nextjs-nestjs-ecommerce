@@ -43,6 +43,7 @@ export class GenerateTokensProvider {
         role: user.role,
         email: user.email,
         fullName: user.fullName,
+        isBlocked: user.isBlocked,
       },
     };
   }
