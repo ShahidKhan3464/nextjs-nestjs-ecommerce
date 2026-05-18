@@ -1,97 +1,77 @@
-import type { Product } from "@/types";
 import type { PaginatedResponse } from "@/types";
-import { getProductCatalog } from "@/lib/product-store";
+import { getBackendUrl } from "@/lib/backend-url";
+import { jsonMessage, jsonOk } from "@/lib/api-response";
+import type { Product } from "@/modules/customer/products/types";
+import { nestErrorMessage, forwardAuthorization } from "@/lib/nest-http";
+import {
+  type NestProductPayload,
+  normalizeNestProductPayload,
+} from "@/lib/nest-product-mapper";
 
-function parseNumber(v: string | null, fallback: number) {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : fallback;
-}
+type NestPagedEnvelope = {
+  data?: {
+    page?: number;
+    limit?: number;
+    total?: number;
+    data?: NestProductPayload[];
+  };
+};
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const q = (searchParams.get("q") ?? "").trim().toLowerCase();
-  const category = (searchParams.get("category") ?? "").trim();
-  const minPrice = parseNumber(searchParams.get("minPrice"), NaN);
-  const maxPrice = parseNumber(searchParams.get("maxPrice"), NaN);
-  const minRating = parseNumber(searchParams.get("minRating"), NaN);
-  const sort = searchParams.get("sort") ?? "featured";
-  const page = Math.max(1, parseNumber(searchParams.get("page"), 1));
-  const limit = Math.min(
-    48,
-    Math.max(1, parseNumber(searchParams.get("limit"), 12))
-  );
+  const url = new URL(req.url);
+  const backend = getBackendUrl();
 
-  let items = [...getProductCatalog()];
+  const searchParams = new URLSearchParams();
 
-  if (q) {
-    items = items.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q)
-    );
-  }
-  if (category) {
-    items = items.filter((p) => p.category === category);
-  }
-  if (!Number.isNaN(minRating)) {
-    items = items.filter((p) => p.rating >= minRating);
-  }
-  if (!Number.isNaN(minPrice) || !Number.isNaN(maxPrice)) {
-    items = items.filter((p) => {
-      const minVariantPrice = Math.min(...p.variants.map((v) => v.price));
-      if (!Number.isNaN(minPrice) && minVariantPrice < minPrice) return false;
-      if (!Number.isNaN(maxPrice) && minVariantPrice > maxPrice) return false;
-      return true;
-    });
+  // Map frontend parameters to backend DTO fields
+  const q = url.searchParams.get("q") || url.searchParams.get("search");
+  const cat =
+    url.searchParams.get("category") || url.searchParams.get("categoryId");
+  const maxPrice = url.searchParams.get("maxPrice");
+  const minPrice = url.searchParams.get("minPrice");
+  const page = url.searchParams.get("page");
+  const limit = url.searchParams.get("limit");
+
+  if (q) searchParams.set("search", q);
+  if (cat) searchParams.set("categoryId", cat);
+  if (maxPrice) searchParams.set("maxPrice", maxPrice);
+  if (minPrice) searchParams.set("minPrice", minPrice);
+  if (page) searchParams.set("page", page);
+  if (limit) searchParams.set("limit", limit);
+
+  const res = await fetch(`${backend}/products?${searchParams.toString()}`, {
+    headers: { ...forwardAuthorization(req) },
+  });
+
+  let raw: unknown = null;
+  try {
+    raw = await res.json();
+  } catch {
+    raw = null;
   }
 
-  switch (sort) {
-    case "price-asc":
-      items.sort(
-        (a, b) =>
-          Math.min(...a.variants.map((v) => v.price)) -
-          Math.min(...b.variants.map((v) => v.price))
-      );
-      break;
-    case "price-desc":
-      items.sort(
-        (a, b) =>
-          Math.min(...b.variants.map((v) => v.price)) -
-          Math.min(...a.variants.map((v) => v.price))
-      );
-      break;
-    case "rating":
-      items.sort((a, b) => b.rating - a.rating);
-      break;
-    case "newest":
-      items.reverse();
-      break;
-    case "featured":
-    default:
-      items.sort((a, b) => Number(b.featured) - Number(a.featured));
-      break;
+  if (!res.ok) {
+    return jsonMessage(nestErrorMessage(raw), res.status);
   }
 
-  const total = items.length;
-  const totalPages = Math.max(1, Math.ceil(total / limit));
-  const start = (page - 1) * limit;
-  const pageItems = items.slice(start, start + limit);
+  const envelope = raw as NestPagedEnvelope;
+  const inner = envelope?.data;
+  if (!inner || !Array.isArray(inner.data)) {
+    return jsonMessage("Unexpected products response", 502);
+  }
 
   const body: PaginatedResponse<Product> = {
-    data: pageItems,
+    data: inner.data.map(normalizeNestProductPayload),
     pagination: {
-      page,
-      limit,
-      total,
-      totalPages,
+      page: inner.page ?? 1,
+      limit: inner.limit ?? 12,
+      total: inner.total ?? inner.data.length,
+      totalPages: Math.max(
+        1,
+        Math.ceil((inner.total ?? inner.data.length) / (inner.limit ?? 12))
+      ),
     },
   };
 
-  return Response.json(body, {
-    status: 200,
-    headers: {
-      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
-    },
-  });
+  return jsonOk(body);
 }

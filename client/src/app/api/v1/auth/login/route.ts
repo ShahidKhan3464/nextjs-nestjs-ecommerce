@@ -3,6 +3,7 @@ import { getBackendUrl } from "@/lib/backend-url";
 import { signAccessToken } from "@/lib/server-auth";
 import { jsonMessage, jsonOk } from "@/lib/api-response";
 import type { ApiResponse, User, UserRole } from "@/types";
+import { ACCOUNT_BLOCKED_MESSAGE } from "@/lib/account-blocked";
 import {
   ACCESS_TOKEN_TTL_SECONDS,
   REFRESH_TOKEN_TTL_SECONDS,
@@ -72,10 +73,9 @@ export async function POST(req: Request) {
   }
 
   if (!res.ok) {
-    return jsonMessage(
-      nestErrorMessage(payload),
-      res.status === 401 ? 401 : res.status
-    );
+    const status =
+      res.status === 401 ? 401 : res.status === 403 ? 403 : res.status;
+    return jsonMessage(nestErrorMessage(payload), status);
   }
 
   const u = payload?.data?.user;
@@ -87,6 +87,10 @@ export async function POST(req: Request) {
     u.id === undefined
   ) {
     return jsonMessage("Unexpected response from server", 502);
+  }
+
+  if (u.isBlocked) {
+    return jsonMessage(ACCOUNT_BLOCKED_MESSAGE, 403);
   }
 
   const role: UserRole =
@@ -101,6 +105,7 @@ export async function POST(req: Request) {
     email: u.email,
     name: u.fullName,
     sub: String(u.id),
+    isBlocked: false,
   });
 
   const jar = await cookies();

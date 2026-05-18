@@ -1,7 +1,6 @@
 "use client";
 
 import { toast } from "sonner";
-import { isAxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
@@ -9,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { queryKeys } from "@/constants/query-keys";
 import { Textarea } from "@/components/ui/textarea";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { categorySchema, type CategoryValues } from "../schemas";
@@ -62,11 +62,8 @@ export function AdminCategoryForm({
       }
       await qc.invalidateQueries({ queryKey: queryKeys.admin.categories });
       router.push(ROUTES.categories);
-    } catch (e) {
-      const msg = isAxiosError(e)
-        ? ((e.response?.data as { message?: string })?.message ?? e.message)
-        : "Something went wrong";
-      toast.error(typeof msg === "string" ? msg : "Could not save category");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Could not save category"));
     }
   }
 

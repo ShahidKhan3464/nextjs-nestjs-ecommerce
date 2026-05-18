@@ -2,7 +2,6 @@
 
 import { toast } from "sonner";
 import Image from "next/image";
-import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,7 @@ import { useFieldArray } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { queryKeys } from "@/constants/query-keys";
 import { Textarea } from "@/components/ui/textarea";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Resolver } from "react-hook-form";
 import { PlusIcon, Trash2Icon, XIcon } from "lucide-react";
@@ -161,15 +161,8 @@ export function AdminProductUpdateForm({ initial }: { initial: Product }) {
         queryKey: ["admin", "products", "detail", initial.id],
       });
       router.push(ROUTES.products);
-    } catch (err: unknown) {
-      let msg = "Something went wrong";
-      if (isAxiosError(err)) {
-        msg =
-          (err.response?.data as { message?: string })?.message ?? err.message;
-      } else if (err instanceof Error) {
-        msg = err.message;
-      }
-      toast.error(msg);
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Could not update product"));
     }
   }
 
@@ -254,9 +247,9 @@ export function AdminProductUpdateForm({ initial }: { initial: Product }) {
               Variants
             </h3>
             <Button
+              size="sm"
               type="button"
               variant="outline"
-              size="sm"
               onClick={() =>
                 append({
                   size: "M",
@@ -279,9 +272,9 @@ export function AdminProductUpdateForm({ initial }: { initial: Product }) {
             >
               {fields.length > 1 && (
                 <Button
+                  size="icon"
                   type="button"
                   variant="ghost"
-                  size="icon"
                   className="text-destructive absolute top-2 right-2"
                   onClick={() => remove(index)}
                 >
@@ -365,8 +358,8 @@ export function AdminProductUpdateForm({ initial }: { initial: Product }) {
 
         <div className="space-y-3">
           <label
-            className="text-sm leading-none font-medium"
             htmlFor="product-images-update"
+            className="text-sm leading-none font-medium"
           >
             Images
           </label>

@@ -15,7 +15,6 @@ export function useProductSearchParams() {
       minPrice: searchParams.get("minPrice") ?? "",
       maxPrice: searchParams.get("maxPrice") ?? "",
       minRating: searchParams.get("minRating") ?? "",
-      sort: searchParams.get("sort") ?? "featured",
       page: Number(searchParams.get("page") ?? "1") || 1,
     };
   }, [searchParams]);

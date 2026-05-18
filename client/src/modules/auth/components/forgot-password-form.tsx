@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { forgotPasswordRequest } from "@/modules/auth/services/auth.service";
 import { forgotPasswordSchema, type ForgotPasswordValues } from "../schemas";
@@ -29,8 +30,8 @@ export function ForgotPasswordForm() {
         "If an account exists, you will receive reset instructions."
       );
       form.reset();
-    } catch {
-      toast.error("Something went wrong");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Something went wrong"));
     }
   }
 

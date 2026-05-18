@@ -2,12 +2,12 @@
 
 import { toast } from "sonner";
 import Image from "next/image";
-import { isAxiosError } from "axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useFieldArray } from "react-hook-form";
 import { queryKeys } from "@/constants/query-keys";
 import { Textarea } from "@/components/ui/textarea";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Resolver } from "react-hook-form";
 import { XIcon, PlusIcon, Trash2Icon } from "lucide-react";
@@ -125,11 +125,8 @@ export function AdminProductCreateForm() {
       });
       toast.success("Product created");
       await qc.invalidateQueries({ queryKey: queryKeys.admin.products });
-    } catch (err: unknown) {
-      const msg = isAxiosError(err)
-        ? ((err.response?.data as { message?: string })?.message ?? err.message)
-        : "Something went wrong";
-      toast.error(typeof msg === "string" ? msg : "Could not create product");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Could not create product"));
     }
   }
 
@@ -237,11 +234,11 @@ export function AdminProductCreateForm() {
             >
               {fields.length > 1 && (
                 <Button
+                  size="icon"
                   type="button"
                   variant="ghost"
-                  size="icon"
-                  className="absolute right-2 top-2 text-destructive"
                   onClick={() => remove(index)}
+                  className="absolute right-2 top-2 text-destructive"
                 >
                   <Trash2Icon className="size-4" />
                 </Button>
@@ -323,8 +320,8 @@ export function AdminProductCreateForm() {
 
         <div className="space-y-3">
           <label
-            className="text-sm leading-none font-medium"
             htmlFor="product-images"
+            className="text-sm leading-none font-medium"
           >
             Images
           </label>
@@ -350,8 +347,8 @@ export function AdminProductCreateForm() {
                   className="bg-muted relative aspect-square overflow-hidden rounded-lg border"
                 >
                   <Image
-                    alt=""
                     fill
+                    alt=""
                     unoptimized
                     className="object-cover"
                     src={objectUrlFor(file)}

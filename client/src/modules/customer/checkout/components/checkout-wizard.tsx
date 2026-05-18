@@ -11,6 +11,7 @@ import { api } from "@/services/api/client";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/store/cart-store";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCheckoutStore } from "@/store/checkout-store";
@@ -110,8 +111,8 @@ export function CheckoutWizard() {
       resetCheckout();
       toast.success("Order placed");
       router.push(ROUTES.order(order.id));
-    } catch {
-      toast.error("Checkout failed");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Checkout failed"));
     }
   }
 

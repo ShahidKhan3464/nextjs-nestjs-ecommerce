@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, type RegisterValues } from "../schemas";
 import { registerRequest } from "@/modules/auth/services/auth.service";
@@ -43,8 +44,8 @@ export function RegisterForm() {
       });
       toast.success("Account created. Sign in to continue.");
       router.push(ROUTES.login);
-    } catch {
-      toast.error("Could not create account");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Could not create account"));
     }
   }
 

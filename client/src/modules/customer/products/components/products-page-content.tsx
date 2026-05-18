@@ -1,9 +1,41 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import type { ProductListParams } from "../types";
+import { queryKeys } from "@/constants/query-keys";
 import { ProductFilters } from "./product-filters";
 import { ProductListing } from "./product-listing";
+import { fetchProducts } from "../services/products.service";
+import { ProductFiltersSkeleton } from "./product-filters-skeleton";
+import { useProductSearchParams } from "../hooks/use-product-search-params";
+
+function toParams(
+  values: ReturnType<typeof useProductSearchParams>["values"]
+): ProductListParams {
+  return {
+    q: values.q || undefined,
+    categoryId: values.category ? Number(values.category) : undefined,
+    maxPrice: values.maxPrice ? Number(values.maxPrice) : undefined,
+    minRating: values.minRating ? Number(values.minRating) : undefined,
+    page: values.page,
+    limit: 12,
+  };
+}
 
 export function ProductsPageContent() {
+  const { values } = useProductSearchParams();
+  const params = toParams(values);
+
+  const { isPending, data } = useQuery({
+    queryKey: queryKeys.products.list(
+      params as unknown as Record<string, unknown>
+    ),
+    queryFn: () => fetchProducts(params),
+    placeholderData: (prev) => prev,
+  });
+
+  const showInitialSkeleton = isPending && !data;
+
   return (
     <div className="space-y-4">
       <header className="space-y-0.5">
@@ -14,7 +46,7 @@ export function ProductsPageContent() {
           Browse our catalog and find the perfect product for you.
         </p>
       </header>
-      <ProductFilters />
+      {showInitialSkeleton ? <ProductFiltersSkeleton /> : <ProductFilters />}
       <ProductListing />
     </div>
   );

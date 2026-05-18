@@ -9,6 +9,7 @@ import { ROUTES } from "@/constants/routes";
 import { Trash2, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { queryKeys } from "@/constants/query-keys";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { Pagination } from "@/components/ui/pagination";
 import { AdminTableSkeleton } from "@/modules/admin/shared";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -26,7 +27,6 @@ import {
   SelectContent,
   SelectTrigger,
 } from "@/components/ui/select";
-
 import {
   Table,
   TableRow,
@@ -51,11 +51,11 @@ export function AdminProductsList() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [searchInput, setSearchInput] = useState("");
+  const debouncedSearch = useDebouncedValue(searchInput, 500);
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [statusFilter, setStatusFilter] = useState<
     "active" | "removed" | "all"
   >("active");
-  const debouncedSearch = useDebouncedValue(searchInput, 350);
-  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
 
   useEffect(() => {
     setPage(1);
@@ -83,13 +83,25 @@ export function AdminProductsList() {
       setDeleteTarget(null);
       await qc.invalidateQueries({ queryKey: queryKeys.admin.products });
     },
-    onError: () => toast.error("Could not delete"),
+    onError: (error) =>
+      toast.error(getApiErrorMessage(error, "Could not delete product")),
   });
 
   const showInitialSkeleton = isPending && !data;
 
   if (showInitialSkeleton) {
-    return <AdminTableSkeleton />;
+    return (
+      <AdminTableSkeleton
+        filterWidths={["w-72", "w-32", "w-24"]}
+        columns={[
+          { className: "w-16 shrink-0" },
+          { className: "flex-1" },
+          { className: "flex-1" },
+          { className: "w-20" },
+          { className: "w-28 shrink-0", isAction: true },
+        ]}
+      />
+    );
   }
 
   if (!data) {
@@ -100,7 +112,14 @@ export function AdminProductsList() {
     <>
       <div className="space-y-4">
         <div className="flex items-center justify-end gap-2">
-          <div className="w-40">
+          <div className="w-72">
+            <Input
+              value={searchInput}
+              placeholder="Search products..."
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+          </div>
+          <div className="w-32">
             <Select
               value={statusFilter}
               onValueChange={(val) => {
@@ -116,13 +135,6 @@ export function AdminProductsList() {
                 <SelectItem value="removed">Removed</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-          <div className="w-72">
-            <Input
-              value={searchInput}
-              placeholder="Search products..."
-              onChange={(e) => setSearchInput(e.target.value)}
-            />
           </div>
           <Button
             onClick={() =>

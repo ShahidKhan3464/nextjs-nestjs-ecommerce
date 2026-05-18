@@ -2,11 +2,15 @@ import { NextResponse } from "next/server";
 import { ROUTES } from "@/constants/routes";
 import type { NextRequest } from "next/server";
 import { verifyToken } from "@/lib/server-auth";
-import { AUTH_SESSION_COOKIE } from "@/lib/auth-cookies";
 import {
   isProtectedShopPath,
   safeProtectedRedirectPath,
 } from "@/lib/auth-route-guards";
+import {
+  AUTH_SESSION_COOKIE,
+  AUTH_REFRESH_COOKIE,
+  AUTH_BACKEND_ACCESS_COOKIE,
+} from "@/lib/auth-cookies";
 
 const PUBLIC_AUTH_PREFIXES = [
   ROUTES.login,
@@ -67,6 +71,17 @@ export async function middleware(request: NextRequest) {
     const login = new URL(ROUTES.login, request.url);
     login.searchParams.set("next", `${pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(login);
+  }
+
+  if (payload.isBlocked) {
+    const login = new URL(ROUTES.login, request.url);
+    login.searchParams.set("blocked", "1");
+    const res = NextResponse.redirect(login);
+    res.cookies.delete(AUTH_SESSION_COOKIE);
+    res.cookies.delete(AUTH_BACKEND_ACCESS_COOKIE);
+    res.cookies.delete(AUTH_REFRESH_COOKIE);
+    res.cookies.delete(RETURN_PATH_COOKIE);
+    return res;
   }
 
   const adminOnly =

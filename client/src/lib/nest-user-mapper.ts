@@ -3,13 +3,13 @@ import type { User, UserRole } from "@/modules/auth/types";
 /** Backend user shape (TypeORM entity JSON). */
 export type NestUserDto = {
   id: number;
-  fullName: string;
-  email: string;
-  phoneNumber?: string | null;
   role: string;
+  email: string;
+  fullName: string;
   isBlocked?: boolean;
-  createDate?: string | Date;
   createdAt?: string | Date;
+  createDate?: string | Date;
+  phoneNumber?: string | null;
 };
 
 function toIsoDate(value: string | Date | undefined): string {
@@ -28,12 +28,12 @@ export function mapNestUserToClient(dto: NestUserDto): User {
       : "customer";
 
   return {
+    role,
+    createdAt,
+    email: dto.email,
     id: String(dto.id),
     name: dto.fullName,
     fullName: dto.fullName,
-    email: dto.email,
-    role,
-    createdAt,
     isBlocked: dto.isBlocked ?? false,
     phoneNumber: dto.phoneNumber ?? undefined,
   };

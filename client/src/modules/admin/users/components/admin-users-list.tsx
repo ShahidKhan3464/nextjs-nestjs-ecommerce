@@ -10,6 +10,7 @@ import { ROUTES } from "@/constants/routes";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { queryKeys } from "@/constants/query-keys";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { Eye, Ban, CheckCircle } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
 import { AdminTableSkeleton } from "@/modules/admin/shared";
@@ -96,11 +97,25 @@ export function AdminUsersList() {
       setBlockTarget(null);
       await qc.invalidateQueries({ queryKey: queryKeys.admin.users });
     },
-    onError: () => toast.error("Action failed"),
+    onError: (error) =>
+      toast.error(getApiErrorMessage(error, "Action failed")),
   });
 
   if (isPending && !data) {
-    return <AdminTableSkeleton />;
+    return (
+      <AdminTableSkeleton
+        filterWidths={["w-72", "w-32", "w-24"]}
+        columns={[
+          { className: "flex-1" },
+          { className: "flex-1" },
+          { className: "flex-1" },
+          { className: "flex-1 max-w-[120px]" },
+          { className: "w-20" },
+          { className: "w-20" },
+          { className: "w-32 shrink-0", isAction: true },
+        ]}
+      />
+    );
   }
 
   if (!data) {
@@ -111,7 +126,14 @@ export function AdminUsersList() {
     <>
       <div className="space-y-4">
         <div className="flex items-center justify-end gap-2">
-          <div className="w-40">
+          <div className="w-72">
+            <Input
+              value={searchInput}
+              placeholder="Search by name, email or phone"
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+          </div>
+          <div className="w-32">
             <Select
               value={statusFilter}
               onValueChange={(value) => setStatusFilter(value ?? "all")}
@@ -125,13 +147,6 @@ export function AdminUsersList() {
                 <SelectItem value="blocked">Blocked</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-          <div className="w-72">
-            <Input
-              value={searchInput}
-              placeholder="Search by name, email or phone"
-              onChange={(e) => setSearchInput(e.target.value)}
-            />
           </div>
           <Button
             onClick={() =>
@@ -241,8 +256,8 @@ export function AdminUsersList() {
           </Table>
 
           <Pagination
-            perPage={perPage}
             page={page}
+            perPage={perPage}
             onPageChange={setPage}
             totalPages={data.meta.totalPages || 1}
             onPerPageChange={(n) => {

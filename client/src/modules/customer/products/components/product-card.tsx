@@ -24,68 +24,78 @@ export function ProductCard({ product, className }: Props) {
   return (
     <motion.article
       layout
-      whileHover={{ y: -3 }}
-      transition={{ duration: 0.2 }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       className={cn(
-        "bg-card border-border group relative flex flex-col overflow-hidden rounded-xl border",
+        "bg-card border-border group relative flex flex-col overflow-hidden rounded-2xl border shadow-sm transition-shadow hover:shadow-lg",
         className
       )}
     >
       <Link
         href={ROUTES.product(product.slug)}
-        className="relative aspect-4/5 overflow-hidden"
+        className="border-border relative block h-48 w-full shrink-0 overflow-hidden border-b bg-muted/40 sm:h-52"
+        aria-label={`View ${product.name}`}
       >
         <Image
           fill
-          alt=""
-          sizes="(max-width:768px) 50vw, 25vw"
+          priority={false}
+          alt={product.name}
           src={product.images[0] ?? "/placeholder.svg"}
-          className="object-cover transition duration-500 group-hover:scale-[1.03]"
+          sizes="(max-width:640px) 100vw, (max-width:1280px) 50vw, 33vw"
+          className="object-cover transition duration-500 group-hover:scale-105"
         />
-        {product.featured && (
-          <Badge className="absolute top-3 left-3 text-xs">Featured</Badge>
-        )}
-      </Link>
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <Link
-              href={ROUTES.product(product.slug)}
-              className="line-clamp-2 font-medium hover:underline"
-            >
-              {product.name}
-            </Link>
-            <p className="text-muted-foreground mt-1 text-xs">
-              {product.category}
-            </p>
-          </div>
+        <div className="absolute top-3 right-3 z-10">
           <Button
+            size="icon"
             type="button"
-            size="icon-sm"
-            variant="ghost"
-            className="shrink-0"
+            variant="secondary"
             aria-pressed={wishlisted}
             aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            className={cn(
+              "size-9 rounded-full bg-white/90 shadow-md backdrop-blur-sm transition-transform hover:scale-110 active:scale-95 dark:bg-black/60",
+              wishlisted && "text-primary"
+            )}
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               toggleWishlist(product.id);
             }}
           >
-            <Heart
-              className={cn(
-                "size-4",
-                wishlisted && "fill-primary text-primary"
-              )}
-            />
+            <Heart className={cn("size-4", wishlisted && "fill-current")} />
           </Button>
         </div>
-        <div className="mt-auto flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">
-            {product.rating.toFixed(1)} ★ ({product.reviewCount})
-          </span>
-          <span className="font-medium tabular-nums">
-            From ${minPrice.toFixed(0)}
-          </span>
+        {product.featured ? (
+          <Badge className="absolute top-3 left-3 z-10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-sm">
+            Featured
+          </Badge>
+        ) : null}
+      </Link>
+
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        <div className="space-y-1">
+          <Link
+            href={ROUTES.product(product.slug)}
+            className="line-clamp-1 text-base font-semibold tracking-tight transition-colors hover:text-primary"
+          >
+            {product.name}
+          </Link>
+          <p className="text-muted-foreground text-xs">{product.category}</p>
+        </div>
+
+        <div className="mt-auto flex items-center justify-between gap-2">
+          <div>
+            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">
+              From
+            </p>
+            <p className="text-lg font-bold tabular-nums">
+              ${minPrice.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+            </p>
+          </div>
+          <Link href={ROUTES.product(product.slug)} className="shrink-0">
+            <Button size="sm" variant="outline" className="rounded-full px-4 text-xs font-semibold">
+              Details
+            </Button>
+          </Link>
         </div>
       </div>
     </motion.article>
