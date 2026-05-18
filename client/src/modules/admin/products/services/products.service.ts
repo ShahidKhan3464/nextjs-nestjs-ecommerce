@@ -1,6 +1,9 @@
 import { api } from "@/services/api/client";
-import type { CreateAdminProductInput } from "../types";
 import type { Product } from "@/modules/customer/products/types";
+import type {
+  CreateAdminProductInput,
+  UpdateAdminProductInput,
+} from "../types";
 
 export async function fetchAdminProducts(params?: {
   page?: number;
@@ -41,15 +44,6 @@ export async function fetchAdminProduct(id: number | string) {
   const res = await api.get<{ data: Product }>(`/api/v1/admin/products/${id}`);
   return res.data.data;
 }
-
-export type UpdateAdminProductInput = {
-  categoryId?: number;
-  name?: string;
-  description?: string;
-  variants?: CreateAdminProductInput["variants"];
-  retainImagePaths?: string[];
-  newImages?: File[];
-};
 
 export async function updateAdminProduct(
   id: number | string,

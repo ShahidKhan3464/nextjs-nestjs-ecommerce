@@ -42,3 +42,10 @@ export type Address = {
   fullName: string;
   postalCode: string;
 };
+
+export type PlaceOrderInput = {
+  items: { productSlug: string; variantId: string; quantity: number }[];
+  shippingAddress: Address;
+  payment: { method: "card" | "paypal"; summary: string };
+  couponCode?: string;
+};
