@@ -1,23 +1,14 @@
 import type { User } from "@/types";
 import { cookies } from "next/headers";
-import { MOCK_USERS } from "@/lib/mock-data";
 import { jsonMessage } from "@/lib/api-response";
 import { AUTH_SESSION_COOKIE } from "@/lib/auth-cookies";
+import { MOCK_USERS, toPublicUser } from "@/lib/mock-data";
 import { verifyToken, type JwtPayload } from "@/lib/server-auth";
 
-export function userFromSessionPayload(payload: JwtPayload): User {
+function userFromSessionPayload(payload: JwtPayload): User {
   const mock = MOCK_USERS.find((u) => u.id === payload.sub);
   if (mock) {
-    return {
-      id: mock.id,
-      name: mock.name,
-      role: mock.role,
-      email: mock.email,
-      fullName: mock.fullName,
-      isBlocked: mock.isBlocked,
-      createdAt: mock.createdAt,
-      avatarUrl: mock.avatarUrl,
-    };
+    return toPublicUser(mock);
   }
   return {
     id: payload.sub,

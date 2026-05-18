@@ -1,3 +1,4 @@
+import { getSiteUrl } from "@/lib/backend-url";
 import { useAuthStore, isTokenExpired } from "@/store/auth-store";
 import { handlePossibleBlockedApiError } from "@/lib/account-blocked";
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
@@ -9,14 +10,7 @@ declare module "axios" {
 }
 
 /** Browser: same-origin `/api/v1/*` (Route Handlers → Nest). Server: absolute URL to this Next app so paths resolve correctly. */
-const base =
-  typeof window !== "undefined"
-    ? ""
-    : (
-        process.env.NEXT_PUBLIC_API_URL ??
-        process.env.NEXT_PUBLIC_SITE_URL ??
-        "http://localhost:3000"
-      ).replace(/\/$/, "");
+const base = typeof window !== "undefined" ? "" : getSiteUrl();
 
 export const api = axios.create({
   withCredentials: true,

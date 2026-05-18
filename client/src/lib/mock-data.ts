@@ -190,6 +190,19 @@ export interface MockUserRecord extends User {
   password: string;
 }
 
+export function toPublicUser(record: MockUserRecord): User {
+  return {
+    id: record.id,
+    email: record.email,
+    name: record.name,
+    role: record.role,
+    fullName: record.fullName,
+    isBlocked: record.isBlocked,
+    createdAt: record.createdAt,
+    avatarUrl: record.avatarUrl,
+  };
+}
+
 export const MOCK_USERS: MockUserRecord[] = [
   {
     id: "u1",

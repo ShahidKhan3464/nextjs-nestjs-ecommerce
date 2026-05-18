@@ -1,3 +1,4 @@
+import { slugify } from "@/lib/slugify";
 import { getBackendUrl } from "@/lib/backend-url";
 import type { Product } from "@/modules/customer/products/types";
 import { formatVariantNameFromNest } from "@/modules/customer/products/lib/variant-label";
@@ -26,15 +27,6 @@ export type NestProductPayload = {
   }[];
   images: string[] | { id: number; urlPath: string; sortOrder?: number }[];
 };
-
-function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80);
-}
 
 export function normalizeNestProductPayload(p: NestProductPayload): Product {
   const backend = getBackendUrl();

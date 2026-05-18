@@ -1,9 +1,9 @@
 import { z } from "zod";
 import type { User } from "@/types";
 import type { ApiResponse } from "@/types";
-import { MOCK_USERS } from "@/lib/mock-data";
 import { requireUser } from "@/lib/require-auth";
 import { jsonMessage, jsonOk } from "@/lib/api-response";
+import { MOCK_USERS, toPublicUser } from "@/lib/mock-data";
 
 const patchSchema = z.object({
   name: z.string().min(2).optional(),
@@ -43,16 +43,8 @@ export async function PATCH(req: Request) {
     record.avatarUrl = parsed.data.avatarUrl || undefined;
   }
 
-  const next: User = {
-    id: record.id,
-    email: record.email,
-    name: record.name,
-    role: record.role,
-    fullName: record.fullName,
-    isBlocked: record.isBlocked,
-    createdAt: record.createdAt,
-    avatarUrl: record.avatarUrl,
+  const body: ApiResponse<{ user: User }> = {
+    data: { user: toPublicUser(record) },
   };
-  const body: ApiResponse<{ user: User }> = { data: { user: next } };
   return jsonOk(body);
 }

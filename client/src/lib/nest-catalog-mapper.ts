@@ -1,3 +1,5 @@
+import { slugify } from "@/lib/slugify";
+import { getBackendUrl } from "@/lib/backend-url";
 import type { Product, ProductVariant } from "@/types";
 
 /** Backend product shape (relations loaded). Keep loose to track API drift. */
@@ -26,25 +28,8 @@ type NestVariantDto = {
   price: string | number;
 };
 
-function getCatalogImageBase(): string {
-  return (
-    process.env.NEXT_PUBLIC_BACKEND_URL ??
-    process.env.BACKEND_URL ??
-    "http://localhost:3001"
-  ).replace(/\/$/, "");
-}
-
-function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80);
-}
-
 export function mapNestProductToAdminProduct(p: NestProductDto): Product {
-  const base = getCatalogImageBase();
+  const base = getBackendUrl();
   const rawImages = (p.images ?? [])
     .slice()
     .sort((a, b) => a.sortOrder - b.sortOrder)

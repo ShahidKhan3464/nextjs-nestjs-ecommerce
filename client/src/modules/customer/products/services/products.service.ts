@@ -1,4 +1,5 @@
 import { api } from "@/services/api/client";
+import { getSiteUrl } from "@/lib/backend-url";
 import type { Product, ProductListParams } from "../types";
 import type { ApiResponse, PaginatedResponse } from "@/types/api";
 
@@ -17,14 +18,6 @@ export async function fetchProducts(params: ProductListParams) {
   return res.data;
 }
 
-function serverApiBaseUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_API_URL ??
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    "http://localhost:3000"
-  ).replace(/\/$/, "");
-}
-
 /** Server components cannot use the browser axios client (no cookies / Zustand token). */
 async function fetchProductBySlugOnServer(slug: string): Promise<Product> {
   const { cookies } = await import("next/headers");
@@ -39,7 +32,7 @@ async function fetchProductBySlugOnServer(slug: string): Promise<Product> {
   }
 
   const res = await fetch(
-    `${serverApiBaseUrl()}/api/v1/customer/products/${encodeURIComponent(slug)}`,
+    `${getSiteUrl()}/api/v1/customer/products/${encodeURIComponent(slug)}`,
     { headers, next: { revalidate: 60 } }
   );
 
