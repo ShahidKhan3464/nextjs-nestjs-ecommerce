@@ -5,7 +5,9 @@ function messageFromPayload(data: unknown): string | null {
   const raw = (data as { message?: unknown }).message;
   if (typeof raw === "string" && raw.trim()) return raw.trim();
   if (Array.isArray(raw)) {
-    const parts = raw.filter((x): x is string => typeof x === "string" && x.trim());
+    const parts = raw.filter(
+      (x): x is string => typeof x === "string" && x.trim().length > 0
+    );
     if (parts.length > 0) return parts.join(", ");
   }
   const error = (data as { error?: unknown }).error;

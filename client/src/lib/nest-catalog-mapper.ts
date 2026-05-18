@@ -64,6 +64,11 @@ export function mapNestProductToAdminProduct(p: NestProductDto): Product {
     stock: v.stock,
   }));
 
+  const basePrice =
+    variants.length > 0
+      ? Math.min(...variants.map((v) => v.price))
+      : 0;
+
   return {
     id: String(p.id),
     slug: `${slugify(p.name)}-${p.id}`,
@@ -74,6 +79,7 @@ export function mapNestProductToAdminProduct(p: NestProductDto): Product {
     reviewCount: 0,
     images,
     variants,
+    basePrice,
     featured: false,
   };
 }

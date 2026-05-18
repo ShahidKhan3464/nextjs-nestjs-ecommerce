@@ -1,4 +1,5 @@
 import { getBackendUrl } from "@/lib/backend-url";
+import type { Product } from "@/modules/customer/products/types";
 import { formatVariantNameFromNest } from "@/modules/customer/products/lib/variant-label";
 
 export type NestProductPayload = {
@@ -35,7 +36,7 @@ function slugify(name: string): string {
     .slice(0, 80);
 }
 
-export function normalizeNestProductPayload(p: NestProductPayload) {
+export function normalizeNestProductPayload(p: NestProductPayload): Product {
   const backend = getBackendUrl();
 
   const images: string[] = (p.images ?? [])
@@ -64,11 +65,16 @@ export function normalizeNestProductPayload(p: NestProductPayload) {
   }));
 
   return {
-    ...p,
-    id: String(p.id),
     slug,
     images,
     variants,
+    name: p.name,
+    id: String(p.id),
+    rating: p.rating,
+    featured: p.featured,
+    category: p.category.name,
+    description: p.description,
+    reviewCount: p.reviewCount,
     basePrice: Number(p.basePrice),
   };
 }
