@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { ROUTES } from "@/constants/routes";
 import { Pencil, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { queryKeys } from "@/constants/query-keys";
+import { getApiErrorMessage } from "@/lib/api-error";
 import type { AdminCategoryOption } from "../types";
 import { Pagination } from "@/components/ui/pagination";
 import { AdminTableSkeleton } from "@/modules/admin/shared";
@@ -16,8 +16,8 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  fetchAdminCategories,
   deleteAdminCategory,
+  fetchAdminCategories,
 } from "../services/categories.service";
 import {
   Table,
@@ -43,7 +43,7 @@ export function AdminCategoriesList() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [searchInput, setSearchInput] = useState("");
-  const debouncedSearch = useDebouncedValue(searchInput, 350);
+  const debouncedSearch = useDebouncedValue(searchInput, 500);
   const [deleteTarget, setDeleteTarget] = useState<AdminCategoryOption | null>(
     null
   );
@@ -73,18 +73,33 @@ export function AdminCategoriesList() {
       setDeleteTarget(null);
       await qc.invalidateQueries({ queryKey: queryKeys.admin.categories });
     },
-    onError: (error: AxiosError) => toast.error((error.response?.data as { message?: string })?.message ?? "Could not delete category"),
+    onError: (error) =>
+      toast.error(getApiErrorMessage(error, "Could not delete category")),
   });
 
   const showInitialSkeleton = isPending && !data;
 
   if (showInitialSkeleton) {
-    return <AdminTableSkeleton />;
+    return (
+      <AdminTableSkeleton
+        filterWidths={["w-72", "w-24"]}
+        columns={[
+          { className: "flex-1" },
+          { className: "flex-1 max-w-md" },
+          { className: "w-28 shrink-0", isAction: true },
+        ]}
+      />
+    );
   }
 
   if (!data) {
     return null;
   }
+
+  const total = data.pagination?.total ?? 0;
+  const hasSearch = debouncedSearch.trim().length > 0;
+  const isEmptyCatalog = total === 0 && !hasSearch;
+  const showPagination = total > 0;
 
   return (
     <>
@@ -93,9 +108,10 @@ export function AdminCategoriesList() {
           <div className="w-72">
             <Input
               value={searchInput}
+              disabled={isEmptyCatalog}
               placeholder="Search categories"
-              onChange={(e) => setSearchInput(e.target.value)}
               aria-busy={isFetching && !isPlaceholderData}
+              onChange={(e) => setSearchInput(e.target.value)}
             />
           </div>
           <Button
@@ -109,7 +125,9 @@ export function AdminCategoriesList() {
 
         <div
           className={
-            isFetching && !isPlaceholderData ? "opacity-60 transition-opacity" : ""
+            isFetching && !isPlaceholderData
+              ? "opacity-60 transition-opacity"
+              : ""
           }
         >
           <Table>
@@ -127,7 +145,7 @@ export function AdminCategoriesList() {
                     colSpan={3}
                     className="text-muted-foreground py-10 text-center text-sm"
                   >
-                    No categories match your search.
+                    No categories found.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -141,7 +159,9 @@ export function AdminCategoriesList() {
                       <Link
                         aria-label={`Edit ${c.name}`}
                         href={ROUTES.category(String(c.id))}
-                        className={cn(buttonVariants({ size: "icon", variant: "outline" }))}
+                        className={cn(
+                          buttonVariants({ size: "icon", variant: "outline" })
+                        )}
                       >
                         <Pencil />
                       </Link>
@@ -160,16 +180,18 @@ export function AdminCategoriesList() {
             </TableBody>
           </Table>
 
-          <Pagination
-            page={page}
-            perPage={perPage}
-            onPageChange={(p) => setPage(p)}
-            totalPages={data.pagination?.totalPages ?? 1}
-            onPerPageChange={(n) => {
-              setPerPage(n);
-              setPage(1);
-            }}
-          />
+          {showPagination ? (
+            <Pagination
+              page={page}
+              perPage={perPage}
+              onPageChange={(p) => setPage(p)}
+              totalPages={data.pagination?.totalPages ?? 1}
+              onPerPageChange={(n) => {
+                setPerPage(n);
+                setPage(1);
+              }}
+            />
+          ) : null}
         </div>
       </div>
 

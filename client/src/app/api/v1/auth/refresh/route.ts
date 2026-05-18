@@ -5,6 +5,7 @@ import { getBackendUrl } from "@/lib/backend-url";
 import { nestErrorMessage } from "@/lib/nest-http";
 import { signAccessToken } from "@/lib/server-auth";
 import { jsonMessage, jsonOk } from "@/lib/api-response";
+import { ACCOUNT_BLOCKED_MESSAGE } from "@/lib/account-blocked";
 import {
   ACCESS_TOKEN_TTL_SECONDS,
   REFRESH_TOKEN_TTL_SECONDS,
@@ -22,6 +23,7 @@ type NestRefreshPayload = {
       email: string;
       role?: string;
       fullName: string;
+      isBlocked?: boolean;
       accessToken: string;
       refreshToken: string;
     };
@@ -55,7 +57,13 @@ export async function POST() {
   }
 
   if (!res.ok) {
-    return jsonMessage(nestErrorMessage(payload), 401);
+    const status = res.status === 403 ? 403 : 401;
+    if (status === 403) {
+      jar.delete(AUTH_SESSION_COOKIE);
+      jar.delete(AUTH_BACKEND_ACCESS_COOKIE);
+      jar.delete(AUTH_REFRESH_COOKIE);
+    }
+    return jsonMessage(nestErrorMessage(payload), status);
   }
 
   const u = payload?.data?.user;
@@ -66,6 +74,13 @@ export async function POST() {
     u.id === undefined
   ) {
     return jsonMessage("Unexpected response from server", 502);
+  }
+
+  if (u.isBlocked) {
+    jar.delete(AUTH_SESSION_COOKIE);
+    jar.delete(AUTH_BACKEND_ACCESS_COOKIE);
+    jar.delete(AUTH_REFRESH_COOKIE);
+    return jsonMessage(ACCOUNT_BLOCKED_MESSAGE, 403);
   }
 
   const role: UserRole =
@@ -85,6 +100,7 @@ export async function POST() {
     email: u.email,
     role,
     name: displayName,
+    isBlocked: false,
   });
 
   jar.set(AUTH_SESSION_COOKIE, sessionJwt, {

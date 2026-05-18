@@ -17,11 +17,11 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
 import {
   Table,
+  TableRow,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
 } from "@/components/ui/table";
 
 const statusVariant: Record<
@@ -40,7 +40,7 @@ export function OrdersList() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [searchInput, setSearchInput] = useState("");
-  const debouncedSearch = useDebouncedValue(searchInput, 350);
+  const debouncedSearch = useDebouncedValue(searchInput, 500);
 
   useEffect(() => {
     setPage(1);
@@ -77,7 +77,19 @@ export function OrdersList() {
   }, [page, pageClamped]);
 
   if (isPending) {
-    return <AdminTableSkeleton />;
+    return (
+      <AdminTableSkeleton
+        filterWidths={["w-72", "w-24"]}
+        columns={[
+          { className: "flex-1" },
+          { className: "w-24" },
+          { className: "flex-1" },
+          { className: "min-w-32 flex-1" },
+          { className: "w-24 shrink-0" },
+          { className: "w-36 shrink-0", isAction: true },
+        ]}
+      />
+    );
   }
 
   if (!data?.length) {
@@ -176,8 +188,8 @@ export function OrdersList() {
         </Table>
 
         <Pagination
-          page={pageClamped}
           perPage={perPage}
+          page={pageClamped}
           onPageChange={setPage}
           totalPages={totalPages}
           onPerPageChange={(n) => {

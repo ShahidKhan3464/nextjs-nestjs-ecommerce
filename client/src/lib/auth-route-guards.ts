@@ -15,7 +15,7 @@ export function isProtectedShopPath(pathname: string): boolean {
 
 /** Path (+ optional query); internal + shop-protected only — avoids open redirects. */
 export function safeProtectedRedirectPath(
-  raw: string | null | undefined,
+  raw: string | null | undefined
 ): string | null {
   if (raw == null || raw === "") return null;
   const trimmed = raw.trim();

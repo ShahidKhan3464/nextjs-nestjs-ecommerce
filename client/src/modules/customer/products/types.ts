@@ -1,14 +1,11 @@
-export type { PaginatedResponse } from "@/types/api";
-
 export type ProductListParams = {
   q?: string;
   page?: number;
-  sort?: string;
   limit?: number;
-  category?: string;
   minPrice?: number;
   maxPrice?: number;
   minRating?: number;
+  categoryId?: number;
 };
 
 export type ProductVariant = {
@@ -25,13 +22,14 @@ export type ProductVariant = {
 
 export type Product = {
   id: string;
-  slug: string;
   name: string;
   rating: number;
   category: string;
   images: string[];
+  basePrice: number;
   featured?: boolean;
   description: string;
   reviewCount: number;
+  slug: string | null;
   variants: ProductVariant[];
 };

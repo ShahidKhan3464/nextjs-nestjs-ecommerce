@@ -40,7 +40,10 @@ export function WishlistGrid() {
 
   if (items.length === 0) {
     return (
-      <EmptyState title="Nothing to show" description="Try adding products again." />
+      <EmptyState
+        title="Nothing to show"
+        description="Try adding products again."
+      />
     );
   }
 

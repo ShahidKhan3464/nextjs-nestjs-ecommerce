@@ -2,13 +2,10 @@ import type { Product } from "@/types";
 import type { ApiResponse } from "@/types";
 import { getBackendUrl } from "@/lib/backend-url";
 import { jsonMessage, jsonOk } from "@/lib/api-response";
+import { nestErrorMessage, forwardAuthorization } from "@/lib/nest-http";
 import {
-  forwardAuthorization,
-  nestErrorMessage,
-} from "@/lib/nest-http";
-import {
-  mapNestProductToAdminProduct,
   type NestProductDto,
+  mapNestProductToAdminProduct,
 } from "@/lib/nest-catalog-mapper";
 
 type NestPagedEnvelope = {
@@ -22,8 +19,8 @@ type NestPagedEnvelope = {
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const qs = url.searchParams.toString();
   const backend = getBackendUrl();
+  const qs = url.searchParams.toString();
   const res = await fetch(`${backend}/products${qs ? `?${qs}` : ""}`, {
     headers: { ...forwardAuthorization(req) },
   });

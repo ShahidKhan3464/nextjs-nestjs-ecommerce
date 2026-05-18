@@ -11,3 +11,12 @@ export type CreateAdminProductInput = {
   }[];
   images: File[];
 };
+
+export type UpdateAdminProductInput = {
+  categoryId?: number;
+  name?: string;
+  description?: string;
+  variants?: CreateAdminProductInput["variants"];
+  retainImagePaths?: string[];
+  newImages?: File[];
+};

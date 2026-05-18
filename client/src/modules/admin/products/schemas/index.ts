@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const variantSchema = z.object({
+const variantSchema = z.object({
   size: z.string().min(1, "Size is required"),
   color: z.string().min(1, "Color is required"),
   sku: z.string().min(2),
@@ -20,5 +20,4 @@ export const productSchema = z.object({
   variants: z.array(variantSchema).min(1),
 });
 
-export type VariantValues = z.infer<typeof variantSchema>;
 export type ProductValues = z.infer<typeof productSchema>;

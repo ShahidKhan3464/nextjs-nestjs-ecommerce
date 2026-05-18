@@ -15,6 +15,7 @@ export async function loginRequest(email: string, password: string) {
 
 export async function registerRequest(body: {
   fullName: string;
+  phoneNumber?: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -48,9 +49,4 @@ export async function resetPasswordRequest(body: {
 
 export async function logoutRequest() {
   await api.post<ApiResponse<{ ok: true }>>("/api/v1/auth/logout");
-}
-
-export async function fetchSession() {
-  const res = await api.get<ApiResponse<{ user: User }>>("/api/v1/auth/me");
-  return res.data.data.user;
 }

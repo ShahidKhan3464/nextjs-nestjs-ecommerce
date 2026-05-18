@@ -2,15 +2,15 @@
 
 import { toast } from "sonner";
 import Image from "next/image";
-import { XIcon } from "lucide-react";
-import { isAxiosError } from "axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useFieldArray } from "react-hook-form";
 import { queryKeys } from "@/constants/query-keys";
 import { Textarea } from "@/components/ui/textarea";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Resolver } from "react-hook-form";
+import { XIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { productSchema, type ProductValues } from "../schemas";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -38,15 +38,12 @@ export function AdminProductCreateForm() {
     queryFn: () => fetchAdminCategories({ limit: 200 }),
   });
 
-  const categories = categoriesResp?.categories ?? [];
-
-  const categoryOptions = useMemo(
-    () =>
-      [...categories].sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
-      ),
-    [categories]
-  );
+  const categoryOptions = useMemo(() => {
+    const categories = categoriesResp?.categories ?? [];
+    return [...categories].sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+    );
+  }, [categoriesResp?.categories]);
 
   useEffect(() => {
     const map = objectUrlsRef.current;
@@ -101,7 +98,7 @@ export function AdminProductCreateForm() {
     name: "variants",
   });
 
-  async function onSubmit(values: Values) {
+  async function onSubmit(values: ProductValues) {
     if (files.length === 0) {
       toast.error("Add at least one product image");
       return;
@@ -128,15 +125,8 @@ export function AdminProductCreateForm() {
       });
       toast.success("Product created");
       await qc.invalidateQueries({ queryKey: queryKeys.admin.products });
-    } catch (err) {
-      const msg = isAxiosError(err)
-        ? ((err.response?.data as { message?: string })?.message ?? err.message)
-        : "Something went wrong";
-      toast.error(typeof msg === "string" ? msg : "Could not create product");
-      toast.error(
-        (err.response?.data as { message?: string })?.message ??
-          "Could not create product"
-      );
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Could not create product"));
     }
   }
 
@@ -144,7 +134,7 @@ export function AdminProductCreateForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full max-w-4xl space-y-6"
+        className="w-full max-w-3xl space-y-6"
       >
         <FormField
           name="name"
@@ -213,82 +203,125 @@ export function AdminProductCreateForm() {
           )}
         />
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField
-            name="size"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Variant size</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            name="color"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Variant color</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-heading text-lg font-semibold tracking-tight">
+              Variants
+            </h3>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                append({
+                  size: "M",
+                  color: "Black",
+                  sku: "",
+                  stock: 20,
+                  price: 99,
+                })
+              }
+            >
+              <PlusIcon className="mr-2 size-4" />
+              Add Variant
+            </Button>
+          </div>
 
-        <FormField
-          name="sku"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>SKU</FormLabel>
-              <FormControl>
-                <Input placeholder="UNIQUE-SKU-001" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          {fields.map((field, index) => (
+            <div
+              key={field.id}
+              className="relative space-y-4 rounded-xl border p-4"
+            >
+              {fields.length > 1 && (
+                <Button
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                  onClick={() => remove(index)}
+                  className="absolute right-2 top-2 text-destructive"
+                >
+                  <Trash2Icon className="size-4" />
+                </Button>
+              )}
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField
-            name="price"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Price</FormLabel>
-                <FormControl>
-                  <Input type="number" step="0.01" min={0} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            name="stock"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Stock</FormLabel>
-                <FormControl>
-                  <Input type="number" min={0} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              <div className="grid gap-4 sm:grid-cols-3">
+                <FormField
+                  name={`variants.${index}.size`}
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Size</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name={`variants.${index}.color`}
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Color</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name={`variants.${index}.sku`}
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>SKU</FormLabel>
+                      <FormControl>
+                        <Input placeholder="UNIQUE-SKU-001" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  name={`variants.${index}.price`}
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Price</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" min={0} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name={`variants.${index}.stock`}
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Stock</FormLabel>
+                      <FormControl>
+                        <Input type="number" min={0} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="space-y-3">
           <label
-            className="text-sm leading-none font-medium"
             htmlFor="product-images"
+            className="text-sm leading-none font-medium"
           >
             Images
           </label>
@@ -314,8 +347,8 @@ export function AdminProductCreateForm() {
                   className="bg-muted relative aspect-square overflow-hidden rounded-lg border"
                 >
                   <Image
-                    alt=""
                     fill
+                    alt=""
                     unoptimized
                     className="object-cover"
                     src={objectUrlFor(file)}

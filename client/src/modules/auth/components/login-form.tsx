@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/auth-store";
 import { useSearchParams } from "next/navigation";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginValues } from "../schemas";
+import { ACCOUNT_BLOCKED_MESSAGE } from "@/lib/account-blocked";
 import { safeProtectedRedirectPath } from "@/lib/auth-route-guards";
 import { loginRequest } from "@/modules/auth/services/auth.service";
 import {
@@ -37,10 +39,12 @@ export function LoginForm() {
       const next =
         safeProtectedRedirectPath(searchParams.get("next")) ?? ROUTES.dashboard;
       window.location.assign(next);
-    } catch {
-      toast.error("Invalid email or password");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Invalid email or password"));
     }
   }
+
+  const blocked = searchParams.get("blocked") === "1";
 
   return (
     <Form {...form}>
@@ -49,6 +53,11 @@ export function LoginForm() {
         className="space-y-4"
         onSubmit={form.handleSubmit(onSubmit)}
       >
+        {blocked ? (
+          <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {ACCOUNT_BLOCKED_MESSAGE}
+          </p>
+        ) : null}
         <FormField
           name="email"
           control={form.control}

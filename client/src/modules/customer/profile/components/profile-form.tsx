@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/auth-store";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Resolver } from "react-hook-form";
 import { updateProfile } from "../services/profile.service";
@@ -37,8 +38,8 @@ export function ProfileForm() {
       });
       setUser(next);
       toast.success("Profile updated");
-    } catch {
-      toast.error("Could not update profile");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Could not update profile"));
     }
   }
 

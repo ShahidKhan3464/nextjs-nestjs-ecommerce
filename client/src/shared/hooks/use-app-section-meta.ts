@@ -23,6 +23,9 @@ export function useAppSectionMeta(): { title: string; hint?: string } {
       if (pathname.startsWith("/products/new")) {
         return { title: "New product", hint: "Create catalog item" };
       }
+      if (pathname.startsWith("/products/edit/")) {
+        return { title: "Edit product", hint: "Update catalog item" };
+      }
       return { title: "Product", hint: "Details & variants" };
     }
     if (pathname === "/products") {

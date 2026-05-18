@@ -44,6 +44,11 @@ export class ProductsController {
     return this.productsService.findOne(id);
   }
 
+  @Get('detail/:slug')
+  findBySlug(@Param('slug') slug: string) {
+    return this.productsService.findBySlug(slug);
+  }
+
   @Post()
   @Roles(UserRole.ADMIN)
   @ApiConsumes('multipart/form-data')
@@ -58,33 +63,19 @@ export class ProductsController {
 
   @Patch(':id')
   @Roles(UserRole.ADMIN)
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateProductDto) {
-    return this.productsService.update(id, dto);
+  @ApiConsumes('multipart/form-data', 'application/json')
+  @UseInterceptors(FilesInterceptor('images', 12, imagesMulter))
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateProductDto,
+    @UploadedFiles() files?: Express.Multer.File[],
+  ) {
+    return this.productsService.update(id, dto, files ?? []);
   }
 
   @Delete(':id')
   @Roles(UserRole.ADMIN)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.remove(id);
-  }
-
-  @Post(':id/images')
-  @Roles(UserRole.ADMIN)
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FilesInterceptor('images', 12, imagesMulter))
-  addImages(
-    @Param('id', ParseIntPipe) id: number,
-    @UploadedFiles() files: Express.Multer.File[],
-  ) {
-    return this.productsService.addImages(id, files ?? []);
-  }
-
-  @Delete(':id/images/:imageId')
-  @Roles(UserRole.ADMIN)
-  removeImage(
-    @Param('id', ParseIntPipe) id: number,
-    @Param('imageId', ParseIntPipe) imageId: number,
-  ) {
-    return this.productsService.removeImage(id, imageId);
   }
 }

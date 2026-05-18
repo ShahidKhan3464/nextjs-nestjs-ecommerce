@@ -17,6 +17,7 @@ export const ROUTES = {
   forgotPassword: "/forgot-password",
   user: (id: string) => `/users/${id}`,
   order: (id: string) => `/orders/${id}`,
-  product: (slug: string) => `/products/${slug}`,
   category: (id: string | number) => `/categories/${id}`,
+  productEdit: (id: string | number) => `/products/edit/${id}`,
+  product: (slug: string | null | undefined) => `/products/${slug ?? ""}`,
 } as const;

@@ -1,10 +1,10 @@
-import { Logger, Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { UserRole } from 'src/users/constants/user.constants';
 import { HashingProvider } from 'src/auth/providers/hashing.provider';
+import { Logger, Injectable, OnApplicationBootstrap } from '@nestjs/common';
 
 @Injectable()
 export class SeedAdminProvider implements OnApplicationBootstrap {
@@ -23,6 +23,7 @@ export class SeedAdminProvider implements OnApplicationBootstrap {
 
   private async seedAdminUser(): Promise<void> {
     const adminEmail = this.configService.get<string>('ADMIN_EMAIL');
+    const adminPhone = this.configService.get<string>('ADMIN_PHONE');
     const adminPassword = this.configService.get<string>('ADMIN_PASSWORD');
     const adminName =
       this.configService.get<string>('ADMIN_NAME') ?? 'System Admin';
@@ -50,6 +51,7 @@ export class SeedAdminProvider implements OnApplicationBootstrap {
       email: adminEmail,
       fullName: adminName,
       role: UserRole.ADMIN,
+      phoneNumber: adminPhone,
       password: await this.hashingProvider.hash(adminPassword),
       confirmPassword: await this.hashingProvider.hash(adminPassword),
     });

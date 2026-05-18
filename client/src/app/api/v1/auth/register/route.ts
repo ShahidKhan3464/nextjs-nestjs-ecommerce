@@ -61,7 +61,9 @@ export async function POST(req: Request) {
     id: String(u.id),
     email: u.email,
     name: u.fullName,
+    fullName: u.fullName,
     role: u.role ?? DEFAULT_ROLE,
+    isBlocked: u.isBlocked ?? false,
     createdAt: new Date().toISOString(),
   };
 

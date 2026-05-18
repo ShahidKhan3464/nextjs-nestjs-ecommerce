@@ -1,9 +1,4 @@
-export type OrderStatus =
-  | "paid"
-  | "pending"
-  | "shipped"
-  | "delivered"
-  | "cancelled";
+type OrderStatus = "paid" | "pending" | "shipped" | "delivered" | "cancelled";
 
 export type OrderLineItem = {
   image?: string;
@@ -41,4 +36,11 @@ export type Address = {
   country: string;
   fullName: string;
   postalCode: string;
+};
+
+export type PlaceOrderInput = {
+  items: { productSlug: string; variantId: string; quantity: number }[];
+  shippingAddress: Address;
+  payment: { method: "card" | "paypal"; summary: string };
+  couponCode?: string;
 };

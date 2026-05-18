@@ -4,8 +4,11 @@ import * as React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/constants/query-keys";
 import { useDebouncedCallback } from "use-debounce";
 import { useProductSearchParams } from "../hooks/use-product-search-params";
+import { fetchAdminCategories } from "@/modules/admin/categories/services/categories.service";
 import {
   Select,
   SelectItem,
@@ -14,11 +17,15 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 
-const categories = ["Apparel", "Home", "Accessories", "Footwear"];
-
-export function ProductFilters() {
+export function ProductFilters({ disabled = false }: { disabled?: boolean }) {
   const { values, setParams } = useProductSearchParams();
   const [qLocal, setQLocal] = React.useState(values.q);
+  const { data: categoriesResp, isPending: categoriesLoading } = useQuery({
+    queryKey: queryKeys.admin.categories,
+    queryFn: () => fetchAdminCategories({ limit: 100 }),
+  });
+
+  const categories = categoriesResp?.categories ?? [];
 
   React.useEffect(() => {
     setQLocal(values.q);
@@ -36,6 +43,7 @@ export function ProductFilters() {
           <Input
             id="search"
             value={qLocal}
+            disabled={disabled}
             placeholder="Search products…"
             aria-describedby="search-hint"
             onChange={(e) => {
@@ -49,22 +57,39 @@ export function ProductFilters() {
         <div className="w-full min-w-[140px] space-y-2 sm:w-auto">
           <Label>Category</Label>
           <Select
+            disabled={disabled || categoriesLoading}
             value={values.category || "all"}
             onValueChange={(v) => {
               if (v == null) return;
               setParams({ category: v === "all" ? "" : v, page: 1 });
             }}
           >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="All categories" />
+            <SelectTrigger
+              className="w-full"
+              disabled={disabled || categoriesLoading}
+            >
+              <SelectValue
+                placeholder={categoriesLoading ? "Loading…" : "All categories"}
+              >
+                {values.category && categories.length > 0
+                  ? categories.find((c) => String(c.id) === values.category)
+                      ?.name
+                  : undefined}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All categories</SelectItem>
-              {categories.filter(Boolean).map((c) => (
-                <SelectItem key={c} value={c}>
-                  {c}
+              {categories.length > 0 ? (
+                categories.map((c) => (
+                  <SelectItem key={c.id} value={String(c.id)}>
+                    {c.name}
+                  </SelectItem>
+                ))
+              ) : !categoriesLoading ? (
+                <SelectItem value="none" disabled>
+                  No categories found
                 </SelectItem>
-              ))}
+              ) : null}
             </SelectContent>
           </Select>
         </div>
@@ -72,16 +97,18 @@ export function ProductFilters() {
         <div className="w-full min-w-[140px] space-y-2 sm:w-auto">
           <Label>Max price</Label>
           <Select
-            value={values.maxPrice || "400"}
+            disabled={disabled}
+            value={values.maxPrice || "all"}
             onValueChange={(v) => {
               if (v == null) return;
-              setParams({ maxPrice: v, page: 1 });
+              setParams({ maxPrice: v === "all" ? "" : v, page: 1 });
             }}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full" disabled={disabled}>
               <SelectValue placeholder="No limit" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">No limit</SelectItem>
               <SelectItem value="50">$50 or less</SelectItem>
               <SelectItem value="100">$100 or less</SelectItem>
               <SelectItem value="200">$200 or less</SelectItem>
@@ -92,52 +119,11 @@ export function ProductFilters() {
           </Select>
         </div>
 
-        <div className="w-full min-w-[140px] space-y-2 sm:w-auto">
-          <Label>Minimum rating</Label>
-          <Select
-            value={values.minRating || "any"}
-            onValueChange={(v) => {
-              if (v == null) return;
-              setParams({ minRating: v === "any" ? "" : v, page: 1 });
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Any" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="any">Any</SelectItem>
-              <SelectItem value="4">4+ stars</SelectItem>
-              <SelectItem value="4.5">4.5+ stars</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="w-full min-w-[140px] space-y-2 sm:w-auto sm:min-w-[160px]">
-          <Label>Sort</Label>
-          <Select
-            value={values.sort}
-            onValueChange={(v) => {
-              if (v == null) return;
-              setParams({ sort: v, page: 1 });
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="featured">Featured</SelectItem>
-              <SelectItem value="price-asc">Price: Low to High</SelectItem>
-              <SelectItem value="price-desc">Price: High to Low</SelectItem>
-              <SelectItem value="rating">Rating</SelectItem>
-              <SelectItem value="newest">Newest</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end">
           <Button
             type="button"
             variant="outline"
+            disabled={disabled}
             className="w-full sm:w-auto"
             onClick={() =>
               setParams({
@@ -146,7 +132,6 @@ export function ProductFilters() {
                 minPrice: "",
                 maxPrice: "",
                 minRating: "",
-                sort: "featured",
                 page: 1,
               })
             }

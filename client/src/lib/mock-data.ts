@@ -40,6 +40,7 @@ export const MOCK_PRODUCTS: Product[] = [
     description:
       "Ultra-soft merino wool with a relaxed shoulder and ribbed cuffs. Temperature-regulating comfort for every season.",
     category: "Apparel",
+    basePrice: 128,
     rating: 4.8,
     reviewCount: 124,
     images: [img("merino-1"), img("merino-2"), img("merino-3")],
@@ -53,6 +54,7 @@ export const MOCK_PRODUCTS: Product[] = [
     description:
       "Structured wool blend with a tapered leg. Pressed crease and interior waistband grip for all-day ease.",
     category: "Apparel",
+    basePrice: 168,
     rating: 4.6,
     reviewCount: 89,
     images: [img("trouser-1"), img("trouser-2")],
@@ -66,6 +68,7 @@ export const MOCK_PRODUCTS: Product[] = [
     description:
       "Breathable Italian linen with matte corozo buttons. Layer-ready weight with a modern boxy cut.",
     category: "Apparel",
+    basePrice: 142,
     rating: 4.7,
     reviewCount: 56,
     images: [img("linen-1"), img("linen-2"), img("linen-3")],
@@ -78,6 +81,7 @@ export const MOCK_PRODUCTS: Product[] = [
     description:
       "Hand-glazed stoneware dripper with optimized spiral ribs for even extraction.",
     category: "Home",
+    basePrice: 64,
     rating: 4.9,
     reviewCount: 210,
     images: [img("ceramic-1"), img("ceramic-2")],
@@ -113,6 +117,7 @@ export const MOCK_PRODUCTS: Product[] = [
     description:
       "Warm dimmable LED with powder-coated steel arm and weighted base for precise positioning.",
     category: "Home",
+    basePrice: 189,
     rating: 4.5,
     reviewCount: 72,
     images: [img("lamp-1"), img("lamp-2"), img("lamp-3")],
@@ -147,6 +152,7 @@ export const MOCK_PRODUCTS: Product[] = [
     description:
       "Vegetable-tanned leather with reinforced handles and interior laptop sleeve.",
     category: "Accessories",
+    basePrice: 98,
     rating: 4.8,
     reviewCount: 198,
     images: [img("tote-1"), img("tote-2")],
@@ -159,6 +165,7 @@ export const MOCK_PRODUCTS: Product[] = [
     description:
       "Full-grain leather upper, Margom sole, cushioned footbed. Designed for daily mileage.",
     category: "Footwear",
+    basePrice: 195,
     rating: 4.4,
     reviewCount: 311,
     images: [img("sneaker-1"), img("sneaker-2"), img("sneaker-3")],
@@ -171,6 +178,7 @@ export const MOCK_PRODUCTS: Product[] = [
     description:
       "Two-ply Mongolian cashmere with feather-light hand feel and generous length.",
     category: "Accessories",
+    basePrice: 88,
     rating: 4.9,
     reviewCount: 64,
     images: [img("scarf-1"), img("scarf-2")],
@@ -182,11 +190,26 @@ export interface MockUserRecord extends User {
   password: string;
 }
 
+export function toPublicUser(record: MockUserRecord): User {
+  return {
+    id: record.id,
+    email: record.email,
+    name: record.name,
+    role: record.role,
+    fullName: record.fullName,
+    isBlocked: record.isBlocked,
+    createdAt: record.createdAt,
+    avatarUrl: record.avatarUrl,
+  };
+}
+
 export const MOCK_USERS: MockUserRecord[] = [
   {
     id: "u1",
     email: "admin@example.com",
     name: "Alex Admin",
+    fullName: "Alex Admin",
+    isBlocked: false,
     role: "admin",
     password: "Admin123!",
     createdAt: new Date().toISOString(),
@@ -196,6 +219,8 @@ export const MOCK_USERS: MockUserRecord[] = [
     id: "u2",
     email: "customer@example.com",
     name: "Casey Customer",
+    fullName: "Casey Customer",
+    isBlocked: false,
     role: "customer",
     password: "Customer123!",
     createdAt: new Date().toISOString(),

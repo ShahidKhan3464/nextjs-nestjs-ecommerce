@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { isAxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { ROUTES } from "@/constants/routes";
 import { Input } from "@/components/ui/input";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -49,20 +49,8 @@ export function ResetPasswordForm() {
         "Password updated. You can sign in with your new password."
       );
       router.push(ROUTES.login);
-    } catch (e: unknown) {
-      const raw =
-        isAxiosError(e) &&
-        e.response?.data &&
-        typeof e.response.data === "object"
-          ? (e.response.data as { message?: unknown }).message
-          : undefined;
-      const msg =
-        typeof raw === "string"
-          ? raw
-          : Array.isArray(raw)
-            ? raw.filter((x): x is string => typeof x === "string").join(", ")
-            : "Something went wrong";
-      toast.error(msg);
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Could not reset password"));
     }
   }
 

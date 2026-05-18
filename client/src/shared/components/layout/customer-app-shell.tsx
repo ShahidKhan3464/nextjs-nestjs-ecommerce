@@ -18,7 +18,7 @@ import {
 
 const nav = [
   { href: ROUTES.dashboard, label: "Dashboard", icon: LayoutDashboard },
-  { href: ROUTES.products, label: "Shop", icon: ShoppingBag },
+  { href: ROUTES.products, label: "Products", icon: ShoppingBag },
   { href: ROUTES.cart, label: "Cart", icon: ShoppingCart },
   { href: ROUTES.wishlist, label: "Wishlist", icon: Heart },
   { href: ROUTES.orders, label: "Orders", icon: Package },
@@ -40,7 +40,7 @@ export function CustomerAppShell({ children }: { children: React.ReactNode }) {
           <div className="bg-primary flex size-6 items-center justify-center rounded-md">
             <Store className="text-primary-foreground size-4" />
           </div>
-          <span className="font-heading text-sm font-semibold tracking-tight">
+          <span className="font-heading font-semibold tracking-tight">
             My Account
           </span>
         </div>
@@ -72,14 +72,8 @@ export function CustomerAppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <AppChromeHeader
-          sectionHint={meta.hint}
-          sectionTitle={meta.title}
-        />
-        <div
-          id="main-content"
-          className="flex-1 p-4 pb-20 md:p-6 md:pb-6"
-        >
+        <AppChromeHeader sectionHint={meta.hint} sectionTitle={meta.title} />
+        <div id="main-content" className="flex-1 px-4 py-4 lg:px-6 lg:py-4">
           {children}
         </div>
       </div>
@@ -92,8 +86,7 @@ export function CustomerAppShell({ children }: { children: React.ReactNode }) {
           const active =
             item.href === ROUTES.dashboard
               ? pathname === ROUTES.dashboard
-              : pathname === item.href ||
-                pathname.startsWith(`${item.href}/`);
+              : pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;
           return (
             <Link

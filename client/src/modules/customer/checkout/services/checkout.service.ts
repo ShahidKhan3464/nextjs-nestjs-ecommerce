@@ -1,1 +1,1 @@
-export { placeOrder } from "../orders/services/orders.service";
+export { placeOrder } from "../../orders/services/orders.service";

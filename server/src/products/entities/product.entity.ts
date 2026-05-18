@@ -10,6 +10,8 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  BeforeInsert,
+  BeforeUpdate,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
@@ -28,17 +30,44 @@ export class Product {
   name: string;
 
   @Column({
+    length: 255,
+    type: 'varchar',
+    unique: true,
+    nullable: true,
+  })
+  slug: string;
+
+  @Column({
     type: 'text',
     nullable: true,
   })
   description: string | null;
 
-  // @Column({
-  //   scale: 2,
-  //   precision: 10,
-  //   type: 'decimal',
-  // })
-  // basePrice: number;
+  @Column({
+    type: 'float',
+    default: 0,
+  })
+  rating: number;
+
+  @Column({
+    type: 'int',
+    default: 0,
+  })
+  reviewCount: number;
+
+  @Column({
+    type: 'boolean',
+    default: false,
+  })
+  featured: boolean;
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0,
+  })
+  basePrice: number;
 
   @Column({
     type: 'enum',
@@ -73,4 +102,17 @@ export class Product {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  generateSlug() {
+    if (this.name) {
+      this.slug = this.name
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    }
+  }
 }

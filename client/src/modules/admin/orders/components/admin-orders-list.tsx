@@ -37,7 +37,7 @@ export function AdminOrdersList() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [searchInput, setSearchInput] = useState("");
-  const debouncedSearch = useDebouncedValue(searchInput, 350);
+  const debouncedSearch = useDebouncedValue(searchInput, 500);
 
   useEffect(() => {
     setPage(1);
@@ -69,12 +69,28 @@ export function AdminOrdersList() {
   }, [page, pageClamped]);
 
   if (isPending || !data) {
-    return <AdminTableSkeleton />;
+    return (
+      <AdminTableSkeleton
+        filterWidths={["w-72", "w-24"]}
+        columns={[
+          { className: "flex-1" },
+          { className: "w-24" },
+          { className: "flex-1" },
+          { className: "w-24" },
+          { className: "w-36 shrink-0", isAction: true },
+        ]}
+      />
+    );
   }
 
   if (!data) {
     return null;
   }
+
+  const total = data.length;
+  const hasSearch = debouncedSearch.trim().length > 0;
+  const isEmptyCatalog = total === 0 && !hasSearch;
+  const showPagination = filtered.length > 0;
 
   return (
     <div className="space-y-4">
@@ -82,6 +98,7 @@ export function AdminOrdersList() {
         <div className="w-72">
           <Input
             value={searchInput}
+            disabled={isEmptyCatalog}
             placeholder="Search by order id or status"
             onChange={(e) => setSearchInput(e.target.value)}
           />
@@ -148,16 +165,18 @@ export function AdminOrdersList() {
           </TableBody>
         </Table>
 
-        <Pagination
-          perPage={perPage}
-          page={pageClamped}
-          onPageChange={setPage}
-          totalPages={totalPages}
-          onPerPageChange={(n) => {
-            setPerPage(n);
-            setPage(1);
-          }}
-        />
+        {showPagination ? (
+          <Pagination
+            perPage={perPage}
+            page={pageClamped}
+            onPageChange={setPage}
+            totalPages={totalPages}
+            onPerPageChange={(n) => {
+              setPerPage(n);
+              setPage(1);
+            }}
+          />
+        ) : null}
       </div>
     </div>
   );

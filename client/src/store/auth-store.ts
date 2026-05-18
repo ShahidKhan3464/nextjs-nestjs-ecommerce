@@ -45,10 +45,6 @@ export const useAuthStore = create<AuthState>()(
   )
 );
 
-export function getAccessToken(): string | null {
-  return useAuthStore.getState().accessToken;
-}
-
 /** Returns true if the stored access token is expired or about to expire (within 30s buffer). */
 export function isTokenExpired(): boolean {
   const { accessToken, tokenExpiresAt } = useAuthStore.getState();

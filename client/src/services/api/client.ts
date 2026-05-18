@@ -1,4 +1,6 @@
+import { getSiteUrl } from "@/lib/backend-url";
 import { useAuthStore, isTokenExpired } from "@/store/auth-store";
+import { handlePossibleBlockedApiError } from "@/lib/account-blocked";
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 
 declare module "axios" {
@@ -8,14 +10,7 @@ declare module "axios" {
 }
 
 /** Browser: same-origin `/api/v1/*` (Route Handlers → Nest). Server: absolute URL to this Next app so paths resolve correctly. */
-const base =
-  typeof window !== "undefined"
-    ? ""
-    : (
-        process.env.NEXT_PUBLIC_API_URL ??
-        process.env.NEXT_PUBLIC_SITE_URL ??
-        "http://localhost:3000"
-      ).replace(/\/$/, "");
+const base = typeof window !== "undefined" ? "" : getSiteUrl();
 
 export const api = axios.create({
   withCredentials: true,
@@ -68,8 +63,10 @@ api.interceptors.request.use(async (config) => {
     try {
       const fresh = await refreshAccessToken();
       config.headers.Authorization = `Bearer ${fresh}`;
-    } catch {
-      useAuthStore.getState().clearSession();
+    } catch (refreshError) {
+      if (!handlePossibleBlockedApiError(refreshError)) {
+        useAuthStore.getState().clearSession();
+      }
     }
   } else if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -96,6 +93,10 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    if (handlePossibleBlockedApiError(error)) {
+      return Promise.reject(error);
+    }
+
     // Only retry once on 401 (token may have expired between request interceptor and server response)
     if (error.response?.status !== 401 || original._retry) {
       return Promise.reject(error);
@@ -107,8 +108,10 @@ api.interceptors.response.use(
       const fresh = await refreshAccessToken();
       original.headers.Authorization = `Bearer ${fresh}`;
       return api(original);
-    } catch {
-      useAuthStore.getState().clearSession();
+    } catch (refreshError) {
+      if (!handlePossibleBlockedApiError(refreshError)) {
+        useAuthStore.getState().clearSession();
+      }
       return Promise.reject(error);
     }
   }

@@ -21,6 +21,12 @@ export class User {
   fullName: string;
 
   @Column({
+    type: 'varchar',
+    nullable: true,
+  })
+  phoneNumber: string;
+
+  @Column({
     unique: true,
     type: 'varchar',
     nullable: false,

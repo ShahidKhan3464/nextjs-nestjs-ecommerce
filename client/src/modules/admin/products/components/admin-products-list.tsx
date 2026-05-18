@@ -1,14 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import { ROUTES } from "@/constants/routes";
+import { Trash2, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { queryKeys } from "@/constants/query-keys";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { Pagination } from "@/components/ui/pagination";
 import { AdminTableSkeleton } from "@/modules/admin/shared";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import type { Product } from "@/modules/customer/products/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -17,10 +21,17 @@ import {
   fetchAdminProducts,
 } from "../services/products.service";
 import {
+  Select,
+  SelectItem,
+  SelectValue,
+  SelectContent,
+  SelectTrigger,
+} from "@/components/ui/select";
+import {
   Table,
+  TableRow,
   TableBody,
   TableCell,
-  TableRow,
   TableHead,
   TableHeader,
 } from "@/components/ui/table";
@@ -29,10 +40,10 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
+  AlertDialogTitle,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogDescription,
 } from "@/components/ui/alert-dialog";
 
 export function AdminProductsList() {
@@ -40,22 +51,26 @@ export function AdminProductsList() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [searchInput, setSearchInput] = useState("");
-  const debouncedSearch = useDebouncedValue(searchInput, 350);
+  const debouncedSearch = useDebouncedValue(searchInput, 500);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [statusFilter, setStatusFilter] = useState<
+    "active" | "removed" | "all"
+  >("active");
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, statusFilter]);
 
   const { data, isPending, isFetching, isPlaceholderData } = useQuery({
     queryKey: [
       ...queryKeys.admin.products,
-      { search: debouncedSearch, page, perPage },
+      { page, perPage, search: debouncedSearch, lifeCycle: statusFilter },
     ] as const,
     queryFn: () =>
       fetchAdminProducts({
-        limit: perPage,
         page,
+        limit: perPage,
+        lifeCycle: statusFilter,
         search: debouncedSearch || undefined,
       }),
     placeholderData: (prev) => prev,
@@ -68,18 +83,36 @@ export function AdminProductsList() {
       setDeleteTarget(null);
       await qc.invalidateQueries({ queryKey: queryKeys.admin.products });
     },
-    onError: () => toast.error("Could not delete"),
+    onError: (error) =>
+      toast.error(getApiErrorMessage(error, "Could not delete product")),
   });
 
   const showInitialSkeleton = isPending && !data;
 
   if (showInitialSkeleton) {
-    return <AdminTableSkeleton />;
+    return (
+      <AdminTableSkeleton
+        filterWidths={["w-72", "w-32", "w-24"]}
+        columns={[
+          { className: "w-16 shrink-0" },
+          { className: "flex-1" },
+          { className: "flex-1" },
+          { className: "w-20" },
+          { className: "w-28 shrink-0", isAction: true },
+        ]}
+      />
+    );
   }
 
   if (!data) {
     return null;
   }
+
+  const total = data.pagination?.total ?? 0;
+  const hasSearch = debouncedSearch.trim().length > 0;
+  const hasStatusFilter = statusFilter !== "active";
+  const isEmptyCatalog = total === 0 && !hasSearch && !hasStatusFilter;
+  const showPagination = total > 0;
 
   return (
     <>
@@ -88,9 +121,28 @@ export function AdminProductsList() {
           <div className="w-72">
             <Input
               value={searchInput}
-              placeholder="Search products"
+              disabled={isEmptyCatalog}
+              placeholder="Search products..."
               onChange={(e) => setSearchInput(e.target.value)}
             />
+          </div>
+          <div className="w-32">
+            <Select
+              value={statusFilter}
+              disabled={isEmptyCatalog}
+              onValueChange={(val) => {
+                if (val) setStatusFilter(val);
+              }}
+            >
+              <SelectTrigger className="w-full" disabled={isEmptyCatalog}>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="removed">Removed</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <Button
             onClick={() =>
@@ -100,7 +152,6 @@ export function AdminProductsList() {
             Refresh
           </Button>
         </div>
-
         <div
           className={
             isFetching && !isPlaceholderData
@@ -149,15 +200,29 @@ export function AdminProductsList() {
                     <TableCell className="tabular-nums">
                       {p.variants.length}
                     </TableCell>
-                    <TableCell className="text-center">
-                      <Button
-                        size="icon"
-                        variant="destructive"
-                        aria-label={`Delete ${p.name}`}
-                        onClick={() => setDeleteTarget(p)}
-                      >
-                        <Trash2 />
-                      </Button>
+                    <TableCell>
+                      <div className="flex items-center justify-center gap-2">
+                        <Link
+                          href={ROUTES.productEdit(p.id)}
+                          className={cn(
+                            buttonVariants({
+                              variant: "secondary",
+                              size: "icon",
+                            })
+                          )}
+                          aria-label={`Edit ${p.name}`}
+                        >
+                          <Pencil className="size-4" />
+                        </Link>
+                        <Button
+                          size="icon"
+                          variant="destructive"
+                          aria-label={`Delete ${p.name}`}
+                          onClick={() => setDeleteTarget(p)}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -165,16 +230,18 @@ export function AdminProductsList() {
             </TableBody>
           </Table>
 
-          <Pagination
-            page={page}
-            perPage={perPage}
-            onPageChange={(p) => setPage(p)}
-            totalPages={data.pagination?.totalPages ?? 1}
-            onPerPageChange={(n) => {
-              setPerPage(n);
-              setPage(1);
-            }}
-          />
+          {showPagination ? (
+            <Pagination
+              page={page}
+              perPage={perPage}
+              onPageChange={(p) => setPage(p)}
+              totalPages={data.pagination?.totalPages ?? 1}
+              onPerPageChange={(n) => {
+                setPerPage(n);
+                setPage(1);
+              }}
+            />
+          ) : null}
         </div>
       </div>
 
