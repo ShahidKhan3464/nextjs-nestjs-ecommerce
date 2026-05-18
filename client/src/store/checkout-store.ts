@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import type { Address } from "@/modules/customer/orders/types";
 
-export type CheckoutStep = "shipping" | "payment" | "review";
+type CheckoutStep = "shipping" | "payment" | "review";
 
 interface CheckoutState {
   step: CheckoutStep;

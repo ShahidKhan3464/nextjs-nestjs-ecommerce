@@ -1,4 +1,4 @@
-export type AdminTableColumnSkeleton = {
+type AdminTableColumnSkeleton = {
   /** Tailwind width/layout classes for header and body cells. */
   className?: string;
   /** Narrow action column (icon buttons). */

@@ -1,5 +1,3 @@
-export type CheckoutStep = "shipping" | "payment" | "review";
-
 export type Address = {
   id?: string;
   city: string;

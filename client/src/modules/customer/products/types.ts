@@ -1,5 +1,3 @@
-export type { PaginatedResponse } from "@/types/api";
-
 export type ProductListParams = {
   q?: string;
   page?: number;

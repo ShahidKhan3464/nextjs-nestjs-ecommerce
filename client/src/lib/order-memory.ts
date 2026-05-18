@@ -5,7 +5,7 @@ const ordersByUser = new Map<string, Order[]>();
 
 let seeded = false;
 
-export function seedDemoOrdersIfNeeded() {
+function seedDemoOrdersIfNeeded() {
   if (seeded) return;
   seeded = true;
   const p = MOCK_PRODUCTS[0];
@@ -70,15 +70,6 @@ export function allOrdersFlat(): Order[] {
     out.push(...list);
   }
   return out;
-}
-
-export function findOrderGlobally(orderId: string): Order | undefined {
-  seedDemoOrdersIfNeeded();
-  for (const list of ordersByUser.values()) {
-    const found = list.find((o) => o.id === orderId);
-    if (found) return found;
-  }
-  return undefined;
 }
 
 export function findOrderWithUser(

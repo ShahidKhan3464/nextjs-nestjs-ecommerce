@@ -1,4 +1,4 @@
-export type OrderStatus =
+type OrderStatus =
   | "paid"
   | "pending"
   | "shipped"

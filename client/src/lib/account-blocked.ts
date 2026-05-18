@@ -10,7 +10,7 @@ export const ACCOUNT_BLOCKED_MESSAGE =
 let forcedLogoutInProgress = false;
 
 /** Clear client session and cookies when the account is blocked mid-session. */
-export async function forceBlockedLogout(
+async function forceBlockedLogout(
   message = ACCOUNT_BLOCKED_MESSAGE
 ): Promise<void> {
   if (forcedLogoutInProgress) return;

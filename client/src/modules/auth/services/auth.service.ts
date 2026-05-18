@@ -51,7 +51,3 @@ export async function logoutRequest() {
   await api.post<ApiResponse<{ ok: true }>>("/api/v1/auth/logout");
 }
 
-export async function fetchSession() {
-  const res = await api.get<ApiResponse<{ user: User }>>("/api/v1/auth/me");
-  return res.data.data.user;
-}

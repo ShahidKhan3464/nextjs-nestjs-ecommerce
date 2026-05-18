@@ -11,13 +11,13 @@ export type NestProductDto = {
   images?: NestProductImageDto[];
 };
 
-export type NestProductImageDto = {
+type NestProductImageDto = {
   id: number;
   urlPath: string;
   sortOrder: number;
 };
 
-export type NestVariantDto = {
+type NestVariantDto = {
   id: number;
   size: string;
   color: string;
@@ -26,7 +26,7 @@ export type NestVariantDto = {
   price: string | number;
 };
 
-export function getCatalogImageBase(): string {
+function getCatalogImageBase(): string {
   return (
     process.env.NEXT_PUBLIC_BACKEND_URL ??
     process.env.BACKEND_URL ??

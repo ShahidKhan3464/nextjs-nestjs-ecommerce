@@ -1,5 +1,4 @@
 export type { UserRole, User } from "@/modules/auth/types";
-export type { CartItem } from "@/modules/customer/cart/types";
 export type {
   Product,
   ProductVariant,
@@ -7,7 +6,6 @@ export type {
 export type {
   Order,
   Address,
-  OrderStatus,
   OrderLineItem,
 } from "@/modules/customer/orders/types";
 

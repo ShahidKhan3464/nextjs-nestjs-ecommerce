@@ -14,7 +14,7 @@ export function mapProductVariantsToFormValues(
 }
 
 /** Map public image URL to Nest `urlPath` (e.g. `/uploads/products/...`). */
-export function imageUrlToRetainPath(url: string): string {
+function imageUrlToRetainPath(url: string): string {
   try {
     const parsed = new URL(url);
     return parsed.pathname;

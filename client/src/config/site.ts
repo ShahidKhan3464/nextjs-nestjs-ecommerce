@@ -11,5 +11,3 @@ export const siteConfig = {
   locale: "en",
   supportedLocales: ["en"] as const,
 } as const;
-
-export type SupportedLocale = (typeof siteConfig.supportedLocales)[number];

@@ -24,15 +24,6 @@ export async function signAccessToken(payload: Omit<JwtPayload, "typ">) {
   return token;
 }
 
-export async function signRefreshToken(payload: Omit<JwtPayload, "typ">) {
-  const token = await new SignJWT({ ...payload, typ: "refresh" })
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime("7d")
-    .sign(secret);
-  return token;
-}
-
 export async function verifyToken(token: string): Promise<JwtPayload | null> {
   try {
     const { payload } = await jwtVerify(token, secret);
