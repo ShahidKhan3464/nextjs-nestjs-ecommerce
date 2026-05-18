@@ -7,7 +7,7 @@ export async function updateProfile(body: {
   avatarUrl?: string;
 }) {
   const res = await api.patch<ApiResponse<{ user: User }>>(
-    "/api/v1/users/me",
+    "/api/v1/customer/profile/me",
     body
   );
   return res.data.data.user;

@@ -23,7 +23,7 @@ export async function GET(req: Request) {
 
   const searchParams = new URLSearchParams();
 
-  // Map frontend parameters to backend DTO fields
+  // Map frontend parameters to backend DTO fields.
   const q = url.searchParams.get("q") || url.searchParams.get("search");
   const cat =
     url.searchParams.get("category") || url.searchParams.get("categoryId");

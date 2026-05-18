@@ -3,7 +3,7 @@ import type { AdminCategoryOption, CreateCategoryInput } from "../types";
 
 export async function createAdminCategory(payload: CreateCategoryInput) {
   const res = await api.post<{ data: { category: AdminCategoryOption } }>(
-    "/api/v1/categories",
+    "/api/v1/admin/categories",
     payload
   );
   return res.data.data.category;
@@ -14,19 +14,19 @@ export async function updateAdminCategory(
   payload: CreateCategoryInput
 ) {
   const res = await api.patch<{ data: { category: AdminCategoryOption } }>(
-    `/api/v1/categories/${id}`,
+    `/api/v1/admin/categories/${id}`,
     payload
   );
   return res.data.data.category;
 }
 
 export async function deleteAdminCategory(id: number) {
-  await api.delete(`/api/v1/categories/${id}`);
+  await api.delete(`/api/v1/admin/categories/${id}`);
 }
 
 export async function fetchAdminCategory(id: number) {
   const res = await api.get<{ data: { category: AdminCategoryOption } }>(
-    `/api/v1/categories/${id}`
+    `/api/v1/admin/categories/${id}`
   );
   return res.data.data.category;
 }
@@ -46,7 +46,7 @@ export async function fetchAdminCategories(params?: {
         totalPages: number;
       };
     };
-  }>("/api/v1/categories", {
+  }>("/api/v1/admin/categories", {
     params: {
       limit: params?.limit ?? 10,
       page: params?.page ?? 1,

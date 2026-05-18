@@ -22,7 +22,7 @@ export async function fetchAdminUsers(params?: {
       limit: number;
       total: number;
     };
-  }>("/api/v1/users", { params: query });
+  }>("/api/v1/admin/users", { params: query });
 
   const rawData = res.data.data;
 
@@ -38,13 +38,16 @@ export async function fetchAdminUsers(params?: {
 }
 
 export async function fetchAdminUser(id: string | number) {
-  const res = await api.get<{ data: User }>(`/api/v1/users/${id}`);
+  const res = await api.get<{ data: User }>(`/api/v1/admin/users/${id}`);
   return res.data.data;
 }
 
 export async function blockAdminUser(id: string | number, isBlocked: boolean) {
-  const res = await api.patch<{ data: User }>(`/api/v1/users/${id}/block`, {
-    isBlocked,
-  });
+  const res = await api.patch<{ data: User }>(
+    `/api/v1/admin/users/${id}/block`,
+    {
+      isBlocked,
+    }
+  );
   return res.data.data;
 }

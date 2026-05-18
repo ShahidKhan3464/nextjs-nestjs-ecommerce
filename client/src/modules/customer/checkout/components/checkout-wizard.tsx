@@ -69,7 +69,7 @@ export function CheckoutWizard() {
       return;
     }
     try {
-      await api.get(`/api/v1/coupons/${encodeURIComponent(code)}`);
+      await api.get(`/api/v1/customer/coupons/${encodeURIComponent(code)}`);
       setCoupon(code.toUpperCase());
       setCouponValid(code.toUpperCase());
       toast.success("Coupon applied");

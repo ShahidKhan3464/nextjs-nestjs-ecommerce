@@ -12,7 +12,7 @@ export async function fetchProducts(params: ProductListParams) {
   });
 
   const res = await api.get<PaginatedResponse<Product>>(
-    `/api/v1/products?${search.toString()}`
+    `/api/v1/customer/products?${search.toString()}`
   );
   return res.data;
 }
@@ -39,7 +39,7 @@ async function fetchProductBySlugOnServer(slug: string): Promise<Product> {
   }
 
   const res = await fetch(
-    `${serverApiBaseUrl()}/api/v1/products/${encodeURIComponent(slug)}`,
+    `${serverApiBaseUrl()}/api/v1/customer/products/${encodeURIComponent(slug)}`,
     { headers, next: { revalidate: 60 } }
   );
 
@@ -57,7 +57,7 @@ export async function fetchProductBySlug(slug: string) {
   }
 
   const res = await api.get<ApiResponse<Product>>(
-    `/api/v1/products/${encodeURIComponent(slug)}`
+    `/api/v1/customer/products/${encodeURIComponent(slug)}`
   );
   return res.data.data;
 }

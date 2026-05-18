@@ -11,13 +11,11 @@ import {
 } from "@/lib/nest-http";
 
 /**
- * Extract a numeric id from the end of a slug like "nike-shoes-6" → 6.
- * Falls back to treating the whole string as an id if it's purely numeric.
+ * Extract a numeric id from the end of a slug like "nike-shoes-6" -> 6.
+ * Falls back to treating the whole string as an id if it is purely numeric.
  */
 function extractIdFromSlug(slug: string): string | null {
-  // Pure numeric id (e.g. "6")
   if (/^\d+$/.test(slug)) return slug;
-  // Slug ending with "-{id}" (e.g. "nike-shoes-6")
   const match = slug.match(/-(\d+)$/);
   if (match) return match[1];
   return null;
@@ -30,8 +28,6 @@ export async function GET(
   const { slug } = await ctx.params;
   const backend = getBackendUrl();
 
-  // Try to resolve by id extracted from the slug first (handles null-slug products
-  // where we generate "name-id" slugs on the client side).
   const id = extractIdFromSlug(slug);
   const backendUrl = id
     ? `${backend}/products/${encodeURIComponent(id)}`
