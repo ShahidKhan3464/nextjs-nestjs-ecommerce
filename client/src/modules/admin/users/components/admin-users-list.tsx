@@ -122,6 +122,12 @@ export function AdminUsersList() {
     return null;
   }
 
+  const total = data.meta.totalItems ?? 0;
+  const hasSearch = debouncedSearch.trim().length > 0;
+  const hasStatusFilter = statusFilter !== "all";
+  const isEmptyCatalog = total === 0 && !hasSearch && !hasStatusFilter;
+  const showPagination = total > 0;
+
   return (
     <>
       <div className="space-y-4">
@@ -129,6 +135,7 @@ export function AdminUsersList() {
           <div className="w-72">
             <Input
               value={searchInput}
+              disabled={isEmptyCatalog}
               placeholder="Search by name, email or phone"
               onChange={(e) => setSearchInput(e.target.value)}
             />
@@ -136,9 +143,10 @@ export function AdminUsersList() {
           <div className="w-32">
             <Select
               value={statusFilter}
+              disabled={isEmptyCatalog}
               onValueChange={(value) => setStatusFilter(value ?? "all")}
             >
-              <SelectTrigger className="w-full!">
+              <SelectTrigger className="w-full!" disabled={isEmptyCatalog}>
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -255,16 +263,18 @@ export function AdminUsersList() {
             </TableBody>
           </Table>
 
-          <Pagination
-            page={page}
-            perPage={perPage}
-            onPageChange={setPage}
-            totalPages={data.meta.totalPages || 1}
-            onPerPageChange={(n) => {
-              setPerPage(n);
-              setPage(1);
-            }}
-          />
+          {showPagination ? (
+            <Pagination
+              page={page}
+              perPage={perPage}
+              onPageChange={setPage}
+              totalPages={data.meta.totalPages || 1}
+              onPerPageChange={(n) => {
+                setPerPage(n);
+                setPage(1);
+              }}
+            />
+          ) : null}
         </div>
       </div>
 

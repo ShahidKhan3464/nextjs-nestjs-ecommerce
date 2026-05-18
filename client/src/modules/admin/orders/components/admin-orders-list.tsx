@@ -87,12 +87,18 @@ export function AdminOrdersList() {
     return null;
   }
 
+  const total = data.length;
+  const hasSearch = debouncedSearch.trim().length > 0;
+  const isEmptyCatalog = total === 0 && !hasSearch;
+  const showPagination = filtered.length > 0;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-end gap-2">
         <div className="w-72">
           <Input
             value={searchInput}
+            disabled={isEmptyCatalog}
             placeholder="Search by order id or status"
             onChange={(e) => setSearchInput(e.target.value)}
           />
@@ -159,16 +165,18 @@ export function AdminOrdersList() {
           </TableBody>
         </Table>
 
-        <Pagination
-          perPage={perPage}
-          page={pageClamped}
-          onPageChange={setPage}
-          totalPages={totalPages}
-          onPerPageChange={(n) => {
-            setPerPage(n);
-            setPage(1);
-          }}
-        />
+        {showPagination ? (
+          <Pagination
+            perPage={perPage}
+            page={pageClamped}
+            onPageChange={setPage}
+            totalPages={totalPages}
+            onPerPageChange={(n) => {
+              setPerPage(n);
+              setPage(1);
+            }}
+          />
+        ) : null}
       </div>
     </div>
   );

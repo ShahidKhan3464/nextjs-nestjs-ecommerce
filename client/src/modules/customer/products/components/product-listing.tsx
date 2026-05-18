@@ -74,7 +74,7 @@ export function ProductListing() {
 
   return (
     <div className="space-y-8">
-      <motion.div layout className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <motion.div layout className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((product: Product) => (
           <ProductCard key={product.id} product={product} />
         ))}

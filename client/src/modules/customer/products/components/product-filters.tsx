@@ -17,7 +17,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 
-export function ProductFilters() {
+export function ProductFilters({ disabled = false }: { disabled?: boolean }) {
   const { values, setParams } = useProductSearchParams();
   const [qLocal, setQLocal] = React.useState(values.q);
   const { data: categoriesResp, isPending: categoriesLoading } = useQuery({
@@ -43,6 +43,7 @@ export function ProductFilters() {
           <Input
             id="search"
             value={qLocal}
+            disabled={disabled}
             placeholder="Search products…"
             aria-describedby="search-hint"
             onChange={(e) => {
@@ -56,14 +57,14 @@ export function ProductFilters() {
         <div className="w-full min-w-[140px] space-y-2 sm:w-auto">
           <Label>Category</Label>
           <Select
-            disabled={categoriesLoading}
+            disabled={disabled || categoriesLoading}
             value={values.category || "all"}
             onValueChange={(v) => {
               if (v == null) return;
               setParams({ category: v === "all" ? "" : v, page: 1 });
             }}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full" disabled={disabled || categoriesLoading}>
               <SelectValue
                 placeholder={categoriesLoading ? "Loading…" : "All categories"}
               >
@@ -93,13 +94,14 @@ export function ProductFilters() {
         <div className="w-full min-w-[140px] space-y-2 sm:w-auto">
           <Label>Max price</Label>
           <Select
+            disabled={disabled}
             value={values.maxPrice || "all"}
             onValueChange={(v) => {
               if (v == null) return;
               setParams({ maxPrice: v === "all" ? "" : v, page: 1 });
             }}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full" disabled={disabled}>
               <SelectValue placeholder="No limit" />
             </SelectTrigger>
             <SelectContent>
@@ -118,6 +120,7 @@ export function ProductFilters() {
           <Button
             type="button"
             variant="outline"
+            disabled={disabled}
             className="w-full sm:w-auto"
             onClick={() =>
               setParams({

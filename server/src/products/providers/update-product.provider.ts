@@ -4,6 +4,7 @@ import { Product } from '../entities/product.entity';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { GetProductsProvider } from './get-products.provider';
 import { ProductImage } from '../entities/product-image.entity';
+import { DeleteProductProvider } from './delete-product.provider';
 import { Category } from 'src/categories/entities/category.entity';
 import { ProductVariant } from '../entities/product-variant.entity';
 import {
@@ -26,6 +27,7 @@ export class UpdateProductProvider {
     private readonly productImageRepository: Repository<ProductImage>,
     @Inject(forwardRef(() => GetProductsProvider))
     private readonly getProductsProvider: GetProductsProvider,
+    private readonly deleteProductProvider: DeleteProductProvider,
   ) {}
 
   public async update(
@@ -65,6 +67,17 @@ export class UpdateProductProvider {
 
     if (dto.retainImagePaths !== undefined) {
       const keep = dto.retainImagePaths;
+      const imagesToRemove = await this.productImageRepository.find({
+        where:
+          keep.length === 0
+            ? { product: { id } }
+            : { product: { id }, urlPath: Not(In(keep)) },
+      });
+      await Promise.all(
+        imagesToRemove.map((img) =>
+          this.deleteProductProvider.safeUnlinkPublicPath(img.urlPath),
+        ),
+      );
       if (keep.length === 0) {
         await this.productImageRepository.delete({ product: { id } });
       } else {

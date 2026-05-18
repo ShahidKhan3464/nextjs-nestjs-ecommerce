@@ -108,6 +108,12 @@ export function AdminProductsList() {
     return null;
   }
 
+  const total = data.pagination?.total ?? 0;
+  const hasSearch = debouncedSearch.trim().length > 0;
+  const hasStatusFilter = statusFilter !== "active";
+  const isEmptyCatalog = total === 0 && !hasSearch && !hasStatusFilter;
+  const showPagination = total > 0;
+
   return (
     <>
       <div className="space-y-4">
@@ -115,6 +121,7 @@ export function AdminProductsList() {
           <div className="w-72">
             <Input
               value={searchInput}
+              disabled={isEmptyCatalog}
               placeholder="Search products..."
               onChange={(e) => setSearchInput(e.target.value)}
             />
@@ -122,11 +129,12 @@ export function AdminProductsList() {
           <div className="w-32">
             <Select
               value={statusFilter}
+              disabled={isEmptyCatalog}
               onValueChange={(val) => {
                 if (val) setStatusFilter(val);
               }}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" disabled={isEmptyCatalog}>
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -222,16 +230,18 @@ export function AdminProductsList() {
             </TableBody>
           </Table>
 
-          <Pagination
-            page={page}
-            perPage={perPage}
-            onPageChange={(p) => setPage(p)}
-            totalPages={data.pagination?.totalPages ?? 1}
-            onPerPageChange={(n) => {
-              setPerPage(n);
-              setPage(1);
-            }}
-          />
+          {showPagination ? (
+            <Pagination
+              page={page}
+              perPage={perPage}
+              onPageChange={(p) => setPage(p)}
+              totalPages={data.pagination?.totalPages ?? 1}
+              onPerPageChange={(n) => {
+                setPerPage(n);
+                setPage(1);
+              }}
+            />
+          ) : null}
         </div>
       </div>
 

@@ -35,6 +35,13 @@ export function ProductsPageContent() {
   });
 
   const showInitialSkeleton = isPending && !data;
+  const hasActiveFilters =
+    values.q.trim().length > 0 ||
+    values.category.length > 0 ||
+    values.maxPrice.length > 0 ||
+    values.minPrice.length > 0 ||
+    values.minRating.length > 0;
+  const filtersDisabled = (data?.pagination.total ?? 0) === 0 && !hasActiveFilters;
 
   return (
     <div className="space-y-4">
@@ -46,7 +53,11 @@ export function ProductsPageContent() {
           Browse our catalog and find the perfect product for you.
         </p>
       </header>
-      {showInitialSkeleton ? <ProductFiltersSkeleton /> : <ProductFilters />}
+      {showInitialSkeleton ? (
+        <ProductFiltersSkeleton />
+      ) : (
+        <ProductFilters disabled={filtersDisabled} />
+      )}
       <ProductListing />
     </div>
   );
