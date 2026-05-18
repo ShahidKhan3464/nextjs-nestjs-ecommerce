@@ -40,9 +40,7 @@ export function LoginForm() {
         safeProtectedRedirectPath(searchParams.get("next")) ?? ROUTES.dashboard;
       window.location.assign(next);
     } catch (error) {
-      toast.error(
-        getApiErrorMessage(error, "Invalid email or password")
-      );
+      toast.error(getApiErrorMessage(error, "Invalid email or password"));
     }
   }
 

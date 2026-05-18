@@ -97,8 +97,7 @@ export function AdminUsersList() {
       setBlockTarget(null);
       await qc.invalidateQueries({ queryKey: queryKeys.admin.users });
     },
-    onError: (error) =>
-      toast.error(getApiErrorMessage(error, "Action failed")),
+    onError: (error) => toast.error(getApiErrorMessage(error, "Action failed")),
   });
 
   if (isPending && !data) {

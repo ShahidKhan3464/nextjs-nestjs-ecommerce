@@ -41,7 +41,8 @@ export function ProductsPageContent() {
     values.maxPrice.length > 0 ||
     values.minPrice.length > 0 ||
     values.minRating.length > 0;
-  const filtersDisabled = (data?.pagination.total ?? 0) === 0 && !hasActiveFilters;
+  const filtersDisabled =
+    (data?.pagination.total ?? 0) === 0 && !hasActiveFilters;
 
   return (
     <div className="space-y-4">

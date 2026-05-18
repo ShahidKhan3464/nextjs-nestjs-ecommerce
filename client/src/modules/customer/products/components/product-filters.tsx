@@ -64,13 +64,16 @@ export function ProductFilters({ disabled = false }: { disabled?: boolean }) {
               setParams({ category: v === "all" ? "" : v, page: 1 });
             }}
           >
-            <SelectTrigger className="w-full" disabled={disabled || categoriesLoading}>
+            <SelectTrigger
+              className="w-full"
+              disabled={disabled || categoriesLoading}
+            >
               <SelectValue
                 placeholder={categoriesLoading ? "Loading…" : "All categories"}
               >
                 {values.category && categories.length > 0
                   ? categories.find((c) => String(c.id) === values.category)
-                    ?.name
+                      ?.name
                   : undefined}
               </SelectValue>
             </SelectTrigger>

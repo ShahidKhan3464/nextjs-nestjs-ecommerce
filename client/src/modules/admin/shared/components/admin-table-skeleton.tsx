@@ -61,10 +61,7 @@ export function AdminTableSkeleton({
         </div>
         <div className="space-y-0 divide-y p-0">
           {Array.from({ length: rows }).map((_, rowIndex) => (
-            <div
-              key={rowIndex}
-              className="flex items-center gap-2 px-2 py-2.5"
-            >
+            <div key={rowIndex} className="flex items-center gap-2 px-2 py-2.5">
               {columns.map((column, colIndex) => (
                 <TableCellSkeleton key={colIndex} column={column} />
               ))}

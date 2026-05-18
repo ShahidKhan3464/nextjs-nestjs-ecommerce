@@ -1,9 +1,4 @@
-type OrderStatus =
-  | "paid"
-  | "pending"
-  | "shipped"
-  | "delivered"
-  | "cancelled";
+type OrderStatus = "paid" | "pending" | "shipped" | "delivered" | "cancelled";
 
 export type OrderLineItem = {
   image?: string;

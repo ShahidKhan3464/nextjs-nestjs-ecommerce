@@ -88,11 +88,19 @@ export function ProductCard({ product, className }: Props) {
               From
             </p>
             <p className="text-lg font-bold tabular-nums">
-              ${minPrice.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+              $
+              {minPrice.toLocaleString(undefined, {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              })}
             </p>
           </div>
           <Link href={ROUTES.product(product.slug)} className="shrink-0">
-            <Button size="sm" variant="outline" className="rounded-full px-4 text-xs font-semibold">
+            <Button
+              size="sm"
+              variant="outline"
+              className="rounded-full px-4 text-xs font-semibold"
+            >
               Details
             </Button>
           </Link>

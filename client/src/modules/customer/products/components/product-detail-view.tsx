@@ -279,13 +279,17 @@ export function ProductDetailView({ product }: Props) {
                     label="Size"
                     options={sizes}
                     value={selectedSize}
-                    onChange={(size) => selectVariantOptions(size, selectedColor)}
+                    onChange={(size) =>
+                      selectVariantOptions(size, selectedColor)
+                    }
                   />
                   <OptionPills
                     label="Color"
                     options={colors}
                     value={selectedColor}
-                    onChange={(color) => selectVariantOptions(selectedSize, color)}
+                    onChange={(color) =>
+                      selectVariantOptions(selectedSize, color)
+                    }
                   />
                 </>
               ) : (
@@ -327,7 +331,9 @@ export function ProductDetailView({ product }: Props) {
                     <>
                       {" "}
                       · SKU{" "}
-                      <span className="font-mono text-[11px]">{variant.sku}</span>
+                      <span className="font-mono text-[11px]">
+                        {variant.sku}
+                      </span>
                     </>
                   ) : null}
                 </p>

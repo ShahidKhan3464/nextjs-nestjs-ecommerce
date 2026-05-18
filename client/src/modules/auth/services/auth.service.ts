@@ -50,4 +50,3 @@ export async function resetPasswordRequest(body: {
 export async function logoutRequest() {
   await api.post<ApiResponse<{ ok: true }>>("/api/v1/auth/logout");
 }
-

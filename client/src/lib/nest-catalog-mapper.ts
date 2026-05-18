@@ -50,9 +50,7 @@ export function mapNestProductToAdminProduct(p: NestProductDto): Product {
   }));
 
   const basePrice =
-    variants.length > 0
-      ? Math.min(...variants.map((v) => v.price))
-      : 0;
+    variants.length > 0 ? Math.min(...variants.map((v) => v.price)) : 0;
 
   return {
     id: String(p.id),
