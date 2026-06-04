@@ -14,6 +14,7 @@ import { loginSchema, type LoginValues } from "../schemas";
 import { ACCOUNT_BLOCKED_MESSAGE } from "@/lib/account-blocked";
 import { safeProtectedRedirectPath } from "@/lib/auth-route-guards";
 import { loginRequest } from "@/modules/auth/services/auth.service";
+import { syncCartAndWishlistWithServer } from "@/lib/cart-wishlist-sync";
 import {
   Form,
   FormItem,
@@ -35,6 +36,7 @@ export function LoginForm() {
     try {
       const data = await loginRequest(values.email, values.password);
       setSession(data.user, data.accessToken, data.expiresIn);
+      await syncCartAndWishlistWithServer().catch(() => undefined);
       toast.success("Signed in");
       const next =
         safeProtectedRedirectPath(searchParams.get("next")) ?? ROUTES.dashboard;

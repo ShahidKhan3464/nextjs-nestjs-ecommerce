@@ -10,6 +10,7 @@ import { Pagination } from "@/components/ui/pagination";
 import type { Product, ProductListParams } from "../types";
 import { fetchProducts } from "../services/products.service";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
+import { useWishlistHydrate } from "@/shared/hooks/use-wishlist-hydrate";
 import { useProductSearchParams } from "../hooks/use-product-search-params";
 
 function toParams(
@@ -26,6 +27,7 @@ function toParams(
 }
 
 export function ProductListing() {
+  useWishlistHydrate();
   const { values, setParams } = useProductSearchParams();
   const params = toParams(values);
 

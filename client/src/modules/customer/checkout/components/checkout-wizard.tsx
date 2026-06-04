@@ -10,6 +10,7 @@ import { ROUTES } from "@/constants/routes";
 import { api } from "@/services/api/client";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
+import { cartClear } from "@/lib/cart-actions";
 import { useCartStore } from "@/store/cart-store";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { Separator } from "@/components/ui/separator";
@@ -18,6 +19,7 @@ import { useCheckoutStore } from "@/store/checkout-store";
 import { placeOrder } from "../services/checkout.service";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { shippingSchema, type ShippingValues } from "../schemas";
+import { useCartHydrate } from "@/shared/hooks/use-cart-hydrate";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Form,
@@ -29,10 +31,10 @@ import {
 } from "@/components/ui/form";
 
 export function CheckoutWizard() {
+  useCartHydrate();
   const router = useRouter();
   const items = useCartStore((s) => s.items);
   const step = useCheckoutStore((s) => s.step);
-  const clearCart = useCartStore((s) => s.clear);
   const setStep = useCheckoutStore((s) => s.setStep);
   const resetCheckout = useCheckoutStore((s) => s.reset);
   const setCoupon = useCheckoutStore((s) => s.setCoupon);
@@ -107,7 +109,7 @@ export function CheckoutWizard() {
         shippingAddress: shippingAddress as Address,
         payment: { method: "card", summary: paymentSummary },
       });
-      clearCart();
+      await cartClear();
       resetCheckout();
       toast.success("Order placed");
       router.push(ROUTES.order(order.id));

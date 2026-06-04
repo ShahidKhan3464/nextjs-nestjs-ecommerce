@@ -8,6 +8,12 @@ export const queryKeys = {
     infinite: (filters: Record<string, unknown>) =>
       [...queryKeys.products.all, "infinite", filters] as const,
   },
+  cart: {
+    all: ["cart"] as const,
+  },
+  wishlist: {
+    all: ["wishlist"] as const,
+  },
   orders: {
     all: ["orders"] as const,
     list: () => [...queryKeys.orders.all, "list"] as const,

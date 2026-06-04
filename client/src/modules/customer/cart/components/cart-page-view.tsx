@@ -8,12 +8,13 @@ import { useCartStore } from "@/store/cart-store";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { useCartHydrate } from "@/shared/hooks/use-cart-hydrate";
+import { cartRemoveItem, cartUpdateQty } from "@/lib/cart-actions";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
 
 export function CartPageView() {
+  useCartHydrate();
   const items = useCartStore((s) => s.items);
-  const updateQty = useCartStore((s) => s.updateQty);
-  const removeItem = useCartStore((s) => s.removeItem);
 
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
 
@@ -77,7 +78,7 @@ export function CartPageView() {
                       className="rounded-none"
                       aria-label="Decrease quantity"
                       onClick={() =>
-                        updateQty(item.variantId, item.quantity - 1)
+                        void cartUpdateQty(item.variantId, item.quantity - 1)
                       }
                     >
                       <Minus className="size-3.5" />
@@ -92,7 +93,7 @@ export function CartPageView() {
                       className="rounded-none"
                       aria-label="Increase quantity"
                       onClick={() =>
-                        updateQty(item.variantId, item.quantity + 1)
+                        void cartUpdateQty(item.variantId, item.quantity + 1)
                       }
                     >
                       <Plus className="size-3.5" />
@@ -103,7 +104,7 @@ export function CartPageView() {
                     type="button"
                     variant="ghost"
                     className="text-muted-foreground"
-                    onClick={() => removeItem(item.variantId)}
+                    onClick={() => void cartRemoveItem(item.variantId)}
                   >
                     <Trash2 className="mr-1 size-4" /> Remove
                   </Button>

@@ -2,6 +2,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { Module } from '@nestjs/common';
 import appConfig from './config/app.config';
 import mailConfig from './config/mail.config';
+import { CartModule } from './cart/cart.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
@@ -10,6 +11,7 @@ import { UsersModule } from './users/users.module';
 import databaseConfig from './config/database.config';
 import { SeedersModule } from './seeders/seeders.module';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { WishlistModule } from './wishlist/wishlist.module';
 import { ProductsModule } from './products/products.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RolesGuard } from './auth/guards/roles/roles.guard';
@@ -24,8 +26,10 @@ import { DataResponseInterceptor } from './common/interceptors/data-response/dat
   imports: [
     AuthModule,
     MailModule,
+    CartModule,
     UsersModule,
     SeedersModule,
+    WishlistModule,
     ProductsModule,
     CategoriesModule,
     PaginationModule,

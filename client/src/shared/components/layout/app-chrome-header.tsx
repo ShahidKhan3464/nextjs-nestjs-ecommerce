@@ -10,6 +10,7 @@ import { LogOut, User } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
 import { buttonVariants } from "@/components/ui/button";
 import { logoutRequest } from "@/modules/auth/services/auth.service";
+import { resetCartWishlistSession } from "@/lib/cart-wishlist-session";
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -43,6 +44,7 @@ export function AppChromeHeader({ sectionTitle, sectionHint }: Props) {
       /* ignore */
     }
     clearSession();
+    resetCartWishlistSession();
     router.refresh();
     router.push(ROUTES.home);
   }

@@ -7,9 +7,10 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useCartStore } from "@/store/cart-store";
+import { cartAddItem } from "@/lib/cart-actions";
 import type { Product, ProductVariant } from "../types";
 import { useRecentlyViewedStore } from "@/store/recently-viewed-store";
+import { useWishlistHydrate } from "@/shared/hooks/use-wishlist-hydrate";
 import {
   formatVariantLabel,
   findVariantByOptions,
@@ -73,7 +74,7 @@ function OptionPills({
 }
 
 export function ProductDetailView({ product }: Props) {
-  const addItem = useCartStore((s) => s.addItem);
+  useWishlistHydrate();
   const recordView = useRecentlyViewedStore((s) => s.recordView);
 
   const sizes = React.useMemo(
@@ -155,9 +156,9 @@ export function ProductDetailView({ product }: Props) {
     setActiveIndex(0);
   }, [variantId, galleryImages.length]);
 
-  function handleAddToCart() {
+  async function handleAddToCart() {
     if (!variant) return;
-    addItem({
+    await cartAddItem({
       variantId: variant.id,
       productId: product.id,
       slug: product.slug ?? product.id,

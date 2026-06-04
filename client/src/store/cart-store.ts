@@ -4,6 +4,7 @@ import type { CartItem } from "@/modules/customer/cart/types";
 
 export interface CartState {
   items: CartItem[];
+  setItems: (items: CartItem[]) => void;
   addItem: (item: CartItem) => void;
   removeItem: (variantId: string) => void;
   updateQty: (variantId: string, quantity: number) => void;
@@ -14,6 +15,7 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
+      setItems: (items) => set({ items }),
       addItem: (item) => {
         const existing = get().items.find(
           (i) => i.variantId === item.variantId
