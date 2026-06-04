@@ -16,14 +16,17 @@ export async function PATCH(
   const backend = getBackendUrl();
   const payload = await req.json();
 
-  const res = await fetch(`${backend}/cart/items/${encodeURIComponent(variantId)}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      ...forwardAuthorization(req),
-    },
-    body: JSON.stringify(payload),
-  });
+  const res = await fetch(
+    `${backend}/cart/items/${encodeURIComponent(variantId)}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        ...forwardAuthorization(req),
+      },
+      body: JSON.stringify(payload),
+    }
+  );
 
   let raw: unknown = null;
   try {
@@ -51,10 +54,13 @@ export async function DELETE(
   const { variantId } = await ctx.params;
   const backend = getBackendUrl();
 
-  const res = await fetch(`${backend}/cart/items/${encodeURIComponent(variantId)}`, {
-    method: "DELETE",
-    headers: { ...forwardAuthorization(req) },
-  });
+  const res = await fetch(
+    `${backend}/cart/items/${encodeURIComponent(variantId)}`,
+    {
+      method: "DELETE",
+      headers: { ...forwardAuthorization(req) },
+    }
+  );
 
   if (!res.ok) {
     let raw: unknown = null;

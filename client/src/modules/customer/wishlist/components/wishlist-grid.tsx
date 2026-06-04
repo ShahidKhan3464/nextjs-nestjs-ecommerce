@@ -14,7 +14,11 @@ export function WishlistGrid() {
   const ids = useWishlistStore((s) => s.productIds);
 
   const { data, isPending } = useQuery({
-    queryKey: [...queryKeys.wishlist.all, ...queryKeys.products.all, ids.join(",")],
+    queryKey: [
+      ...queryKeys.wishlist.all,
+      ...queryKeys.products.all,
+      ids.join(","),
+    ],
     queryFn: () => fetchProducts({ limit: 100, page: 1 }),
     enabled: ids.length > 0,
   });
