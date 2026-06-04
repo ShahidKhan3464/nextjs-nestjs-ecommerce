@@ -5,14 +5,20 @@ import { queryKeys } from "@/constants/query-keys";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWishlistStore } from "@/store/wishlist-store";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
+import { useWishlistHydrate } from "@/shared/hooks/use-wishlist-hydrate";
 import { ProductCard } from "@/modules/customer/products/components/product-card";
 import { fetchProducts } from "@/modules/customer/products/services/products.service";
 
 export function WishlistGrid() {
+  useWishlistHydrate();
   const ids = useWishlistStore((s) => s.productIds);
 
   const { data, isPending } = useQuery({
-    queryKey: [...queryKeys.products.all, "wishlist", ids.join(",")],
+    queryKey: [
+      ...queryKeys.wishlist.all,
+      ...queryKeys.products.all,
+      ids.join(","),
+    ],
     queryFn: () => fetchProducts({ limit: 100, page: 1 }),
     enabled: ids.length > 0,
   });

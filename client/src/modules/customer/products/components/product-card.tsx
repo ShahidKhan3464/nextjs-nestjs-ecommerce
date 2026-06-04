@@ -9,6 +9,7 @@ import type { Product } from "../types";
 import { ROUTES } from "@/constants/routes";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { wishlistToggle } from "@/lib/wishlist-actions";
 import { useWishlistStore } from "@/store/wishlist-store";
 
 type Props = {
@@ -17,7 +18,6 @@ type Props = {
 };
 
 export function ProductCard({ product, className }: Props) {
-  const toggleWishlist = useWishlistStore((s) => s.toggle);
   const wishlisted = useWishlistStore((s) => s.has(product.id));
   const minPrice = Math.min(...product.variants.map((v) => v.price));
 
@@ -58,7 +58,7 @@ export function ProductCard({ product, className }: Props) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              toggleWishlist(product.id);
+              void wishlistToggle(product.id);
             }}
           >
             <Heart className={cn("size-4", wishlisted && "fill-current")} />

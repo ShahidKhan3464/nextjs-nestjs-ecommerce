@@ -2,6 +2,7 @@ import { toast } from "sonner";
 import { ROUTES } from "@/constants/routes";
 import { useAuthStore } from "@/store/auth-store";
 import { logoutRequest } from "@/modules/auth/services/auth.service";
+import { resetCartWishlistSession } from "@/lib/cart-wishlist-session";
 import { getApiErrorMessage, isAccountBlockedMessage } from "@/lib/api-error";
 
 export const ACCOUNT_BLOCKED_MESSAGE =
@@ -17,6 +18,7 @@ async function forceBlockedLogout(
   forcedLogoutInProgress = true;
 
   useAuthStore.getState().clearSession();
+  resetCartWishlistSession();
   try {
     await logoutRequest();
   } catch {
