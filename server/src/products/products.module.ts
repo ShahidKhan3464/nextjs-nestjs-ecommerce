@@ -4,7 +4,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { Product } from './entities/product.entity';
 import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
-import { ProductImage } from './entities/product-image.entity';
+import { FilesModule } from 'src/common/files/files.module';
 import { Category } from 'src/categories/entities/category.entity';
 import { ProductVariant } from './entities/product-variant.entity';
 import { GetProductsProvider } from './providers/get-products.provider';
@@ -15,8 +15,9 @@ import { ProductImagesProvider } from './providers/product-images.provider';
 
 @Module({
   imports: [
+    FilesModule,
     forwardRef(() => AuthModule),
-    TypeOrmModule.forFeature([Category, Product, ProductVariant, ProductImage]),
+    TypeOrmModule.forFeature([Category, Product, ProductVariant]),
   ],
   providers: [
     ProductsService,

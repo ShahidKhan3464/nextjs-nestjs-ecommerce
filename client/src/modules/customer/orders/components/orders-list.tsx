@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { EyeIcon } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { queryKeys } from "@/constants/query-keys";
+import { formatOrderDate } from "@/lib/format-date";
 import { useEffect, useMemo, useState } from "react";
 import { Pagination } from "@/components/ui/pagination";
 import { fetchOrders } from "../services/orders.service";
@@ -56,7 +57,9 @@ export function OrdersList() {
     const q = debouncedSearch.trim().toLowerCase();
     if (!q) return data;
     return data.filter((o) => {
-      const idMatch = o.id.toLowerCase().includes(q);
+      const idMatch =
+        o.id.toLowerCase().includes(q) ||
+        o.orderNumber.toLowerCase().includes(q);
       const statusMatch = o.status.toLowerCase().includes(q);
       const itemMatch = o.items.some(
         (i) =>
@@ -136,7 +139,7 @@ export function OrdersList() {
                 Items
               </TableHead>
               <TableHead className="text-right">Total</TableHead>
-              <TableHead className="w-36 text-right">Actions</TableHead>
+              <TableHead className="w-36 text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -153,7 +156,7 @@ export function OrdersList() {
               pageRows.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-mono text-sm">
-                    #{order.id}
+                    {order.orderNumber}
                   </TableCell>
                   <TableCell>
                     <Badge variant={statusVariant[order.status] ?? "outline"}>
@@ -161,7 +164,7 @@ export function OrdersList() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm tabular-nums">
-                    {format(new Date(order.createdAt), "MMM d, yyyy")}
+                    {formatOrderDate(order.createdAt)}
                   </TableCell>
                   <TableCell className="text-muted-foreground max-w-56 text-sm whitespace-normal">
                     {order.items.length} item
@@ -171,14 +174,15 @@ export function OrdersList() {
                   <TableCell className="text-right font-medium tabular-nums">
                     ${order.total.toFixed(2)}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-center">
                     <Link
                       href={ROUTES.order(order.id)}
                       className={cn(
-                        buttonVariants({ variant: "outline", size: "sm" })
+                        buttonVariants({ variant: "outline", size: "icon" })
                       )}
+                      aria-label={`View order ${order.orderNumber}`}
                     >
-                      Details
+                      <EyeIcon className="h-4 w-4" />
                     </Link>
                   </TableCell>
                 </TableRow>

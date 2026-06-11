@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from '../entities/product.entity';
 import { QueryProductDto } from '../dto/query-product.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { joinProductImages } from 'src/common/files/file-query.util';
 import { PaginationProviders } from 'src/common/pagination/providers/pagination.providers';
 import { PaginateQueryResult } from 'src/common/pagination/interfaces/paginated.interfaces';
 
@@ -62,12 +63,6 @@ export class GetProductsProvider {
       }
     }
 
-    if (query.minRating !== undefined && query.minRating !== null) {
-      qb.andWhere('product.rating >= :minRating', {
-        minRating: query.minRating,
-      });
-    }
-
     return qb;
   }
 
@@ -78,12 +73,12 @@ export class GetProductsProvider {
 
     const total = await this.buildFilteredProductQb(query).getCount();
 
-    const data = await this.buildFilteredProductQb(query)
-      .leftJoinAndSelect('product.category', 'category')
-      .leftJoinAndSelect('product.variants', 'variants')
-      .leftJoinAndSelect('product.images', 'images')
-      .orderBy('product.createdAt', 'DESC')
-      .addOrderBy('images.sortOrder', 'ASC')
+    const data = await joinProductImages(
+      this.buildFilteredProductQb(query)
+        .leftJoinAndSelect('product.category', 'category')
+        .leftJoinAndSelect('product.variants', 'variants')
+        .orderBy('product.createdAt', 'DESC'),
+    )
       .skip(skip)
       .take(limit)
       .getMany();
@@ -92,14 +87,13 @@ export class GetProductsProvider {
   }
 
   public async findOne(id: number): Promise<Product> {
-    const product = await this.productRepository
-      .createQueryBuilder('product')
-      .where('product.id = :id', { id })
-      .leftJoinAndSelect('product.category', 'category')
-      .leftJoinAndSelect('product.variants', 'variants')
-      .leftJoinAndSelect('product.images', 'images')
-      .orderBy('images.sortOrder', 'ASC')
-      .getOne();
+    const product = await joinProductImages(
+      this.productRepository
+        .createQueryBuilder('product')
+        .where('product.id = :id', { id })
+        .leftJoinAndSelect('product.category', 'category')
+        .leftJoinAndSelect('product.variants', 'variants'),
+    ).getOne();
 
     if (!product) {
       throw new NotFoundException('Product not found');
@@ -108,14 +102,13 @@ export class GetProductsProvider {
   }
 
   public async findBySlug(slug: string): Promise<Product> {
-    const product = await this.productRepository
-      .createQueryBuilder('product')
-      .where('product.slug = :slug', { slug })
-      .leftJoinAndSelect('product.category', 'category')
-      .leftJoinAndSelect('product.variants', 'variants')
-      .leftJoinAndSelect('product.images', 'img')
-      .orderBy('img.sortOrder', 'ASC')
-      .getOne();
+    const product = await joinProductImages(
+      this.productRepository
+        .createQueryBuilder('product')
+        .where('product.slug = :slug', { slug })
+        .leftJoinAndSelect('product.category', 'category')
+        .leftJoinAndSelect('product.variants', 'variants'),
+    ).getOne();
 
     if (!product) {
       throw new NotFoundException('Product not found');

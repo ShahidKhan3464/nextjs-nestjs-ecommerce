@@ -1,5 +1,19 @@
 import type { User } from "../types";
 import { api } from "@/services/api/client";
+import type { Order } from "@/modules/customer/orders/types";
+import type { Address } from "@/modules/customer/orders/types";
+
+export type AdminUserDetail = {
+  user: User;
+  totalOrders: number;
+  totalSpending: number;
+  wishlistCount: number;
+  recentOrders: Order[];
+  profilePhotoUrl?: string;
+  defaultAddress?: Address;
+  billingAddresses: Address[];
+  shippingAddresses: Address[];
+};
 
 export async function fetchAdminUsers(params?: {
   page?: number;
@@ -39,6 +53,13 @@ export async function fetchAdminUsers(params?: {
 
 export async function fetchAdminUser(id: string | number) {
   const res = await api.get<{ data: User }>(`/api/v1/admin/users/${id}`);
+  return res.data.data;
+}
+
+export async function fetchAdminUserDetail(id: string | number) {
+  const res = await api.get<{ data: AdminUserDetail }>(
+    `/api/v1/admin/users/${id}/detail`
+  );
   return res.data.data;
 }
 

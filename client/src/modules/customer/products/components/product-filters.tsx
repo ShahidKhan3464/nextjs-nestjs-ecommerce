@@ -131,7 +131,6 @@ export function ProductFilters({ disabled = false }: { disabled?: boolean }) {
                 category: "",
                 minPrice: "",
                 maxPrice: "",
-                minRating: "",
                 page: 1,
               })
             }

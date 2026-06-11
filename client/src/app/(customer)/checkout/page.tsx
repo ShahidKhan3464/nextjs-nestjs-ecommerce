@@ -15,8 +15,8 @@ export default function CheckoutPage() {
           Checkout
         </h1>
         <p className="text-muted-foreground text-sm">
-          Enter shipping details, choose payment, apply a coupon if you have
-          one, then review before you submit.
+          Enter shipping details, pay securely with your card, then review before
+          you place your order.
         </p>
       </header>
       <CheckoutWizard />

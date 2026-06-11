@@ -4,7 +4,6 @@ export type ProductListParams = {
   limit?: number;
   minPrice?: number;
   maxPrice?: number;
-  minRating?: number;
   categoryId?: number;
 };
 
@@ -17,19 +16,19 @@ export type ProductVariant = {
   image?: string;
   productId: string;
   compareAtPrice?: number;
-  options: Record<string, string>;
+  options?: {
+    size?: string;
+    color?: string;
+  };
 };
 
 export type Product = {
   id: string;
   name: string;
-  rating: number;
+  slug: string;
   category: string;
   images: string[];
   basePrice: number;
-  featured?: boolean;
   description: string;
-  reviewCount: number;
-  slug: string | null;
   variants: ProductVariant[];
 };

@@ -6,12 +6,9 @@ import { formatVariantNameFromNest } from "@/modules/customer/products/lib/varia
 export type NestProductPayload = {
   id: number;
   name: string;
-  rating: number;
   status?: string;
-  featured: boolean;
   slug: string | null;
   description: string;
-  reviewCount: number;
   basePrice: string | number;
   category: {
     id: number;
@@ -62,11 +59,8 @@ export function normalizeNestProductPayload(p: NestProductPayload): Product {
     variants,
     name: p.name,
     id: String(p.id),
-    rating: p.rating,
-    featured: p.featured,
     category: p.category.name,
     description: p.description,
-    reviewCount: p.reviewCount,
     basePrice: Number(p.basePrice),
   };
 }

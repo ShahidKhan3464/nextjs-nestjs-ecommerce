@@ -3,12 +3,31 @@ import { api } from "@/services/api/client";
 import type { ApiResponse } from "@/types/api";
 
 export async function updateProfile(body: {
-  name?: string;
-  avatarUrl?: string;
+  fullName: string;
+  phoneNumber?: string;
 }) {
   const res = await api.patch<ApiResponse<{ user: User }>>(
     "/api/v1/customer/profile/me",
     body
   );
   return res.data.data.user;
+}
+
+export async function uploadProfileAvatar(file: File) {
+  const form = new FormData();
+  form.append("avatar", file);
+  const res = await api.post<ApiResponse<{ avatarUrl: string }>>(
+    "/api/v1/customer/profile/me/avatar",
+    form,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return res.data.data.avatarUrl;
+}
+
+export async function changePassword(body: {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}) {
+  await api.patch("/api/v1/customer/profile/me/password", body);
 }

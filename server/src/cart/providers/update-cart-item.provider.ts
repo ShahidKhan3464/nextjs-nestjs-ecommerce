@@ -2,6 +2,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CartItem } from '../entities/cart-item.entity';
 import { UpdateCartItemDto } from '../dto/update-cart-item.dto';
+import { joinProductImages } from 'src/common/files/file-query.util';
 import {
   Injectable,
   NotFoundException,
@@ -24,10 +25,15 @@ export class UpdateCartItemProvider {
     variantId: number,
     dto: UpdateCartItemDto,
   ): Promise<CartItemResponse> {
-    const item = await this.cartRepository.findOne({
-      where: { userId, productVariantId: variantId },
-      relations: ['variant', 'variant.product', 'variant.product.images'],
-    });
+    const item = await joinProductImages(
+      this.cartRepository
+        .createQueryBuilder('cart')
+        .where('cart.userId = :userId', { userId })
+        .andWhere('cart.productVariantId = :variantId', { variantId })
+        .innerJoinAndSelect('cart.variant', 'variant')
+        .innerJoinAndSelect('variant.product', 'product'),
+      'product',
+    ).getOne();
 
     if (!item) {
       throw new NotFoundException('Cart item not found');

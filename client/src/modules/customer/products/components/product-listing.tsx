@@ -20,7 +20,6 @@ function toParams(
     q: values.q || undefined,
     categoryId: values.category ? Number(values.category) : undefined,
     maxPrice: values.maxPrice ? Number(values.maxPrice) : undefined,
-    minRating: values.minRating ? Number(values.minRating) : undefined,
     page: values.page,
     limit: 12,
   };

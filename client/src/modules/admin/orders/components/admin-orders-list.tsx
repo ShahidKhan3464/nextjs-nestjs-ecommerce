@@ -1,16 +1,19 @@
 "use client";
 
-import { format } from "date-fns";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { EyeIcon } from "lucide-react";
+import { ROUTES } from "@/constants/routes";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { queryKeys } from "@/constants/query-keys";
+import { formatOrderDate } from "@/lib/format-date";
 import { useEffect, useMemo, useState } from "react";
 import { Pagination } from "@/components/ui/pagination";
 import { AdminTableSkeleton } from "@/modules/admin/shared";
 import { fetchAdminOrders } from "../services/orders.service";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Table,
@@ -53,7 +56,9 @@ export function AdminOrdersList() {
     const q = debouncedSearch.trim().toLowerCase();
     if (!q) return data;
     return data.filter((o) => {
-      const idMatch = o.id.toLowerCase().includes(q);
+      const idMatch =
+        o.id.toLowerCase().includes(q) ||
+        o.orderNumber.toLowerCase().includes(q);
       const statusMatch = o.status.toLowerCase().includes(q);
       return idMatch || statusMatch;
     });
@@ -136,28 +141,27 @@ export function AdminOrdersList() {
             ) : (
               pageRows.map((o) => (
                 <TableRow key={o.id}>
-                  <TableCell className="font-mono text-sm">#{o.id}</TableCell>
+                  <TableCell className="font-mono text-sm">{o.orderNumber}</TableCell>
                   <TableCell>
                     <Badge variant={statusVariant[o.status] ?? "outline"}>
                       {o.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {format(new Date(o.createdAt), "MMM d, yyyy HH:mm")}
+                  <TableCell className="text-muted-foreground text-sm tabular-nums">
+                    {formatOrderDate(o.createdAt)}
                   </TableCell>
                   <TableCell className="font-medium tabular-nums">
                     ${o.total.toFixed(2)}
                   </TableCell>
                   <TableCell className="text-center">
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => {
-                        // console.log(o.id);
-                      }}
+                    <Link
+                      href={ROUTES.order(o.id)}
+                      className={cn(
+                        buttonVariants({ variant: "outline", size: "icon" })
+                      )}
                     >
                       <EyeIcon className="h-4 w-4" />
-                    </Button>
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))

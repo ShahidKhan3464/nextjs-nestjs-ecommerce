@@ -2,6 +2,7 @@ import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CartItem } from '../entities/cart-item.entity';
+import { joinProductImages } from 'src/common/files/file-query.util';
 import {
   CartItemResponse,
   mapCartItemToResponse,
@@ -15,15 +16,15 @@ export class GetCartProvider {
   ) {}
 
   public async findByUser(userId: number): Promise<CartItemResponse[]> {
-    const items = await this.cartRepository
-      .createQueryBuilder('cart')
-      .where('cart.userId = :userId', { userId })
-      .innerJoinAndSelect('cart.variant', 'variant')
-      .innerJoinAndSelect('variant.product', 'product')
-      .leftJoinAndSelect('product.images', 'images')
-      .orderBy('images.sortOrder', 'ASC')
-      .addOrderBy('cart.createdAt', 'ASC')
-      .getMany();
+    const items = await joinProductImages(
+      this.cartRepository
+        .createQueryBuilder('cart')
+        .where('cart.userId = :userId', { userId })
+        .innerJoinAndSelect('cart.variant', 'variant')
+        .innerJoinAndSelect('variant.product', 'product')
+        .addOrderBy('cart.createdAt', 'ASC'),
+      'product',
+    ).getMany();
 
     return items.map(mapCartItemToResponse);
   }

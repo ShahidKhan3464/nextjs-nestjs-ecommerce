@@ -3,11 +3,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
 import { ROUTES } from "@/constants/routes";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/constants/query-keys";
+import { formatOrderDate } from "@/lib/format-date";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "@/components/ui/button";
@@ -56,10 +56,10 @@ export function OrderDetailView({ orderId }: Props) {
         <div>
           <p className="text-muted-foreground text-sm">Order</p>
           <h1 className="font-heading text-3xl font-semibold tracking-tight">
-            #{data.id}
+            {data.orderNumber}
           </h1>
           <p className="text-muted-foreground mt-2 text-sm">
-            Placed {format(new Date(data.createdAt), "MMM d, yyyy HH:mm")}
+            Placed {formatOrderDate(data.createdAt)}
           </p>
         </div>
         <Badge>{data.status}</Badge>
@@ -126,27 +126,14 @@ export function OrderDetailView({ orderId }: Props) {
         <div className="space-y-3 text-sm">
           <h2 className="font-medium tracking-wide uppercase">Payment</h2>
           <p className="text-muted-foreground">{data.paymentMethodSummary}</p>
-          {data.couponCode && (
-            <p className="text-muted-foreground">
-              Coupon <span className="text-foreground">{data.couponCode}</span>
-            </p>
-          )}
           <div className="space-y-1 border-t pt-3">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Subtotal</span>
               <span className="tabular-nums">${data.subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Discount</span>
-              <span className="tabular-nums">-${data.discount.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
               <span className="text-muted-foreground">Tax</span>
               <span className="tabular-nums">${data.tax.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Shipping</span>
-              <span className="tabular-nums">${data.shipping.toFixed(2)}</span>
             </div>
             <div className="flex justify-between pt-2 text-base font-semibold">
               <span>Total</span>

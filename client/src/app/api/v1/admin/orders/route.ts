@@ -1,16 +1,41 @@
-import type { Order } from "@/types";
-import type { ApiResponse } from "@/types";
-import { jsonOk } from "@/lib/api-response";
+import { getBackendUrl } from "@/lib/backend-url";
 import { requireAdmin } from "@/lib/require-auth";
-import { allOrdersFlat } from "@/lib/order-memory";
+import type { ApiResponse, Order } from "@/types";
+import { jsonOk, jsonMessage } from "@/lib/api-response";
+import { nestErrorMessage, forwardAuthorization } from "@/lib/nest-http";
+import {
+  type NestOrderPayload,
+  normalizeNestOrderPayload,
+} from "@/lib/nest-order-mapper";
+
+function mapOrders(raw: unknown): Order[] {
+  const list = Array.isArray(raw) ? raw : [];
+  return (list as NestOrderPayload[]).map(normalizeNestOrderPayload);
+}
 
 export async function GET(req: Request) {
   const admin = await requireAdmin(req);
   if (admin instanceof Response) return admin;
 
-  const orders = [...allOrdersFlat()].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-  const body: ApiResponse<{ orders: Order[] }> = { data: { orders } };
+  const backend = getBackendUrl();
+  const res = await fetch(`${backend}/orders/admin/all`, {
+    headers: { ...forwardAuthorization(req) },
+  });
+
+  let raw: unknown = null;
+  try {
+    raw = await res.json();
+  } catch {
+    raw = null;
+  }
+
+  if (!res.ok) {
+    return jsonMessage(nestErrorMessage(raw), res.status);
+  }
+
+  const envelope = raw as { data?: unknown };
+  const body: ApiResponse<{ orders: Order[] }> = {
+    data: { orders: mapOrders(envelope?.data ?? raw) },
+  };
   return jsonOk(body);
 }
