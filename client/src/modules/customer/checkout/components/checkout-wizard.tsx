@@ -58,7 +58,7 @@ export function CheckoutWizard() {
       city: shippingAddress?.city ?? "",
       region: shippingAddress?.region ?? "",
       postalCode: shippingAddress?.postalCode ?? "",
-      country: shippingAddress?.country ?? "US",
+      country: shippingAddress?.country ?? "PK",
       phone: shippingAddress?.phone ?? "",
     },
   });
@@ -120,7 +120,7 @@ export function CheckoutWizard() {
         className={cn(
           "space-y-4",
           step !== "payment" &&
-            "pointer-events-none absolute left-[-9999px] h-px w-px overflow-hidden opacity-0"
+          "pointer-events-none absolute left-[-9999px] h-px w-px overflow-hidden opacity-0"
         )}
       >
         <StripePaymentForm />
@@ -185,11 +185,11 @@ export function CheckoutWizard() {
         onValueChange={(v) => setStep(v as typeof step)}
       >
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="shipping">Shipping</TabsTrigger>
-          <TabsTrigger value="payment" disabled={!clientSecret}>
+          <TabsTrigger value="shipping" className="cursor-pointer">Shipping</TabsTrigger>
+          <TabsTrigger value="payment" className="cursor-pointer" disabled={!clientSecret}>
             Payment
           </TabsTrigger>
-          <TabsTrigger value="review" disabled={!clientSecret}>
+          <TabsTrigger value="review" className="cursor-pointer" disabled={!clientSecret}>
             Review
           </TabsTrigger>
         </TabsList>

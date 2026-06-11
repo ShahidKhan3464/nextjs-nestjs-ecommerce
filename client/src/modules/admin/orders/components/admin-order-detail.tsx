@@ -96,7 +96,7 @@ export function AdminOrderDetail({ orderId }: Props) {
   const { order, customerUserId } = data;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-muted-foreground text-sm">Order</p>

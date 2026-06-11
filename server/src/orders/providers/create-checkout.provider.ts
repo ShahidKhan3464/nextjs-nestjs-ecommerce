@@ -34,8 +34,8 @@ export class CreateCheckoutProvider {
     @InjectRepository(CheckoutSession)
     private readonly sessionRepository: Repository<CheckoutSession>,
     @InjectRepository(CartItem)
-    private readonly dataSource: DataSource,
     private readonly cartRepository: Repository<CartItem>,
+    private readonly dataSource: DataSource,
     private readonly cleanupAbandonedOrdersProvider: CleanupAbandonedOrdersProvider,
     @Inject(stripeConfig.KEY)
     private readonly stripeConfiguration: ConfigType<typeof stripeConfig>,

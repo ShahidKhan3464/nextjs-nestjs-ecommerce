@@ -111,8 +111,8 @@ export function ProfileForm() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-10">
-      <section className="space-y-6">
+    <div className="space-y-6">
+      <section className="space-y-3">
         <div className="flex items-center gap-6">
           <div className="relative size-24 overflow-hidden rounded-full border bg-muted">
             {avatarUrl ? (
@@ -157,7 +157,7 @@ export function ProfileForm() {
 
       <Separator />
 
-      <section className="space-y-4">
+      <section className="space-y-3">
         <h2 className="font-heading text-lg font-semibold">Personal details</h2>
         <Form {...profileForm}>
           <form
@@ -216,7 +216,7 @@ export function ProfileForm() {
 
       <Separator />
 
-      <section className="space-y-4">
+      <section className="space-y-3">
         <h2 className="font-heading text-lg font-semibold">Password</h2>
         <Form {...passwordForm}>
           <form

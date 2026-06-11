@@ -51,7 +51,7 @@ export function OrderDetailView({ orderId }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-10 px-4 py-10 lg:px-6">
+    <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-muted-foreground text-sm">Order</p>
@@ -65,7 +65,7 @@ export function OrderDetailView({ orderId }: Props) {
         <Badge>{data.status}</Badge>
       </div>
 
-      <section className="space-y-4">
+      <section className="space-y-3">
         <h2 className="text-sm font-medium tracking-wide uppercase">Items</h2>
         <ul className="divide-y rounded-xl border">
           {data.items.map((item) => (

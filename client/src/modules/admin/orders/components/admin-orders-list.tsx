@@ -135,7 +135,7 @@ export function AdminOrdersList() {
                   colSpan={5}
                   className="text-muted-foreground py-10 text-center text-sm"
                 >
-                  No orders match your search.
+                  No orders found.
                 </TableCell>
               </TableRow>
             ) : (

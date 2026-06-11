@@ -40,8 +40,8 @@ export function ProductListing() {
 
   if (isPending && !data) {
     return (
-      <motion.div layout className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
+      <motion.div layout className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 8 }).map((_, i) => (
           <Skeleton key={i} className="h-48 rounded-2xl sm:h-52" />
         ))}
       </motion.div>
@@ -74,7 +74,7 @@ export function ProductListing() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <motion.div layout className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((product: Product) => (
           <ProductCard key={product.id} product={product} />

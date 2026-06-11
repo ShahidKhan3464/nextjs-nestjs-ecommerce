@@ -92,7 +92,7 @@ export function AdminAppShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <AppChromeHeader sectionTitle={meta.title} sectionHint={meta.hint} />
-        <div id="main-content" className="flex-1 px-4 py-4 lg:px-6 lg:py-4">
+        <div id="main-content" className="flex-1 p-4 py-4 lg:p-6">
           {children}
         </div>
       </div>

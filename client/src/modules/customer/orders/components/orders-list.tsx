@@ -149,7 +149,7 @@ export function OrdersList() {
                   colSpan={6}
                   className="text-muted-foreground py-10 text-center text-sm"
                 >
-                  No orders match your search.
+                  No orders found.
                 </TableCell>
               </TableRow>
             ) : (

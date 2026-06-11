@@ -186,7 +186,7 @@ export function ProductDetailView({ product }: Props) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="mx-auto grid max-w-6xl gap-10 px-4 py-8 lg:grid-cols-2 lg:gap-14 lg:px-6 lg:py-12"
+      className="mx-auto grid max-w-6xl gap-10 p-4 lg:grid-cols-2 lg:gap-14 lg:p-6"
     >
       {/* Gallery */}
       <div className="mx-auto w-full max-w-xl space-y-4 lg:mx-0">

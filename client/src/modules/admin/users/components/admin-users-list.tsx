@@ -190,7 +190,7 @@ export function AdminUsersList() {
                     colSpan={7}
                     className="text-muted-foreground py-10 text-center text-sm"
                   >
-                    No users match your search.
+                    No users found.
                   </TableCell>
                 </TableRow>
               ) : (

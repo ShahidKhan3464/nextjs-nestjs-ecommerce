@@ -44,7 +44,7 @@ export function ProductFilters({ disabled = false }: { disabled?: boolean }) {
             id="search"
             value={qLocal}
             disabled={disabled}
-            placeholder="Search products…"
+            placeholder="Search products"
             aria-describedby="search-hint"
             onChange={(e) => {
               const v = e.target.value;

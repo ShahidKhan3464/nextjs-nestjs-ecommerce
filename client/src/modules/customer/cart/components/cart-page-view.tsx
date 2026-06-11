@@ -118,7 +118,7 @@ export function CartPageView() {
         </ul>
       </div>
 
-      <aside className="bg-muted/40 border-border h-fit space-y-4 rounded-xl border p-6 lg:sticky lg:top-28">
+      <aside className="bg-muted/40 border-border h-fit space-y-4 rounded-xl border p-4 lg:sticky lg:top-28">
         <p className="font-medium">Summary</p>
         <Separator />
         <div className="flex justify-between text-sm">
