@@ -6,11 +6,11 @@ import type { Product, ProductVariant } from "@/types";
 export type NestProductDto = {
   id: number;
   name: string;
-  description?: string | null;
   status?: string;
-  category?: { id: number; name: string };
+  description?: string | null;
   variants?: NestVariantDto[];
   images?: NestProductImageDto[];
+  category?: { id: number; name: string };
 };
 
 type NestProductImageDto = {
@@ -21,9 +21,9 @@ type NestProductImageDto = {
 
 type NestVariantDto = {
   id: number;
+  sku: string;
   size: string;
   color: string;
-  sku: string;
   stock: number;
   price: string | number;
 };
@@ -34,10 +34,7 @@ export function mapNestProductToAdminProduct(p: NestProductDto): Product {
     .slice()
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map((img) => `${base}${img.urlPath}`);
-  const images =
-    rawImages.length > 0
-      ? rawImages
-      : [`https://picsum.photos/seed/product-${p.id}/80/80`];
+  const images = rawImages.length > 0 ? rawImages : ["/placeholder.svg"];
 
   const variants: ProductVariant[] = (p.variants ?? []).map((v) => ({
     id: String(v.id),
@@ -58,11 +55,8 @@ export function mapNestProductToAdminProduct(p: NestProductDto): Product {
     name: p.name,
     description: p.description ?? "",
     category: p.category?.name ?? "",
-    rating: 0,
-    reviewCount: 0,
     images,
     variants,
     basePrice,
-    featured: false,
   };
 }

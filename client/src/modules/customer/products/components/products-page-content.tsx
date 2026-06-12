@@ -16,7 +16,6 @@ function toParams(
     q: values.q || undefined,
     categoryId: values.category ? Number(values.category) : undefined,
     maxPrice: values.maxPrice ? Number(values.maxPrice) : undefined,
-    minRating: values.minRating ? Number(values.minRating) : undefined,
     page: values.page,
     limit: 12,
   };
@@ -39,8 +38,7 @@ export function ProductsPageContent() {
     values.q.trim().length > 0 ||
     values.category.length > 0 ||
     values.maxPrice.length > 0 ||
-    values.minPrice.length > 0 ||
-    values.minRating.length > 0;
+    values.minPrice.length > 0;
   const filtersDisabled =
     (data?.pagination.total ?? 0) === 0 && !hasActiveFilters;
 

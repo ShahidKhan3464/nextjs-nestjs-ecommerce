@@ -7,7 +7,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import jwtConfig from './auth/config/jwt.config';
+import stripeConfig from './config/stripe.config';
 import { UsersModule } from './users/users.module';
+import { OrdersModule } from './orders/orders.module';
 import databaseConfig from './config/database.config';
 import { SeedersModule } from './seeders/seeders.module';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
@@ -28,6 +30,7 @@ import { DataResponseInterceptor } from './common/interceptors/data-response/dat
     MailModule,
     CartModule,
     UsersModule,
+    OrdersModule,
     SeedersModule,
     WishlistModule,
     ProductsModule,
@@ -39,7 +42,7 @@ import { DataResponseInterceptor } from './common/interceptors/data-response/dat
       isGlobal: true,
       envFilePath: '.env',
       validationSchema: environmentValidation,
-      load: [appConfig, databaseConfig, mailConfig],
+      load: [appConfig, databaseConfig, mailConfig, stripeConfig],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

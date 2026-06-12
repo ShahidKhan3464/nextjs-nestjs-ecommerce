@@ -1,1 +1,5 @@
-export { placeOrder } from "../../orders/services/orders.service";
+export {
+  createCheckout,
+  cancelCheckout,
+  completeCheckout,
+} from "../../orders/services/orders.service";

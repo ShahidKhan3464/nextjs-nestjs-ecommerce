@@ -2,24 +2,70 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ROUTES } from "@/constants/routes";
 import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/constants/query-keys";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "@/components/ui/button";
-import { fetchAdminOrder } from "../services/orders.service";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Select,
+  SelectItem,
+  SelectValue,
+  SelectContent,
+  SelectTrigger,
+} from "@/components/ui/select";
+import {
+  fetchAdminOrder,
+  updateAdminOrderStatus,
+} from "../services/orders.service";
 
 type Props = { orderId: string };
 
+const STATUS_OPTIONS = [
+  "pending",
+  "paid",
+  "shipped",
+  "delivered",
+  "cancelled",
+] as const;
+
 export function AdminOrderDetail({ orderId }: Props) {
+  const qc = useQueryClient();
   const { data, isPending, isError } = useQuery({
     queryKey: queryKeys.admin.order(orderId),
     queryFn: () => fetchAdminOrder(orderId),
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: (status: (typeof STATUS_OPTIONS)[number]) =>
+      updateAdminOrderStatus(
+        orderId,
+        status.toUpperCase() as
+          | "PENDING"
+          | "PAID"
+          | "SHIPPED"
+          | "DELIVERED"
+          | "CANCELLED"
+      ),
+    onSuccess: (updatedOrder) => {
+      toast.success("Order status updated");
+      qc.setQueryData(queryKeys.admin.order(orderId), (current) =>
+        current
+          ? { ...current, order: updatedOrder }
+          : { order: updatedOrder, customerUserId: updatedOrder.userId }
+      );
+      void qc.invalidateQueries({ queryKey: queryKeys.admin.orders });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not update status"));
+    },
   });
 
   if (isPending) {
@@ -50,24 +96,42 @@ export function AdminOrderDetail({ orderId }: Props) {
   const { order, customerUserId } = data;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-muted-foreground text-sm">Order</p>
           <h2 className="font-heading text-2xl font-semibold tabular-nums">
-            #{order.id}
+            {order.orderNumber}
           </h2>
           <p className="text-muted-foreground mt-1 text-sm">
-            {format(new Date(order.createdAt), "PPpp")}
+            {format(new Date(order.createdAt), "yyyy-MM-dd")}
           </p>
         </div>
-        <div className="flex flex-col items-end gap-2">
+        <div className="flex flex-col items-end gap-3">
           <Badge>{order.status}</Badge>
+          <Select
+            value={order.status}
+            disabled={statusMutation.isPending}
+            onValueChange={(value) =>
+              statusMutation.mutate(value as (typeof STATUS_OPTIONS)[number])
+            }
+          >
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Update status" />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_OPTIONS.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {status}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Link
             href={ROUTES.user(customerUserId)}
             className="text-primary text-sm hover:underline"
           >
-            Customer: {customerUserId}
+            View customer
           </Link>
         </div>
       </div>
@@ -132,18 +196,8 @@ export function AdminOrderDetail({ orderId }: Props) {
               <span className="tabular-nums">${order.subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Discount</span>
-              <span className="tabular-nums">
-                -${order.discount.toFixed(2)}
-              </span>
-            </div>
-            <div className="flex justify-between">
               <span className="text-muted-foreground">Tax</span>
               <span className="tabular-nums">${order.tax.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Shipping</span>
-              <span className="tabular-nums">${order.shipping.toFixed(2)}</span>
             </div>
             <div className="flex justify-between pt-2 text-base font-semibold">
               <span>Total</span>

@@ -2,8 +2,9 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from '../entities/product.entity';
 import { GetProductsProvider } from './get-products.provider';
-import { ProductImage } from '../entities/product-image.entity';
 import { DeleteProductProvider } from './delete-product.provider';
+import { FileOwnerModule } from 'src/common/files/file.constants';
+import { StoredFile } from 'src/common/files/entities/stored-file.entity';
 import {
   Inject,
   Injectable,
@@ -17,8 +18,8 @@ export class ProductImagesProvider {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
-    @InjectRepository(ProductImage)
-    private readonly productImageRepository: Repository<ProductImage>,
+    @InjectRepository(StoredFile)
+    private readonly fileRepository: Repository<StoredFile>,
     @Inject(forwardRef(() => GetProductsProvider))
     private readonly getProductsProvider: GetProductsProvider,
     private readonly deleteProductProvider: DeleteProductProvider,
@@ -38,33 +39,38 @@ export class ProductImagesProvider {
       throw new NotFoundException('Product not found');
     }
 
-    const raw = await this.productImageRepository
-      .createQueryBuilder('img')
-      .select('MAX(img.sortOrder)', 'max')
-      .where('img.productId = :productId', { productId })
+    const raw = await this.fileRepository
+      .createQueryBuilder('file')
+      .select('MAX(file.sortOrder)', 'max')
+      .where('file.ownerModule = :module', { module: FileOwnerModule.PRODUCT })
+      .andWhere('file.ownerId = :ownerId', { ownerId: productId })
       .getRawOne<{ max: string | null }>();
     const maxSort = raw?.max != null ? Number(raw.max) : -1;
 
     const entities = files.map((file, index) =>
-      this.productImageRepository.create({
+      this.fileRepository.create({
         urlPath: `/uploads/products/${file.filename}`,
         sortOrder: maxSort + 1 + index,
-        product,
+        ownerModule: FileOwnerModule.PRODUCT,
+        ownerId: productId,
       }),
     );
-    await this.productImageRepository.save(entities);
+    await this.fileRepository.save(entities);
     return await this.getProductsProvider.findOne(productId);
   }
 
   public async removeImage(productId: number, imageId: number): Promise<void> {
-    const image = await this.productImageRepository.findOne({
-      where: { id: imageId, product: { id: productId } },
-      relations: ['product'],
+    const image = await this.fileRepository.findOne({
+      where: {
+        id: imageId,
+        ownerModule: FileOwnerModule.PRODUCT,
+        ownerId: productId,
+      },
     });
     if (!image) {
       throw new NotFoundException('Image not found');
     }
     await this.deleteProductProvider.safeUnlinkPublicPath(image.urlPath);
-    await this.productImageRepository.remove(image);
+    await this.fileRepository.remove(image);
   }
 }

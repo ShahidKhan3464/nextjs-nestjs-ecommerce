@@ -6,8 +6,8 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import type { Address } from "../types";
 import { useForm } from "react-hook-form";
+import { ShoppingBag } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
-import { api } from "@/services/api/client";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { cartClear } from "@/lib/cart-actions";
@@ -15,11 +15,15 @@ import { useCartStore } from "@/store/cart-store";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { PlaceOrderButton } from "./place-order-button";
+import { StripePaymentForm } from "./stripe-payment-form";
 import { useCheckoutStore } from "@/store/checkout-store";
-import { placeOrder } from "../services/checkout.service";
+import { createCheckout } from "../services/checkout.service";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { shippingSchema, type ShippingValues } from "../schemas";
 import { useCartHydrate } from "@/shared/hooks/use-cart-hydrate";
+import { PaymentContinueButton } from "./payment-continue-button";
+import { StripeCheckoutProvider } from "./stripe-checkout-provider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Form,
@@ -37,15 +41,13 @@ export function CheckoutWizard() {
   const step = useCheckoutStore((s) => s.step);
   const setStep = useCheckoutStore((s) => s.setStep);
   const resetCheckout = useCheckoutStore((s) => s.reset);
-  const setCoupon = useCheckoutStore((s) => s.setCoupon);
-  const couponCode = useCheckoutStore((s) => s.couponCode);
   const setShipping = useCheckoutStore((s) => s.setShipping);
-  const paymentSummary = useCheckoutStore((s) => s.paymentSummary);
+  const clientSecret = useCheckoutStore((s) => s.clientSecret);
+  const paymentIntentId = useCheckoutStore((s) => s.paymentIntentId);
   const shippingAddress = useCheckoutStore((s) => s.shippingAddress);
-  const setPaymentSummary = useCheckoutStore((s) => s.setPaymentSummary);
+  const setCheckoutSession = useCheckoutStore((s) => s.setCheckoutSession);
 
-  const [couponInput, setCouponInput] = React.useState("");
-  const [couponValid, setCouponValid] = React.useState<string | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = React.useState(false);
 
   const form = useForm<ShippingValues>({
     resolver: zodResolver(shippingSchema),
@@ -56,81 +58,124 @@ export function CheckoutWizard() {
       city: shippingAddress?.city ?? "",
       region: shippingAddress?.region ?? "",
       postalCode: shippingAddress?.postalCode ?? "",
-      country: shippingAddress?.country ?? "US",
+      country: shippingAddress?.country ?? "PK",
       phone: shippingAddress?.phone ?? "",
     },
   });
 
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-
-  async function validateCoupon() {
-    const code = couponInput.trim();
-    if (!code) {
-      setCoupon(null);
-      setCouponValid(null);
-      return;
-    }
-    try {
-      await api.get(`/api/v1/customer/coupons/${encodeURIComponent(code)}`);
-      setCoupon(code.toUpperCase());
-      setCouponValid(code.toUpperCase());
-      toast.success("Coupon applied");
-    } catch {
-      setCoupon(null);
-      setCouponValid(null);
-      toast.error("Invalid coupon");
-    }
-  }
+  const estimatedTax = Math.round(subtotal * 0.08 * 100) / 100;
+  const estimatedTotal = Math.round((subtotal + estimatedTax) * 100) / 100;
 
   async function onShipping(values: ShippingValues) {
     setShipping(values as Address);
-    setStep("payment");
-  }
-
-  function onPaymentMock(method: "card" | "paypal") {
-    const summary = method === "card" ? "Visa •••• 4242" : "PayPal account";
-    setPaymentSummary(summary);
-    setStep("review");
-  }
-
-  async function submitOrder() {
-    if (!shippingAddress?.fullName || !paymentSummary) {
-      toast.error("Complete all steps first");
-      return;
-    }
+    setCheckoutLoading(true);
     try {
-      const order = await placeOrder({
-        items: items.map((i) => ({
-          productSlug: i.slug,
-          quantity: i.quantity,
-          variantId: i.variantId,
-        })),
-        couponCode: couponCode ?? undefined,
-        shippingAddress: shippingAddress as Address,
-        payment: { method: "card", summary: paymentSummary },
+      const session = await createCheckout({
+        shippingAddress: values as Address,
       });
-      await cartClear();
-      resetCheckout();
-      toast.success("Order placed");
-      router.push(ROUTES.order(order.id));
+      setCheckoutSession(session.paymentIntentId, session.clientSecret);
+      toast.success("Ready for payment");
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Checkout failed"));
+      toast.error(getApiErrorMessage(error, "Could not start checkout"));
+    } finally {
+      setCheckoutLoading(false);
     }
+  }
+
+  async function handleOrderSuccess() {
+    await cartClear();
+    resetCheckout();
+    toast.success("Order placed");
+    router.push(ROUTES.orders);
   }
 
   if (items.length === 0) {
     return (
-      <div className="mx-auto max-w-xl px-4 py-16 text-center">
-        <p className="font-medium">Your cart is empty.</p>
+      <div className="mx-auto flex max-w-lg flex-col items-center px-4 py-20 text-center">
+        <div className="bg-muted/60 mb-6 flex size-20 items-center justify-center rounded-full">
+          <ShoppingBag className="text-muted-foreground size-9" />
+        </div>
+        <h2 className="font-heading text-2xl font-semibold tracking-tight">
+          Your bag is empty
+        </h2>
+        <p className="text-muted-foreground mt-2 max-w-sm text-sm leading-relaxed">
+          Add items to your cart before checking out. When you are ready, return
+          here to complete your purchase.
+        </p>
         <Link
           href={ROUTES.products}
-          className={cn(buttonVariants(), "mt-6 inline-flex justify-center")}
+          className={cn(buttonVariants({ size: "lg" }), "mt-8")}
         >
           Continue shopping
         </Link>
       </div>
     );
   }
+
+  const paymentAndReview = clientSecret ? (
+    <StripeCheckoutProvider clientSecret={clientSecret}>
+      <div
+        aria-hidden={step !== "payment"}
+        className={cn(
+          "space-y-4",
+          step !== "payment" &&
+          "pointer-events-none absolute left-[-9999px] h-px w-px overflow-hidden opacity-0"
+        )}
+      >
+        <StripePaymentForm />
+        {step === "payment" ? (
+          <PaymentContinueButton onContinue={() => setStep("review")} />
+        ) : null}
+      </div>
+
+      <TabsContent value="review" className="space-y-6">
+        <div className="space-y-2 text-sm">
+          <p className="font-medium">Shipping</p>
+          <p className="text-muted-foreground">
+            {shippingAddress?.fullName}
+            <br />
+            {shippingAddress?.line1}
+            {shippingAddress?.line2 && (
+              <>
+                <br />
+                {shippingAddress.line2}
+              </>
+            )}
+            <br />
+            {shippingAddress?.city}, {shippingAddress?.region}{" "}
+            {shippingAddress?.postalCode}
+            <br />
+            {shippingAddress?.country}
+          </p>
+        </div>
+        <Separator />
+        <div className="space-y-2 text-sm">
+          <p className="font-medium">Payment</p>
+          <p className="text-muted-foreground">
+            Your card will be charged when you place the order.
+          </p>
+        </div>
+        <Separator />
+        {paymentIntentId ? (
+          <PlaceOrderButton onSuccess={() => void handleOrderSuccess()} />
+        ) : null}
+      </TabsContent>
+    </StripeCheckoutProvider>
+  ) : (
+    <>
+      <TabsContent value="payment" className="space-y-4">
+        <p className="text-muted-foreground text-sm">
+          Complete the shipping step to initialize secure payment.
+        </p>
+      </TabsContent>
+      <TabsContent value="review" className="space-y-4">
+        <p className="text-muted-foreground text-sm">
+          Complete shipping and payment before reviewing your order.
+        </p>
+      </TabsContent>
+    </>
+  );
 
   return (
     <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[1fr_340px] lg:px-6">
@@ -140,9 +185,13 @@ export function CheckoutWizard() {
         onValueChange={(v) => setStep(v as typeof step)}
       >
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="shipping">Shipping</TabsTrigger>
-          <TabsTrigger value="payment">Payment</TabsTrigger>
-          <TabsTrigger value="review">Review</TabsTrigger>
+          <TabsTrigger value="shipping" className="cursor-pointer">Shipping</TabsTrigger>
+          <TabsTrigger value="payment" className="cursor-pointer" disabled={!clientSecret}>
+            Payment
+          </TabsTrigger>
+          <TabsTrigger value="review" className="cursor-pointer" disabled={!clientSecret}>
+            Review
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="shipping">
@@ -246,60 +295,14 @@ export function CheckoutWizard() {
                   )}
                 />
               </div>
-              <Button type="submit">Continue to payment</Button>
+              <Button type="submit" disabled={checkoutLoading}>
+                {checkoutLoading ? "Preparing checkout…" : "Continue to payment"}
+              </Button>
             </form>
           </Form>
         </TabsContent>
 
-        <TabsContent value="payment" className="space-y-4">
-          <p className="text-muted-foreground text-sm">
-            Choose how you would like to pay. You will confirm the total on the
-            review step before placing your order.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Button type="button" onClick={() => onPaymentMock("card")}>
-              Pay with card
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onPaymentMock("paypal")}
-            >
-              Pay with PayPal
-            </Button>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="review" className="space-y-6">
-          <div className="space-y-2 text-sm">
-            <p className="font-medium">Shipping</p>
-            <p className="text-muted-foreground">
-              {shippingAddress?.fullName}
-              <br />
-              {shippingAddress?.line1}
-              {shippingAddress?.line2 && (
-                <>
-                  <br />
-                  {shippingAddress.line2}
-                </>
-              )}
-              <br />
-              {shippingAddress?.city}, {shippingAddress?.region}{" "}
-              {shippingAddress?.postalCode}
-              <br />
-              {shippingAddress?.country}
-            </p>
-          </div>
-          <Separator />
-          <div className="space-y-2 text-sm">
-            <p className="font-medium">Payment</p>
-            <p className="text-muted-foreground">{paymentSummary}</p>
-          </div>
-          <Separator />
-          <Button type="button" onClick={() => void submitOrder()}>
-            Place order
-          </Button>
-        </TabsContent>
+        {paymentAndReview}
       </Tabs>
 
       <aside className="bg-muted/40 border-border h-fit space-y-4 rounded-xl border p-6 lg:sticky lg:top-28">
@@ -317,34 +320,19 @@ export function CheckoutWizard() {
           ))}
         </ul>
         <Separator />
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Subtotal</span>
-          <span className="tabular-nums">${subtotal.toFixed(2)}</span>
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium" htmlFor="coupon">
-            Coupon
-          </label>
-          <div className="flex gap-2">
-            <Input
-              id="coupon"
-              value={couponInput}
-              placeholder="WELCOME10"
-              onChange={(e) => setCouponInput(e.target.value)}
-            />
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => void validateCoupon()}
-            >
-              Apply
-            </Button>
+        <div className="space-y-1 text-sm">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Subtotal</span>
+            <span className="tabular-nums">${subtotal.toFixed(2)}</span>
           </div>
-          {couponValid && (
-            <p className="text-muted-foreground text-xs">
-              Applied {couponValid}
-            </p>
-          )}
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Tax (est.)</span>
+            <span className="tabular-nums">${estimatedTax.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between pt-2 font-semibold">
+            <span>Total (est.)</span>
+            <span className="tabular-nums">${estimatedTotal.toFixed(2)}</span>
+          </div>
         </div>
       </aside>
     </div>

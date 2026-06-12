@@ -7,7 +7,6 @@ import { Heart } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Product } from "../types";
 import { ROUTES } from "@/constants/routes";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { wishlistToggle } from "@/lib/wishlist-actions";
 import { useWishlistStore } from "@/store/wishlist-store";
@@ -64,11 +63,6 @@ export function ProductCard({ product, className }: Props) {
             <Heart className={cn("size-4", wishlisted && "fill-current")} />
           </Button>
         </div>
-        {product.featured ? (
-          <Badge className="absolute top-3 left-3 z-10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-sm">
-            Featured
-          </Badge>
-        ) : null}
       </Link>
 
       <div className="flex flex-1 flex-col gap-3 p-4">

@@ -122,7 +122,7 @@ export function AdminProductsList() {
             <Input
               value={searchInput}
               disabled={isEmptyCatalog}
-              placeholder="Search products..."
+              placeholder="Search products"
               onChange={(e) => setSearchInput(e.target.value)}
             />
           </div>
@@ -138,7 +138,7 @@ export function AdminProductsList() {
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="all">All</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="removed">Removed</SelectItem>
               </SelectContent>
@@ -176,7 +176,7 @@ export function AdminProductsList() {
                     colSpan={5}
                     className="text-muted-foreground py-10 text-center text-sm"
                   >
-                    No products match your search.
+                    No products found.
                   </TableCell>
                 </TableRow>
               ) : (

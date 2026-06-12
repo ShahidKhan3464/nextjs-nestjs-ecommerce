@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CartItem } from '../entities/cart-item.entity';
 import { AddCartItemDto } from '../dto/add-cart-item.dto';
 import { Injectable, BadRequestException } from '@nestjs/common';
+import { joinProductImages } from 'src/common/files/file-query.util';
 import { ProductVariant } from 'src/products/entities/product-variant.entity';
 import {
   CartItemResponse,
@@ -24,7 +25,7 @@ export class AddCartItemProvider {
   ): Promise<CartItemResponse> {
     const variant = await this.variantRepository.findOne({
       where: { id: dto.variantId },
-      relations: ['product', 'product.images'],
+      relations: ['product'],
     });
 
     if (!variant) {
@@ -37,7 +38,6 @@ export class AddCartItemProvider {
 
     let item = await this.cartRepository.findOne({
       where: { userId, productVariantId: dto.variantId },
-      relations: ['variant', 'variant.product', 'variant.product.images'],
     });
 
     if (item) {
@@ -51,23 +51,25 @@ export class AddCartItemProvider {
         quantity: dto.quantity,
       });
       await this.cartRepository.save(item);
-      item = await this.cartRepository.findOne({
-        where: { id: item.id },
-        relations: ['variant', 'variant.product', 'variant.product.images'],
-      });
     }
 
-    if (!item?.variant) {
-      const reloaded = await this.cartRepository.findOne({
-        where: { userId, productVariantId: dto.variantId },
-        relations: ['variant', 'variant.product', 'variant.product.images'],
-      });
-      if (!reloaded) {
-        throw new BadRequestException('Failed to add cart item');
-      }
-      return mapCartItemToResponse(reloaded);
+    const reloaded = await this.loadCartItem(userId, dto.variantId);
+    if (!reloaded) {
+      throw new BadRequestException('Failed to add cart item');
     }
 
-    return mapCartItemToResponse(item);
+    return mapCartItemToResponse(reloaded);
+  }
+
+  private loadCartItem(userId: number, variantId: number) {
+    return joinProductImages(
+      this.cartRepository
+        .createQueryBuilder('cart')
+        .where('cart.userId = :userId', { userId })
+        .andWhere('cart.productVariantId = :variantId', { variantId })
+        .innerJoinAndSelect('cart.variant', 'variant')
+        .innerJoinAndSelect('variant.product', 'product'),
+      'product',
+    ).getOne();
   }
 }

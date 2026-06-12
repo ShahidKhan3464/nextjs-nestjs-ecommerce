@@ -133,10 +133,10 @@ export function ProductDetailView({ product }: Props) {
 
     setVariantId(fallback.id);
     if (sizes.length > 0) {
-      setSelectedSize(fallback.options?.size?.trim() ?? nextSize);
+      setSelectedSize(fallback.options?.size?.trim() ?? nextSize ?? sizes[0]);
     }
     if (colors.length > 0) {
-      setSelectedColor(fallback.options?.color?.trim() ?? nextColor);
+      setSelectedColor(fallback.options?.color?.trim() ?? nextColor ?? colors[0]);
     }
   }
 
@@ -156,8 +156,12 @@ export function ProductDetailView({ product }: Props) {
     setActiveIndex(0);
   }, [variantId, galleryImages.length]);
 
+  const [adding, setAdding] = React.useState(false);
+
   async function handleAddToCart() {
-    if (!variant) return;
+    if (!variant || adding) return;
+    setAdding(true);
+    try {
     await cartAddItem({
       variantId: variant.id,
       productId: product.id,
@@ -170,6 +174,9 @@ export function ProductDetailView({ product }: Props) {
       maxQty: variant.stock,
     });
     toast.success("Added to bag");
+    } finally {
+      setAdding(false);
+    }
   }
 
   const inStock = (variant?.stock ?? 0) > 0;
@@ -179,7 +186,7 @@ export function ProductDetailView({ product }: Props) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="mx-auto grid max-w-6xl gap-10 px-4 py-8 lg:grid-cols-2 lg:gap-14 lg:px-6 lg:py-12"
+      className="mx-auto grid max-w-6xl gap-10 p-4 lg:grid-cols-2 lg:gap-14 lg:p-6"
     >
       {/* Gallery */}
       <div className="mx-auto w-full max-w-xl space-y-4 lg:mx-0">
@@ -237,7 +244,6 @@ export function ProductDetailView({ product }: Props) {
             <Badge variant="secondary" className="font-normal">
               {product.category}
             </Badge>
-            {product.featured ? <Badge>Featured</Badge> : null}
           </div>
           <h1 className="font-heading text-3xl font-semibold tracking-tight md:text-4xl">
             {product.name}
@@ -345,11 +351,11 @@ export function ProductDetailView({ product }: Props) {
           <Button
             size="lg"
             type="button"
-            onClick={handleAddToCart}
-            disabled={!variant || !inStock}
+            onClick={() => void handleAddToCart()}
+            disabled={!variant || !inStock || adding}
             className="h-12 w-full text-base font-semibold"
           >
-            {inStock ? "Add to bag" : "Out of stock"}
+            {adding ? "Adding…" : inStock ? "Add to bag" : "Out of stock"}
           </Button>
         </div>
       </div>

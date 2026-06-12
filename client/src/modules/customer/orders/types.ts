@@ -16,11 +16,9 @@ export type Order = {
   total: number;
   userId: string;
   subtotal: number;
-  shipping: number;
-  discount: number;
   createdAt: string;
+  orderNumber: string;
   status: OrderStatus;
-  couponCode?: string;
   items: OrderLineItem[];
   shippingAddress: Address;
   paymentMethodSummary: string;
@@ -38,9 +36,23 @@ export type Address = {
   postalCode: string;
 };
 
-export type PlaceOrderInput = {
-  items: { productSlug: string; variantId: string; quantity: number }[];
+export type CreateCheckoutInput = {
   shippingAddress: Address;
-  payment: { method: "card" | "paypal"; summary: string };
-  couponCode?: string;
+};
+
+export type CheckoutPreview = {
+  tax: number;
+  total: number;
+  subtotal: number;
+};
+
+export type CheckoutSession = {
+  clientSecret: string;
+  paymentIntentId: string;
+  preview: CheckoutPreview;
+  checkoutSessionId: string;
+};
+
+export type CompleteCheckoutInput = {
+  paymentIntentId: string;
 };

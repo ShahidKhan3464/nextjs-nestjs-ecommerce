@@ -4,15 +4,16 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from '../entities/product.entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ProductImage } from '../entities/product-image.entity';
+import { FileOwnerModule } from 'src/common/files/file.constants';
+import { StoredFile } from 'src/common/files/entities/stored-file.entity';
 
 @Injectable()
 export class DeleteProductProvider {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
-    @InjectRepository(ProductImage)
-    private readonly productImageRepository: Repository<ProductImage>,
+    @InjectRepository(StoredFile)
+    private readonly fileRepository: Repository<StoredFile>,
   ) {}
 
   public async remove(id: number): Promise<void> {
@@ -20,14 +21,14 @@ export class DeleteProductProvider {
     if (!product) {
       throw new NotFoundException('Product not found');
     }
-    const images = await this.productImageRepository.find({
-      where: { product: { id } },
+    const images = await this.fileRepository.find({
+      where: { ownerModule: FileOwnerModule.PRODUCT, ownerId: id },
     });
     await Promise.all(
       images.map((img) => this.safeUnlinkPublicPath(img.urlPath)),
     );
     if (images.length) {
-      await this.productImageRepository.remove(images);
+      await this.fileRepository.remove(images);
     }
     await this.productRepository.softRemove(product);
   }

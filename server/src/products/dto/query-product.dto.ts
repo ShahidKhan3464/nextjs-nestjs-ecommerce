@@ -52,10 +52,4 @@ export class QueryProductDto extends PaginationQueryDto {
   @Type(() => Number)
   @Min(0)
   maxPrice?: number;
-
-  @ApiPropertyOptional({ description: 'Filter by minimum rating' })
-  @IsOptional()
-  @Type(() => Number)
-  @Min(0)
-  minRating?: number;
 }

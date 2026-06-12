@@ -2,9 +2,10 @@ import { DataSource } from 'typeorm';
 import { Product } from '../entities/product.entity';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { ProductStatus } from '../constants/product.constants';
-import { ProductImage } from '../entities/product-image.entity';
+import { FileOwnerModule } from 'src/common/files/file.constants';
 import { Category } from 'src/categories/entities/category.entity';
 import { ProductVariant } from '../entities/product-variant.entity';
+import { StoredFile } from 'src/common/files/entities/stored-file.entity';
 import {
   Injectable,
   ConflictException,
@@ -20,9 +21,6 @@ export class CreateProductProvider {
     files: Express.Multer.File[],
   ): Promise<Product> {
     return await this.dataSource.transaction(async (manager) => {
-      /**
-       * 1. Validate Category (DB rule)
-       */
       const category = await manager.findOne(Category, {
         where: { id: dto.categoryId },
       });
@@ -31,9 +29,6 @@ export class CreateProductProvider {
         throw new NotFoundException('Category not found');
       }
 
-      /**
-       * 2. Check SKU uniqueness in DB
-       */
       for (const variant of dto.variants) {
         const skuExists = await manager.exists(ProductVariant, {
           where: { sku: variant.sku },
@@ -44,9 +39,6 @@ export class CreateProductProvider {
         }
       }
 
-      /**
-       * 3. Create Product
-       */
       const product = manager.create(Product, {
         category,
         name: dto.name,
@@ -57,9 +49,6 @@ export class CreateProductProvider {
 
       await manager.save(product);
 
-      /**
-       * 4. Create Variants
-       */
       const variantEntities = dto.variants.map((variant) =>
         manager.create(ProductVariant, {
           product,
@@ -73,27 +62,20 @@ export class CreateProductProvider {
 
       await manager.save(variantEntities);
 
-      /**
-       * 5. Create Images
-       * (file validation already handled in controller pipe)
-       */
       const imageEntities = files.map((file, index) =>
-        manager.create(ProductImage, {
+        manager.create(StoredFile, {
           urlPath: `/uploads/products/${file.filename}`,
           sortOrder: index,
-          product,
+          ownerModule: FileOwnerModule.PRODUCT,
+          ownerId: product.id,
         }),
       );
 
       await manager.save(imageEntities);
 
-      /**
-       * 6. Return full product
-       */
       const createdProduct = await manager.findOne(Product, {
         where: { id: product.id },
         relations: {
-          images: true,
           category: true,
           variants: true,
         },
@@ -103,6 +85,7 @@ export class CreateProductProvider {
         throw new NotFoundException('Product not found');
       }
 
+      createdProduct.images = imageEntities;
       return createdProduct;
     });
   }

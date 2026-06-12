@@ -1,7 +1,7 @@
-import { ProductImage } from './product-image.entity';
 import { ProductVariant } from './product-variant.entity';
 import { ProductStatus } from '../constants/product.constants';
 import { Category } from 'src/categories/entities/category.entity';
+import { StoredFile } from 'src/common/files/entities/stored-file.entity';
 
 import {
   Index,
@@ -44,24 +44,6 @@ export class Product {
   description: string | null;
 
   @Column({
-    type: 'float',
-    default: 0,
-  })
-  rating: number;
-
-  @Column({
-    type: 'int',
-    default: 0,
-  })
-  reviewCount: number;
-
-  @Column({
-    type: 'boolean',
-    default: false,
-  })
-  featured: boolean;
-
-  @Column({
     type: 'decimal',
     precision: 10,
     scale: 2,
@@ -89,10 +71,8 @@ export class Product {
   })
   variants: ProductVariant[];
 
-  @OneToMany(() => ProductImage, (image) => image.product, {
-    cascade: true,
-  })
-  images: ProductImage[];
+  /** Mapped via `joinProductImages` — not a direct TypeORM relation column. */
+  images?: StoredFile[];
 
   @CreateDateColumn()
   createdAt: Date;

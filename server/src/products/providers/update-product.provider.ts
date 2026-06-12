@@ -3,10 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from '../entities/product.entity';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { GetProductsProvider } from './get-products.provider';
-import { ProductImage } from '../entities/product-image.entity';
+import { FileOwnerModule } from 'src/common/files/file.constants';
 import { DeleteProductProvider } from './delete-product.provider';
 import { Category } from 'src/categories/entities/category.entity';
 import { ProductVariant } from '../entities/product-variant.entity';
+import { StoredFile } from 'src/common/files/entities/stored-file.entity';
 import {
   Inject,
   Injectable,
@@ -23,8 +24,8 @@ export class UpdateProductProvider {
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(ProductVariant)
     private readonly productVariantRepository: Repository<ProductVariant>,
-    @InjectRepository(ProductImage)
-    private readonly productImageRepository: Repository<ProductImage>,
+    @InjectRepository(StoredFile)
+    private readonly fileRepository: Repository<StoredFile>,
     @Inject(forwardRef(() => GetProductsProvider))
     private readonly getProductsProvider: GetProductsProvider,
     private readonly deleteProductProvider: DeleteProductProvider,
@@ -67,11 +68,15 @@ export class UpdateProductProvider {
 
     if (dto.retainImagePaths !== undefined) {
       const keep = dto.retainImagePaths;
-      const imagesToRemove = await this.productImageRepository.find({
+      const imagesToRemove = await this.fileRepository.find({
         where:
           keep.length === 0
-            ? { product: { id } }
-            : { product: { id }, urlPath: Not(In(keep)) },
+            ? { ownerModule: FileOwnerModule.PRODUCT, ownerId: id }
+            : {
+                ownerModule: FileOwnerModule.PRODUCT,
+                ownerId: id,
+                urlPath: Not(In(keep)),
+              },
       });
       await Promise.all(
         imagesToRemove.map((img) =>
@@ -79,18 +84,22 @@ export class UpdateProductProvider {
         ),
       );
       if (keep.length === 0) {
-        await this.productImageRepository.delete({ product: { id } });
+        await this.fileRepository.delete({
+          ownerModule: FileOwnerModule.PRODUCT,
+          ownerId: id,
+        });
       } else {
-        await this.productImageRepository.delete({
-          product: { id },
+        await this.fileRepository.delete({
+          ownerModule: FileOwnerModule.PRODUCT,
+          ownerId: id,
           urlPath: Not(In(keep)),
         });
       }
     }
 
     if (files.length > 0) {
-      const existing = await this.productImageRepository.find({
-        where: { product: { id } },
+      const existing = await this.fileRepository.find({
+        where: { ownerModule: FileOwnerModule.PRODUCT, ownerId: id },
         order: { sortOrder: 'ASC' },
       });
       const nextOrder =
@@ -99,13 +108,14 @@ export class UpdateProductProvider {
           : 0;
 
       const imageEntities = files.map((file, index) =>
-        this.productImageRepository.create({
+        this.fileRepository.create({
           urlPath: `/uploads/products/${file.filename}`,
           sortOrder: nextOrder + index,
-          product: { id } as Product,
+          ownerModule: FileOwnerModule.PRODUCT,
+          ownerId: id,
         }),
       );
-      await this.productImageRepository.save(imageEntities);
+      await this.fileRepository.save(imageEntities);
     }
 
     return await this.getProductsProvider.findOne(id);
