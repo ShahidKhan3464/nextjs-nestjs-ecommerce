@@ -16,6 +16,13 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Select,
+  SelectItem,
+  SelectValue,
+  SelectContent,
+  SelectTrigger,
+} from "@/components/ui/select";
+import {
   Table,
   TableRow,
   TableBody,
@@ -35,20 +42,32 @@ const statusVariant: Record<
   cancelled: "destructive",
 };
 
+const ORDER_STATUS_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "paid", label: "Paid" },
+  { value: "shipped", label: "Shipped" },
+  { value: "delivered", label: "Delivered" },
+  { value: "cancelled", label: "Cancelled" },
+] as const;
+
 export function AdminOrdersList() {
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [searchInput, setSearchInput] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const debouncedSearch = useDebouncedValue(searchInput, 500);
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, statusFilter]);
 
   const { data, isPending } = useQuery({
-    queryKey: queryKeys.admin.orders,
-    queryFn: fetchAdminOrders,
+    queryKey: queryKeys.admin.orders({ status: statusFilter }),
+    queryFn: () =>
+      fetchAdminOrders(
+        statusFilter === "all" ? undefined : { status: statusFilter }
+      ),
   });
 
   const filtered = useMemo(() => {
@@ -56,11 +75,10 @@ export function AdminOrdersList() {
     const q = debouncedSearch.trim().toLowerCase();
     if (!q) return data;
     return data.filter((o) => {
-      const idMatch =
+      return (
         o.id.toLowerCase().includes(q) ||
-        o.orderNumber.toLowerCase().includes(q);
-      const statusMatch = o.status.toLowerCase().includes(q);
-      return idMatch || statusMatch;
+        o.orderNumber.toLowerCase().includes(q)
+      );
     });
   }, [data, debouncedSearch]);
 
@@ -76,7 +94,7 @@ export function AdminOrdersList() {
   if (isPending || !data) {
     return (
       <AdminTableSkeleton
-        filterWidths={["w-72", "w-24"]}
+        filterWidths={["w-72", "w-32", "w-24"]}
         columns={[
           { className: "flex-1" },
           { className: "w-24" },
@@ -88,13 +106,10 @@ export function AdminOrdersList() {
     );
   }
 
-  if (!data) {
-    return null;
-  }
-
   const total = data.length;
   const hasSearch = debouncedSearch.trim().length > 0;
-  const isEmptyCatalog = total === 0 && !hasSearch;
+  const hasStatusFilter = statusFilter !== "all";
+  const isEmptyCatalog = total === 0 && !hasSearch && !hasStatusFilter;
   const showPagination = filtered.length > 0;
 
   return (
@@ -104,13 +119,31 @@ export function AdminOrdersList() {
           <Input
             value={searchInput}
             disabled={isEmptyCatalog}
-            placeholder="Search by order id or status"
+            placeholder="Search by order id"
             onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
+        <div className="w-32">
+          <Select
+            value={statusFilter}
+            disabled={isEmptyCatalog}
+            onValueChange={(value) => setStatusFilter(value ?? "all")}
+          >
+            <SelectTrigger className="w-full" disabled={isEmptyCatalog}>
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              {ORDER_STATUS_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <Button
           onClick={() =>
-            qc.invalidateQueries({ queryKey: queryKeys.admin.orders })
+            qc.invalidateQueries({ queryKey: queryKeys.admin.orders() })
           }
         >
           Refresh

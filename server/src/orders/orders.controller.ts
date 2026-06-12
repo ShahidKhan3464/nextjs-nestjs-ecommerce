@@ -1,4 +1,5 @@
 import { OrdersService } from './orders.service';
+import { QueryOrderDto } from './dto/query-order.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from 'src/users/constants/user.constants';
@@ -13,6 +14,7 @@ import {
   Body,
   Patch,
   Param,
+  Query,
   Controller,
   ParseIntPipe,
 } from '@nestjs/common';
@@ -24,14 +26,14 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Get()
-  findMine(@ActiveUser() userId: number) {
-    return this.ordersService.findMine(userId);
+  findMine(@ActiveUser() userId: number, @Query() query: QueryOrderDto) {
+    return this.ordersService.findMine(userId, query);
   }
 
   @Get('admin/all')
   @Roles(UserRole.ADMIN)
-  findAllAdmin() {
-    return this.ordersService.findAllAdmin();
+  findAllAdmin(@Query() query: QueryOrderDto) {
+    return this.ordersService.findAllAdmin(query);
   }
 
   @Post('checkout')

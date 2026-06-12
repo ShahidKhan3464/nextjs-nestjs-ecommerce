@@ -39,4 +39,8 @@ export class CategoriesService {
   public async delete(id: number): Promise<void> {
     return await this.deleteCategoryProvider.delete(id);
   }
+
+  public async restore(id: number): Promise<Category> {
+    return await this.deleteCategoryProvider.restore(id);
+  }
 }

@@ -1,5 +1,8 @@
 import { isAxiosError } from "axios";
 
+export const GENERIC_API_ERROR_MESSAGE =
+  "Something went wrong, plz try again";
+
 function messageFromPayload(data: unknown): string | null {
   if (!data || typeof data !== "object") return null;
   const raw = (data as { message?: unknown }).message;
@@ -15,17 +18,39 @@ function messageFromPayload(data: unknown): string | null {
   return null;
 }
 
+function isTechnicalMessage(message: string): boolean {
+  const trimmed = message.trim();
+  if (!trimmed) return true;
+  return (
+    /^Request failed with status code \d+$/i.test(trimmed) ||
+    /^Network Error$/i.test(trimmed) ||
+    /^timeout of \d+ms exceeded$/i.test(trimmed) ||
+    /^Failed to fetch$/i.test(trimmed)
+  );
+}
+
 /** Extract a user-facing message from API/axios errors (Nest or Next route handlers). */
 export function getApiErrorMessage(
   error: unknown,
-  fallback = "Something went wrong"
+  fallback = GENERIC_API_ERROR_MESSAGE
 ): string {
   if (isAxiosError(error)) {
+    const status = error.response?.status;
     const fromBody = messageFromPayload(error.response?.data);
     if (fromBody) return fromBody;
-    if (error.message?.trim()) return error.message;
+    if (status && status >= 500) return GENERIC_API_ERROR_MESSAGE;
+    if (
+      error.message?.trim() &&
+      !isTechnicalMessage(error.message)
+    ) {
+      return error.message;
+    }
+    return fallback;
   }
   if (error instanceof Error && error.message.trim()) {
+    if (isTechnicalMessage(error.message)) {
+      return fallback;
+    }
     return error.message;
   }
   return fallback;

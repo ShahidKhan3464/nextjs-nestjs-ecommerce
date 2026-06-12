@@ -72,3 +72,7 @@ export async function updateAdminProduct(
 export async function deleteAdminProduct(id: string) {
   await api.delete(`/api/v1/admin/products/${id}`);
 }
+
+export async function restoreAdminProduct(id: string) {
+  await api.patch(`/api/v1/admin/products/${id}/restore`);
+}

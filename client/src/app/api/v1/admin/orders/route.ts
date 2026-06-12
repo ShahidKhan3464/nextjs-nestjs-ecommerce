@@ -18,7 +18,10 @@ export async function GET(req: Request) {
   if (admin instanceof Response) return admin;
 
   const backend = getBackendUrl();
-  const res = await fetch(`${backend}/orders/admin/all`, {
+  const { searchParams } = new URL(req.url);
+  const status = searchParams.get("status");
+  const query = status ? `?status=${encodeURIComponent(status)}` : "";
+  const res = await fetch(`${backend}/orders/admin/all${query}`, {
     headers: { ...forwardAuthorization(req) },
   });
 

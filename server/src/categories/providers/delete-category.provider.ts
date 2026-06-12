@@ -37,7 +37,24 @@ export class DeleteCategoryProvider {
       );
     }
 
-    // await this.categoryRepository.remove(category);
     await this.categoryRepository.softDelete(id);
+  }
+
+  public async restore(id: number): Promise<Category> {
+    const category = await this.categoryRepository.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+    if (!category.deletedAt) {
+      throw new BadRequestException('Category is not removed');
+    }
+
+    await this.categoryRepository.recover(category);
+    return category;
   }
 }

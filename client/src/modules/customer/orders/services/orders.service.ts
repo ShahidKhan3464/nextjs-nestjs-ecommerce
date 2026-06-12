@@ -7,9 +7,14 @@ import type {
   CompleteCheckoutInput,
 } from "../types";
 
-export async function fetchOrders() {
+export async function fetchOrders(params?: { status?: string }) {
   const res = await api.get<ApiResponse<{ orders: Order[] }>>(
-    "/api/v1/customer/orders"
+    "/api/v1/customer/orders",
+    {
+      params: params?.status
+        ? { status: params.status.toUpperCase() }
+        : undefined,
+    }
   );
   return res.data.data.orders;
 }

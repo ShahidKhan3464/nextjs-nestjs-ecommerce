@@ -30,5 +30,6 @@ export type Product = {
   images: string[];
   basePrice: number;
   description: string;
+  isRemoved?: boolean;
   variants: ProductVariant[];
 };

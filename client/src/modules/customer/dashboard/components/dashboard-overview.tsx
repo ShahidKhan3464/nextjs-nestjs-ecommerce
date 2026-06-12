@@ -15,7 +15,7 @@ export function DashboardOverview() {
   const user = useAuthStore((s) => s.user);
   const { data, isPending } = useQuery({
     queryKey: queryKeys.orders.list(),
-    queryFn: fetchOrders,
+    queryFn: () => fetchOrders(),
   });
 
   const revenue = data?.reduce((s, o) => s + o.total, 0) ?? 0;

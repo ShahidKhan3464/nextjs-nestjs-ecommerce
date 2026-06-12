@@ -90,6 +90,7 @@ export class GetProductsProvider {
     const product = await joinProductImages(
       this.productRepository
         .createQueryBuilder('product')
+        .withDeleted()
         .where('product.id = :id', { id })
         .leftJoinAndSelect('product.category', 'category')
         .leftJoinAndSelect('product.variants', 'variants'),

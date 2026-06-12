@@ -17,6 +17,7 @@ import {
 } from './providers/get-user-detail.provider';
 import {
   FindUsersQuery,
+  UserMeResponse,
   GetUsersProvider,
 } from './providers/get-users.provider';
 
@@ -42,6 +43,10 @@ export class UsersService {
 
   public async findOne(id: number): Promise<User> {
     return await this.getUsersProvider.findOne(id);
+  }
+
+  public async findMeWithAvatar(id: number): Promise<UserMeResponse> {
+    return await this.getUsersProvider.findMeWithAvatar(id);
   }
 
   public async getUserDetail(id: number): Promise<UserDetailResponse> {

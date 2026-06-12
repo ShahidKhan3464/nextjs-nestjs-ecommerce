@@ -10,7 +10,9 @@ import { getApiErrorMessage } from "@/lib/api-error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Separator } from "@/components/ui/separator";
 import { useForm, type Resolver } from "react-hook-form";
+import { resolveUploadUrl } from "@/lib/resolve-upload-url";
 import {
+  fetchProfile,
   updateProfile,
   changePassword,
   uploadProfileAvatar,
@@ -45,7 +47,18 @@ export function ProfileForm() {
   const setUser = useAuthStore((s) => s.setUser);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [uploadingAvatar, setUploadingAvatar] = React.useState(false);
-  const [avatarUrl, setAvatarUrl] = React.useState(user?.avatarUrl ?? "");
+  const [avatarUrl, setAvatarUrl] = React.useState(
+    resolveUploadUrl(user?.avatarUrl) ?? ""
+  );
+
+  React.useEffect(() => {
+    void fetchProfile()
+      .then((profile) => {
+        setAvatarUrl(resolveUploadUrl(profile.avatarUrl) ?? "");
+        setUser(profile);
+      })
+      .catch(() => undefined);
+  }, [setUser]);
 
   const { firstName, lastName } = splitName(user?.fullName ?? user?.name);
 
@@ -97,9 +110,10 @@ export function ProfileForm() {
     setUploadingAvatar(true);
     try {
       const url = await uploadProfileAvatar(file);
-      setAvatarUrl(url);
+      const resolved = resolveUploadUrl(url) ?? url;
+      setAvatarUrl(resolved);
       if (user) {
-        setUser({ ...user, avatarUrl: url });
+        setUser({ ...user, avatarUrl: resolved });
       }
       toast.success("Profile photo updated");
     } catch (error) {

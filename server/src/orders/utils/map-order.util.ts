@@ -68,6 +68,7 @@ function mapOrderItem(item: OrderItem): OrderLineItemResponse {
   const variant = item.variant;
   const product = variant?.product;
   const image =
+    item.imageUrl ??
     product?.images?.[0]?.urlPath ??
     (product?.images?.length ? product.images[0].urlPath : undefined);
 

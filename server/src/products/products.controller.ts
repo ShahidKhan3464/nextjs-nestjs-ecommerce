@@ -78,4 +78,10 @@ export class ProductsController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.remove(id);
   }
+
+  @Patch(':id/restore')
+  @Roles(UserRole.ADMIN)
+  restore(@Param('id', ParseIntPipe) id: number) {
+    return this.productsService.restore(id);
+  }
 }

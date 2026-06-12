@@ -30,6 +30,7 @@ export class GetOrderProvider {
         .leftJoinAndSelect('order.items', 'items')
         .leftJoinAndSelect('items.variant', 'variant')
         .leftJoinAndSelect('variant.product', 'product')
+        .withDeleted()
         .where('order.id = :orderId', { orderId }),
       'product',
     ).getOne();

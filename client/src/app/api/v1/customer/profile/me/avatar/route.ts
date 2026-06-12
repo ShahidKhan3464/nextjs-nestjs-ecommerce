@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/require-auth";
 import { getBackendUrl } from "@/lib/backend-url";
 import { jsonMessage, jsonOk } from "@/lib/api-response";
+import { resolveUploadUrl } from "@/lib/resolve-upload-url";
 import { nestErrorMessage, forwardAuthorization } from "@/lib/nest-http";
 
 export async function POST(req: Request) {
@@ -46,5 +47,7 @@ export async function POST(req: Request) {
     return jsonMessage("Invalid avatar response", 500);
   }
 
-  return jsonOk({ data: { avatarUrl } });
+  return jsonOk({
+    data: { avatarUrl: resolveUploadUrl(avatarUrl) ?? avatarUrl },
+  });
 }

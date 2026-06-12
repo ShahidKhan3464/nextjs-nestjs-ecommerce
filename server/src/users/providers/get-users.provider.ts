@@ -4,6 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { QueryUserDto } from '../dto/query-user.dto';
 import { UserRole } from '../constants/user.constants';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { FileOwnerModule } from 'src/common/files/file.constants';
+import { StoredFile } from 'src/common/files/entities/stored-file.entity';
 import { PaginationProviders } from 'src/common/pagination/providers/pagination.providers';
 import { PaginateQueryResult } from 'src/common/pagination/interfaces/paginated.interfaces';
 
@@ -11,11 +13,17 @@ export type FindUsersQuery = Omit<QueryUserDto, 'isBlocked'> & {
   isBlocked?: boolean;
 };
 
+export type UserMeResponse = User & {
+  avatarUrl?: string;
+};
+
 @Injectable()
 export class GetUsersProvider {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(StoredFile)
+    private readonly fileRepository: Repository<StoredFile>,
     private readonly paginationProvider: PaginationProviders,
   ) {}
 
@@ -52,5 +60,14 @@ export class GetUsersProvider {
       throw new NotFoundException('User not found');
     }
     return user;
+  }
+
+  public async findMeWithAvatar(id: number): Promise<UserMeResponse> {
+    const user = await this.findOne(id);
+    const avatar = await this.fileRepository.findOne({
+      where: { ownerModule: FileOwnerModule.CUSTOMER, ownerId: id },
+      order: { sortOrder: 'ASC' },
+    });
+    return { ...user, avatarUrl: avatar?.urlPath };
   }
 }

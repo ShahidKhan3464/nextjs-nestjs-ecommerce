@@ -3,13 +3,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
+import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { ROUTES } from "@/constants/routes";
-import { Trash2, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { queryKeys } from "@/constants/query-keys";
 import { getApiErrorMessage } from "@/lib/api-error";
+import { Eye, Trash2, RotateCcw } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
 import { AdminTableSkeleton } from "@/modules/admin/shared";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteAdminProduct,
   fetchAdminProducts,
+  restoreAdminProduct,
 } from "../services/products.service";
 import {
   Select,
@@ -45,6 +47,23 @@ import {
   AlertDialogHeader,
   AlertDialogDescription,
 } from "@/components/ui/alert-dialog";
+
+function ProductThumb({ src, alt }: { src: string; alt: string }) {
+  const [failed, setFailed] = React.useState(false);
+
+  return (
+    <div className="relative size-10 overflow-hidden rounded-md bg-muted">
+      <Image
+        fill
+        alt={alt}
+        sizes="40px"
+        className="object-cover"
+        onError={() => setFailed(true)}
+        src={failed ? "/placeholder.svg" : src}
+      />
+    </div>
+  );
+}
 
 export function AdminProductsList() {
   const qc = useQueryClient();
@@ -85,6 +104,16 @@ export function AdminProductsList() {
     },
     onError: (error) =>
       toast.error(getApiErrorMessage(error, "Could not delete product")),
+  });
+
+  const restore = useMutation({
+    mutationFn: restoreAdminProduct,
+    onSuccess: async () => {
+      toast.success("Product restored");
+      await qc.invalidateQueries({ queryKey: queryKeys.admin.products });
+    },
+    onError: (error) =>
+      toast.error(getApiErrorMessage(error, "Could not restore product")),
   });
 
   const showInitialSkeleton = isPending && !data;
@@ -183,15 +212,7 @@ export function AdminProductsList() {
                 data.products.map((p: Product) => (
                   <TableRow key={p.id}>
                     <TableCell>
-                      <div className="relative size-10 overflow-hidden rounded-md bg-muted">
-                        <Image
-                          fill
-                          alt=""
-                          sizes="40px"
-                          src={p.images[0]}
-                          className="object-cover"
-                        />
-                      </div>
+                      <ProductThumb alt={p.name} src={p.images[0]} />
                     </TableCell>
                     <TableCell className="font-medium">{p.name}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">
@@ -205,23 +226,32 @@ export function AdminProductsList() {
                         <Link
                           href={ROUTES.productEdit(p.id)}
                           className={cn(
-                            buttonVariants({
-                              variant: "secondary",
-                              size: "icon",
-                            })
+                            buttonVariants({ variant: "outline", size: "icon" })
                           )}
-                          aria-label={`Edit ${p.name}`}
+                          aria-label={`View ${p.name}`}
                         >
-                          <Pencil className="size-4" />
+                          <Eye className="size-4" />
                         </Link>
-                        <Button
-                          size="icon"
-                          variant="destructive"
-                          aria-label={`Delete ${p.name}`}
-                          onClick={() => setDeleteTarget(p)}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
+                        {p.isRemoved ? (
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            aria-label={`Restore ${p.name}`}
+                            disabled={restore.isPending}
+                            onClick={() => restore.mutate(p.id)}
+                          >
+                            <RotateCcw className="size-4" />
+                          </Button>
+                        ) : (
+                          <Button
+                            size="icon"
+                            variant="destructive"
+                            aria-label={`Remove ${p.name}`}
+                            onClick={() => setDeleteTarget(p)}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -253,10 +283,10 @@ export function AdminProductsList() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete product?</AlertDialogTitle>
+            <AlertDialogTitle>Remove product?</AlertDialogTitle>
             <AlertDialogDescription>
               {deleteTarget
-                ? `This will permanently remove "${deleteTarget.name}" and its variants from the catalog.`
+                ? `"${deleteTarget.name}" will be removed from the catalog. You can restore it later from the Removed filter.`
                 : null}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -269,7 +299,7 @@ export function AdminProductsList() {
                 if (deleteTarget) remove.mutate(deleteTarget.id);
               }}
             >
-              Delete
+              Remove
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
