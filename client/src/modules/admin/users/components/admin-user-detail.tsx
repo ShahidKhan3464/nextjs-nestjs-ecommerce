@@ -56,7 +56,7 @@ export function AdminUserDetail({ userId }: Props) {
   if (isPending) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-14 w-72" />
         <Skeleton className="h-64 w-full rounded-xl" />
       </div>
     );

@@ -149,7 +149,7 @@ export function AdminUsersList() {
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="all">All</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="blocked">Blocked</SelectItem>
               </SelectContent>
