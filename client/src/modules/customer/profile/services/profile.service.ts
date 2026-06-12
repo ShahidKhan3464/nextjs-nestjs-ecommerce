@@ -3,11 +3,18 @@ import { api } from "@/services/api/client";
 import type { ApiResponse } from "@/types/api";
 import { resolveUploadUrl } from "@/lib/resolve-upload-url";
 
+let profileFetchInFlight: Promise<User> | null = null;
+
 export async function fetchProfile() {
-  const res = await api.get<ApiResponse<{ user: User }>>(
-    "/api/v1/customer/profile/me"
-  );
-  return res.data.data.user;
+  if (!profileFetchInFlight) {
+    profileFetchInFlight = api
+      .get<ApiResponse<{ user: User }>>("/api/v1/customer/profile/me")
+      .then((res) => res.data.data.user)
+      .finally(() => {
+        profileFetchInFlight = null;
+      });
+  }
+  return profileFetchInFlight;
 }
 
 export async function updateProfile(body: {

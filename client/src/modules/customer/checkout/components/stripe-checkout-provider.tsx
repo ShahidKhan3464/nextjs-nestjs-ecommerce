@@ -17,7 +17,10 @@ export function StripeCheckoutProvider({ clientSecret, children }: Props) {
   const options = React.useMemo(
     () => ({
       clientSecret,
-      appearance: { theme: "stripe" as const },
+      appearance: {
+        theme: "stripe" as const,
+        variables: { borderRadius: "6px" },
+      },
     }),
     [clientSecret]
   );

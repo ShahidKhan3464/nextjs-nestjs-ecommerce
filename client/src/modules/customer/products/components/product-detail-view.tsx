@@ -13,8 +13,11 @@ import { useRecentlyViewedStore } from "@/store/recently-viewed-store";
 import { useWishlistHydrate } from "@/shared/hooks/use-wishlist-hydrate";
 import {
   formatVariantLabel,
+  findVariantForSize,
+  findVariantForColor,
   findVariantByOptions,
   uniqueVariantOptionValues,
+  hasUniqueVariantOptionMatrix,
 } from "../lib/variant-label";
 
 type Props = {
@@ -57,7 +60,7 @@ function OptionPills({
               type="button"
               onClick={() => onChange(opt)}
               className={cn(
-                "min-w-11 rounded-md border px-4 py-2 text-sm font-medium transition-all",
+                "min-w-11 cursor-pointer rounded-md border px-4 py-2 text-sm font-medium transition-all",
                 "hover:border-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 selected
                   ? "border-foreground bg-foreground text-background"
@@ -86,58 +89,46 @@ export function ProductDetailView({ product }: Props) {
     [product.variants]
   );
 
-  const useOptionPickers = sizes.length > 0 || colors.length > 0;
+  const useOptionPickers =
+    (sizes.length > 0 || colors.length > 0) &&
+    hasUniqueVariantOptionMatrix(product.variants) &&
+    product.variants.length > 1;
 
-  const [variantId, setVariantId] = React.useState(
-    product.variants[0]?.id ?? ""
+  const defaultVariant = product.variants[0];
+  const [variantId, setVariantId] = React.useState(defaultVariant?.id ?? "");
+  const [selectedSize, setSelectedSize] = React.useState(
+    defaultVariant?.options?.size?.trim() ?? sizes[0]
   );
-  const [selectedSize, setSelectedSize] = React.useState(sizes[0]);
-  const [selectedColor, setSelectedColor] = React.useState(colors[0]);
+  const [selectedColor, setSelectedColor] = React.useState(
+    defaultVariant?.options?.color?.trim() ?? colors[0]
+  );
 
   React.useEffect(() => {
     recordView(product.slug ?? product.id);
   }, [product.slug, product.id, recordView]);
 
-  React.useEffect(() => {
-    if (!useOptionPickers) return;
-    const match = findVariantByOptions(
-      product.variants,
-      sizes.length > 0 ? selectedSize : undefined,
-      colors.length > 0 ? selectedColor : undefined
-    );
-    if (match) setVariantId(match.id);
-  }, [
-    useOptionPickers,
-    selectedSize,
-    selectedColor,
-    product.variants,
-    sizes.length,
-    colors.length,
-  ]);
-
-  function selectVariantOptions(nextSize?: string, nextColor?: string) {
-    const exact = findVariantByOptions(
-      product.variants,
-      sizes.length > 0 ? nextSize : undefined,
-      colors.length > 0 ? nextColor : undefined
-    );
-    const fallback =
-      exact ??
-      product.variants.find(
-        (v) =>
-          (nextSize && v.options?.size?.trim() === nextSize) ||
-          (nextColor && v.options?.color?.trim() === nextColor)
-      );
-
-    if (!fallback) return;
-
-    setVariantId(fallback.id);
+  function applyVariant(match: ProductVariant) {
+    setVariantId(match.id);
     if (sizes.length > 0) {
-      setSelectedSize(fallback.options?.size?.trim() ?? nextSize ?? sizes[0]);
+      setSelectedSize(match.options?.size?.trim() ?? sizes[0]);
     }
     if (colors.length > 0) {
-      setSelectedColor(fallback.options?.color?.trim() ?? nextColor ?? colors[0]);
+      setSelectedColor(match.options?.color?.trim() ?? colors[0]);
     }
+  }
+
+  function handleSizeChange(size: string) {
+    const match =
+      findVariantByOptions(product.variants, size, selectedColor) ??
+      findVariantForSize(product.variants, size, selectedColor);
+    if (match) applyVariant(match);
+  }
+
+  function handleColorChange(color: string) {
+    const match =
+      findVariantByOptions(product.variants, selectedSize, color) ??
+      findVariantForColor(product.variants, color, selectedSize);
+    if (match) applyVariant(match);
   }
 
   const variant: ProductVariant | undefined = product.variants.find(
@@ -194,8 +185,8 @@ export function ProductDetailView({ product }: Props) {
           <Image
             fill
             priority
-            alt={product.name}
             src={activeImage}
+            alt={product.name}
             sizes="(max-width: 1024px) 100vw, 50vw"
             className="object-cover transition-opacity duration-300"
           />
@@ -286,17 +277,13 @@ export function ProductDetailView({ product }: Props) {
                     label="Size"
                     options={sizes}
                     value={selectedSize}
-                    onChange={(size) =>
-                      selectVariantOptions(size, selectedColor)
-                    }
+                    onChange={handleSizeChange}
                   />
                   <OptionPills
                     label="Color"
                     options={colors}
                     value={selectedColor}
-                    onChange={(color) =>
-                      selectVariantOptions(selectedSize, color)
-                    }
+                    onChange={handleColorChange}
                   />
                 </>
               ) : (

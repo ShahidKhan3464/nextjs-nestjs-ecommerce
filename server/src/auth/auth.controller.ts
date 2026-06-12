@@ -1,6 +1,7 @@
 import { ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { AuthService } from './auth.service';
+import { Throttle } from '@nestjs/throttler';
 import { Auth } from './decorators/auth.decorator';
 import { AuthType } from './constants/auth.constants';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -16,6 +17,7 @@ export class AuthController {
 
   @Post('register')
   @Auth(AuthType.NONE)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   async register(@Body() dto: CreateUserDto) {
     return this.authService.register(dto);
   }
@@ -23,6 +25,7 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @Auth(AuthType.NONE)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
@@ -30,6 +33,7 @@ export class AuthController {
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   @Auth(AuthType.NONE)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.authService.forgotPassword(dto);
   }
@@ -37,6 +41,7 @@ export class AuthController {
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   @Auth(AuthType.NONE)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   async resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);
   }

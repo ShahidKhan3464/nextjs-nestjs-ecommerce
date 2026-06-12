@@ -10,8 +10,8 @@ import { ROUTES } from "@/constants/routes";
 import { Input } from "@/components/ui/input";
 import { queryKeys } from "@/constants/query-keys";
 import { getApiErrorMessage } from "@/lib/api-error";
-import { Eye, Trash2, RotateCcw } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
+import { Pencil, Trash2, RotateCcw } from "lucide-react";
 import { AdminTableSkeleton } from "@/modules/admin/shared";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -39,12 +39,12 @@ import {
 } from "@/components/ui/table";
 import {
   AlertDialog,
+  AlertDialogTitle,
   AlertDialogAction,
   AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogTitle,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogContent,
   AlertDialogDescription,
 } from "@/components/ui/alert-dialog";
 
@@ -228,9 +228,9 @@ export function AdminProductsList() {
                           className={cn(
                             buttonVariants({ variant: "outline", size: "icon" })
                           )}
-                          aria-label={`View ${p.name}`}
+                          aria-label={`Edit ${p.name}`}
                         >
-                          <Eye className="size-4" />
+                          <Pencil className="size-4" />
                         </Link>
                         {p.isRemoved ? (
                           <Button

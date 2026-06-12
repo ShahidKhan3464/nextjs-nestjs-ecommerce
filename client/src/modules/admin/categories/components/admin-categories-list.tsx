@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input";
 import { queryKeys } from "@/constants/query-keys";
 import type { AdminCategoryOption } from "../types";
 import { getApiErrorMessage } from "@/lib/api-error";
-import { Eye, Trash2, RotateCcw } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
+import { Pencil, Trash2, RotateCcw } from "lucide-react";
 import { AdminTableSkeleton } from "@/modules/admin/shared";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -199,13 +199,13 @@ export function AdminCategoriesList() {
                     <TableCell>
                       <div className="flex items-center justify-center gap-2">
                         <Link
-                          aria-label={`View ${c.name}`}
+                          aria-label={`Edit ${c.name}`}
                           href={ROUTES.category(String(c.id))}
                           className={cn(
                             buttonVariants({ size: "icon", variant: "outline" })
                           )}
                         >
-                          <Eye className="size-4" />
+                          <Pencil className="size-4" />
                         </Link>
                         {c.isRemoved ? (
                           <Button
