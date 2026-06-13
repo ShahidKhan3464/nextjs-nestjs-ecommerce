@@ -1,6 +1,6 @@
 import { Order } from '../entities/order.entity';
 import { OrderItem } from '../entities/order-item.entity';
-import { OrderStatus } from '../constants/order.constants';
+import { OrderStatus, PaymentStatus } from '../constants/order.constants';
 import { ProductVariant } from 'src/products/entities/product-variant.entity';
 
 export type OrderAddress = {
@@ -32,7 +32,12 @@ export type OrderResponse = {
   status: string;
   subtotal: number;
   createdAt: string;
+  shippedAt?: string;
   orderNumber: string;
+  deliveredAt?: string;
+  cancelledAt?: string;
+  paymentStatus: string;
+  cancellationReason?: string;
   paymentMethodSummary: string;
   shippingAddress: OrderAddress;
   items: OrderLineItemResponse[];
@@ -60,8 +65,8 @@ function parseShippingAddress(raw: string): OrderAddress {
   }
 }
 
-function mapStatus(status: OrderStatus): string {
-  return status.toLowerCase();
+function mapEnumValue(value: OrderStatus | PaymentStatus): string {
+  return value.toLowerCase();
 }
 
 function mapOrderItem(item: OrderItem): OrderLineItemResponse {
@@ -89,11 +94,16 @@ export function mapOrderToResponse(order: Order): OrderResponse {
     tax: Number(order.tax),
     userId: String(order.userId),
     orderNumber: order.orderNumber,
-    status: mapStatus(order.status),
     subtotal: Number(order.subtotal),
     total: Number(order.totalAmount),
+    status: mapEnumValue(order.status),
     createdAt: order.createdAt.toISOString(),
+    shippedAt: order.shippedAt?.toISOString(),
     items: (order.items ?? []).map(mapOrderItem),
+    deliveredAt: order.deliveredAt?.toISOString(),
+    cancelledAt: order.cancelledAt?.toISOString(),
+    paymentStatus: mapEnumValue(order.paymentStatus),
+    cancellationReason: order.cancellationReason ?? undefined,
     paymentMethodSummary: order.paymentMethodSummary ?? 'Card',
     shippingAddress: parseShippingAddress(order.shippingAddress),
   };

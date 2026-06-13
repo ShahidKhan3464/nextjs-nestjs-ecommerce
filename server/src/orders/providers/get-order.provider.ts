@@ -2,7 +2,6 @@ import { Repository } from 'typeorm';
 import { Order } from '../entities/order.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
-import { OrderStatus } from '../constants/order.constants';
 import { UserRole } from 'src/users/constants/user.constants';
 import { joinProductImages } from 'src/common/files/file-query.util';
 import { OrderResponse, mapOrderToResponse } from '../utils/map-order.util';
@@ -44,10 +43,6 @@ export class GetOrderProvider {
 
     if (!isAdmin && order.userId !== userId) {
       throw new ForbiddenException();
-    }
-
-    if (!isAdmin && order.status === OrderStatus.PENDING) {
-      throw new NotFoundException('Order not found');
     }
 
     return {

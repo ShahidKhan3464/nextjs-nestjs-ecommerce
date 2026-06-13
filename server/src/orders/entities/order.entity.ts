@@ -1,6 +1,6 @@
 import { OrderItem } from './order-item.entity';
 import { User } from 'src/users/entities/user.entity';
-import { OrderStatus } from '../constants/order.constants';
+import { OrderStatus, PaymentStatus } from '../constants/order.constants';
 import {
   Column,
   Entity,
@@ -30,6 +30,13 @@ export class Order {
   })
   status: OrderStatus;
 
+  @Column({
+    type: 'enum',
+    enum: PaymentStatus,
+    default: PaymentStatus.PAID,
+  })
+  paymentStatus: PaymentStatus;
+
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   totalAmount: number;
 
@@ -47,6 +54,18 @@ export class Order {
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   paymentMethodSummary: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  cancellationReason: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  shippedAt: Date | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  deliveredAt: Date | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  cancelledAt: Date | null;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })

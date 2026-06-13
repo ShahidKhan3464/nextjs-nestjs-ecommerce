@@ -7,12 +7,12 @@ import stripeConfig from 'src/config/stripe.config';
 import type { Stripe as StripeTypes } from 'stripe';
 import { UsersService } from 'src/users/users.service';
 import { OrderItem } from '../entities/order-item.entity';
-import { OrderStatus } from '../constants/order.constants';
 import { CartItem } from 'src/cart/entities/cart-item.entity';
 import { MailService } from 'src/mail/providers/mail.service';
 import { CompleteCheckoutDto } from '../dto/complete-checkout.dto';
 import { joinProductImages } from 'src/common/files/file-query.util';
 import { CheckoutSession } from '../entities/checkout-session.entity';
+import { OrderStatus, PaymentStatus } from '../constants/order.constants';
 import { ProductVariant } from 'src/products/entities/product-variant.entity';
 import {
   Inject,
@@ -133,7 +133,8 @@ export class CompleteCheckoutProvider {
         userId,
         orderNumber,
         tax: session.tax,
-        status: OrderStatus.PAID,
+        status: OrderStatus.PENDING,
+        paymentStatus: PaymentStatus.PAID,
         subtotal: session.subtotal,
         totalAmount: session.totalAmount,
         paymentMethodSummary: paymentSummary,

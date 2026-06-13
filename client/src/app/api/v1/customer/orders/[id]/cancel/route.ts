@@ -8,11 +8,11 @@ import {
   normalizeNestOrderPayload,
 } from "@/lib/nest-order-mapper";
 
-const statusSchema = z.object({
-  status: z.enum(["SHIPPED", "DELIVERED"]),
+const cancelSchema = z.object({
+  reason: z.string().trim().min(1).max(500),
 });
 
-export async function PATCH(
+export async function POST(
   req: Request,
   ctx: { params: Promise<{ id: string }> }
 ) {
@@ -25,16 +25,16 @@ export async function PATCH(
     return jsonMessage("Invalid JSON body", 400);
   }
 
-  const parsed = statusSchema.safeParse(json);
+  const parsed = cancelSchema.safeParse(json);
   if (!parsed.success) {
-    return jsonMessage("Invalid status payload", 422);
+    return jsonMessage("Cancellation reason is required", 422);
   }
 
   const backend = getBackendUrl();
   const res = await fetch(
-    `${backend}/orders/${encodeURIComponent(id)}/status`,
+    `${backend}/orders/${encodeURIComponent(id)}/cancel`,
     {
-      method: "PATCH",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         ...forwardAuthorization(req),
@@ -57,7 +57,7 @@ export async function PATCH(
   const envelope = raw as { data?: NestOrderPayload };
   const orderRaw = envelope?.data;
   if (!orderRaw) {
-    return jsonMessage("Invalid status response", 500);
+    return jsonMessage("Invalid cancel response", 500);
   }
 
   const body: ApiResponse<{ order: Order }> = {

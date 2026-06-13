@@ -4,9 +4,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
 import { OrderStatus } from '../constants/order.constants';
 import { MailService } from 'src/mail/providers/mail.service';
-import { Injectable, NotFoundException } from '@nestjs/common';
 import { joinProductImages } from 'src/common/files/file-query.util';
 import { OrderResponse, mapOrderToResponse } from '../utils/map-order.util';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+
+const ALLOWED_TRANSITIONS: Partial<Record<OrderStatus, OrderStatus[]>> = {
+  [OrderStatus.PENDING]: [OrderStatus.SHIPPED],
+  [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED],
+};
 
 @Injectable()
 export class UpdateOrderStatusProvider {
@@ -33,8 +42,23 @@ export class UpdateOrderStatusProvider {
       throw new NotFoundException('Order not found');
     }
 
+    const allowed = ALLOWED_TRANSITIONS[order.status] ?? [];
+    if (!allowed.includes(status)) {
+      throw new BadRequestException(
+        `Cannot transition order from ${order.status} to ${status}`,
+      );
+    }
+
     const previousStatus = order.status;
     order.status = status;
+
+    if (status === OrderStatus.SHIPPED && !order.shippedAt) {
+      order.shippedAt = new Date();
+    }
+    if (status === OrderStatus.DELIVERED && !order.deliveredAt) {
+      order.deliveredAt = new Date();
+    }
+
     await this.orderRepository.save(order);
 
     const response = mapOrderToResponse(order);

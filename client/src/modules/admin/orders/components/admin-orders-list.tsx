@@ -4,7 +4,6 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { EyeIcon } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { queryKeys } from "@/constants/query-keys";
 import { formatOrderDate } from "@/lib/format-date";
@@ -15,6 +14,10 @@ import { fetchAdminOrders } from "../services/orders.service";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  OrderStatusBadge,
+  PaymentStatusBadge,
+} from "@/modules/customer/orders/components/order-status-badges";
 import {
   Select,
   SelectItem,
@@ -31,23 +34,18 @@ import {
   TableHeader,
 } from "@/components/ui/table";
 
-const statusVariant: Record<
-  string,
-  "default" | "secondary" | "outline" | "destructive"
-> = {
-  paid: "default",
-  pending: "outline",
-  shipped: "secondary",
-  delivered: "secondary",
-  cancelled: "destructive",
-};
-
 const ORDER_STATUS_OPTIONS = [
   { value: "all", label: "All" },
-  { value: "paid", label: "Paid" },
+  { value: "pending", label: "Pending" },
   { value: "shipped", label: "Shipped" },
   { value: "delivered", label: "Delivered" },
   { value: "cancelled", label: "Cancelled" },
+] as const;
+
+const PAYMENT_STATUS_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "paid", label: "Paid" },
+  { value: "refunded", label: "Refunded" },
 ] as const;
 
 export function AdminOrdersList() {
@@ -56,18 +54,26 @@ export function AdminOrdersList() {
   const [perPage, setPerPage] = useState(10);
   const [searchInput, setSearchInput] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [paymentFilter, setPaymentFilter] = useState("all");
   const debouncedSearch = useDebouncedValue(searchInput, 500);
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, statusFilter]);
+  }, [debouncedSearch, statusFilter, paymentFilter]);
+
+  const listParams = useMemo(() => {
+    const params: {
+      status?: string;
+      paymentStatus?: string;
+    } = {};
+    if (statusFilter !== "all") params.status = statusFilter;
+    if (paymentFilter !== "all") params.paymentStatus = paymentFilter;
+    return Object.keys(params).length > 0 ? params : undefined;
+  }, [statusFilter, paymentFilter]);
 
   const { data, isPending } = useQuery({
-    queryKey: queryKeys.admin.orders({ status: statusFilter }),
-    queryFn: () =>
-      fetchAdminOrders(
-        statusFilter === "all" ? undefined : { status: statusFilter }
-      ),
+    queryKey: queryKeys.admin.orders(listParams ?? {}),
+    queryFn: () => fetchAdminOrders(listParams),
   });
 
   const filtered = useMemo(() => {
@@ -94,9 +100,10 @@ export function AdminOrdersList() {
   if (isPending || !data) {
     return (
       <AdminTableSkeleton
-        filterWidths={["w-72", "w-32", "w-24"]}
+        filterWidths={["w-72", "w-32", "w-32", "w-24"]}
         columns={[
           { className: "flex-1" },
+          { className: "w-24" },
           { className: "w-24" },
           { className: "flex-1" },
           { className: "w-24" },
@@ -108,18 +115,18 @@ export function AdminOrdersList() {
 
   const total = data.length;
   const hasSearch = debouncedSearch.trim().length > 0;
-  const hasStatusFilter = statusFilter !== "all";
-  const isEmptyCatalog = total === 0 && !hasSearch && !hasStatusFilter;
+  const hasFilters = statusFilter !== "all" || paymentFilter !== "all";
+  const isEmptyCatalog = total === 0 && !hasSearch && !hasFilters;
   const showPagination = filtered.length > 0;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2">
         <div className="w-72">
           <Input
             value={searchInput}
             disabled={isEmptyCatalog}
-            placeholder="Search by order id"
+            placeholder="Search orders"
             onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
@@ -130,10 +137,28 @@ export function AdminOrdersList() {
             onValueChange={(value) => setStatusFilter(value ?? "all")}
           >
             <SelectTrigger className="w-full" disabled={isEmptyCatalog}>
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder="Order status" />
             </SelectTrigger>
             <SelectContent>
               {ORDER_STATUS_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="w-32">
+          <Select
+            value={paymentFilter}
+            disabled={isEmptyCatalog}
+            onValueChange={(value) => setPaymentFilter(value ?? "all")}
+          >
+            <SelectTrigger className="w-full" disabled={isEmptyCatalog}>
+              <SelectValue placeholder="Payment" />
+            </SelectTrigger>
+            <SelectContent>
+              {PAYMENT_STATUS_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
@@ -156,6 +181,7 @@ export function AdminOrdersList() {
             <TableRow>
               <TableHead>Order</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Payment</TableHead>
               <TableHead>Placed</TableHead>
               <TableHead>Total</TableHead>
               <TableHead className="w-36 text-center">Actions</TableHead>
@@ -165,7 +191,7 @@ export function AdminOrdersList() {
             {pageRows.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={6}
                   className="text-muted-foreground py-10 text-center text-sm"
                 >
                   No orders found.
@@ -176,9 +202,10 @@ export function AdminOrdersList() {
                 <TableRow key={o.id}>
                   <TableCell className="font-mono text-sm">{o.orderNumber}</TableCell>
                   <TableCell>
-                    <Badge variant={statusVariant[o.status] ?? "outline"}>
-                      {o.status}
-                    </Badge>
+                    <OrderStatusBadge status={o.status} />
+                  </TableCell>
+                  <TableCell>
+                    <PaymentStatusBadge status={o.paymentStatus} />
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm tabular-nums">
                     {formatOrderDate(o.createdAt)}

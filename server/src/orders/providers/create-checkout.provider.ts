@@ -11,7 +11,6 @@ import { joinProductImages } from 'src/common/files/file-query.util';
 import { CheckoutSession } from '../entities/checkout-session.entity';
 import { Inject, Injectable, BadRequestException } from '@nestjs/common';
 import { CheckoutSessionItem } from '../entities/checkout-session-item.entity';
-import { CleanupAbandonedOrdersProvider } from './cleanup-abandoned-orders.provider';
 
 export type CheckoutPreview = {
   tax: number;
@@ -36,7 +35,6 @@ export class CreateCheckoutProvider {
     @InjectRepository(CartItem)
     private readonly cartRepository: Repository<CartItem>,
     private readonly dataSource: DataSource,
-    private readonly cleanupAbandonedOrdersProvider: CleanupAbandonedOrdersProvider,
     @Inject(stripeConfig.KEY)
     private readonly stripeConfiguration: ConfigType<typeof stripeConfig>,
   ) {
@@ -51,8 +49,6 @@ export class CreateCheckoutProvider {
     userId: number,
     dto: CreateCheckoutDto,
   ): Promise<CheckoutSessionResponse> {
-    await this.cleanupAbandonedOrdersProvider.cleanupForUser(userId);
-
     const existingSessions = await this.sessionRepository.find({
       where: { userId },
     });

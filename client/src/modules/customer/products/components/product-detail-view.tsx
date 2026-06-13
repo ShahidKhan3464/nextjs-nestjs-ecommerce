@@ -209,7 +209,7 @@ export function ProductDetailView({ product }: Props) {
                   onClick={() => setActiveIndex(index)}
                   aria-label={`View image ${index + 1} of ${galleryImages.length}`}
                   className={cn(
-                    "border-border relative size-20 shrink-0 overflow-hidden rounded-lg border-2 bg-muted/40 transition-all",
+                    "border-border relative cursor-pointer size-20 shrink-0 overflow-hidden rounded-lg border-2 bg-muted/40 transition-all",
                     "hover:border-foreground/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     selected && "border-foreground ring-1 ring-foreground/20"
                   )}
