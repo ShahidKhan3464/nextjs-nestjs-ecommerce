@@ -50,4 +50,8 @@ export class ProductsService {
   public async remove(id: number): Promise<void> {
     return await this.deleteProductProvider.remove(id);
   }
+
+  public async restore(id: number): Promise<Product> {
+    return await this.deleteProductProvider.restore(id);
+  }
 }

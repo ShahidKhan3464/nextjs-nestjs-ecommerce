@@ -1,6 +1,7 @@
 import type { ApiResponse } from "@/types";
 import { getBackendUrl } from "@/lib/backend-url";
 import { jsonMessage, jsonOk } from "@/lib/api-response";
+import type { AdminCategoryOption } from "@/modules/admin/categories/types";
 import {
   nestErrorMessage,
   forwardAuthorization,
@@ -43,7 +44,7 @@ export async function GET(req: Request) {
   }
 
   const body: ApiResponse<{
-    categories: NestCategoryPayload[];
+    categories: AdminCategoryOption[];
     pagination: {
       page: number;
       limit: number;
@@ -52,7 +53,12 @@ export async function GET(req: Request) {
     };
   }> = {
     data: {
-      categories: inner.data,
+      categories: inner.data.map((category) => ({
+        id: category.id,
+        name: category.name,
+        description: category.description,
+        isRemoved: Boolean(category.deletedAt),
+      })),
       pagination: {
         page: inner.page ?? 1,
         limit: inner.limit ?? 10,

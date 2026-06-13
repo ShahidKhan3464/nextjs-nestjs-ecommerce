@@ -56,6 +56,7 @@ export class GetUserDetailProvider {
         .leftJoinAndSelect('order.items', 'items')
         .leftJoinAndSelect('items.variant', 'variant')
         .leftJoinAndSelect('variant.product', 'product')
+        .withDeleted()
         .where('order.userId = :userId', { userId })
         .andWhere('order.status != :pending', { pending: OrderStatus.PENDING })
         .orderBy('order.createdAt', 'DESC'),

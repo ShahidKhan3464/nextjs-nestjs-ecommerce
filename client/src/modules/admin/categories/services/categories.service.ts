@@ -35,6 +35,7 @@ export async function fetchAdminCategories(params?: {
   limit?: number;
   page?: number;
   search?: string;
+  lifeCycle?: "active" | "removed" | "all";
 }) {
   const res = await api.get<{
     data: {
@@ -51,7 +52,12 @@ export async function fetchAdminCategories(params?: {
       limit: params?.limit ?? 10,
       page: params?.page ?? 1,
       ...(params?.search ? { search: params.search } : {}),
+      ...(params?.lifeCycle ? { lifeCycle: params.lifeCycle } : {}),
     },
   });
   return res.data.data;
+}
+
+export async function restoreAdminCategory(id: number) {
+  await api.patch(`/api/v1/admin/categories/${id}/restore`);
 }

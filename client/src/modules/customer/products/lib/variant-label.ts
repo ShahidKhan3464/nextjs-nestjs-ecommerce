@@ -44,3 +44,49 @@ export function findVariantByOptions(
     return matchSize && matchColor;
   });
 }
+
+/** Variants that match a selected size or color (for dependent option pickers). */
+export function filterVariantsByOption(
+  variants: ProductVariant[],
+  key: "size" | "color",
+  value?: string
+): ProductVariant[] {
+  if (!value) return variants;
+  return variants.filter((v) => v.options?.[key]?.trim() === value);
+}
+
+/** Whether each size+color pair maps to exactly one variant. */
+export function hasUniqueVariantOptionMatrix(
+  variants: ProductVariant[]
+): boolean {
+  const keys = variants.map(
+    (v) => `${v.options?.size?.trim() ?? ""}|${v.options?.color?.trim() ?? ""}`
+  );
+  return new Set(keys).size === variants.length;
+}
+
+/** First variant for a size, optionally preferring a color. */
+export function findVariantForSize(
+  variants: ProductVariant[],
+  size: string,
+  preferColor?: string
+): ProductVariant | undefined {
+  if (preferColor) {
+    const exact = findVariantByOptions(variants, size, preferColor);
+    if (exact) return exact;
+  }
+  return variants.find((v) => v.options?.size?.trim() === size);
+}
+
+/** First variant for a color, optionally preferring a size. */
+export function findVariantForColor(
+  variants: ProductVariant[],
+  color: string,
+  preferSize?: string
+): ProductVariant | undefined {
+  if (preferSize) {
+    const exact = findVariantByOptions(variants, preferSize, color);
+    if (exact) return exact;
+  }
+  return variants.find((v) => v.options?.color?.trim() === color);
+}

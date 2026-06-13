@@ -3,17 +3,17 @@ import { unlink } from 'fs/promises';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from '../entities/product.entity';
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { FileOwnerModule } from 'src/common/files/file.constants';
-import { StoredFile } from 'src/common/files/entities/stored-file.entity';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 
 @Injectable()
 export class DeleteProductProvider {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
-    @InjectRepository(StoredFile)
-    private readonly fileRepository: Repository<StoredFile>,
   ) {}
 
   public async remove(id: number): Promise<void> {
@@ -21,16 +21,22 @@ export class DeleteProductProvider {
     if (!product) {
       throw new NotFoundException('Product not found');
     }
-    const images = await this.fileRepository.find({
-      where: { ownerModule: FileOwnerModule.PRODUCT, ownerId: id },
-    });
-    await Promise.all(
-      images.map((img) => this.safeUnlinkPublicPath(img.urlPath)),
-    );
-    if (images.length) {
-      await this.fileRepository.remove(images);
-    }
     await this.productRepository.softRemove(product);
+  }
+
+  public async restore(id: number): Promise<Product> {
+    const product = await this.productRepository.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+    if (!product.deletedAt) {
+      throw new BadRequestException('Product is not removed');
+    }
+    await this.productRepository.recover(product);
+    return product;
   }
 
   public async safeUnlinkPublicPath(urlPath: string): Promise<void> {

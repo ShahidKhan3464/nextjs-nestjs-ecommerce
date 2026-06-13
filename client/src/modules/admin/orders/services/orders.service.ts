@@ -2,9 +2,14 @@ import type { Order } from "../types";
 import { api } from "@/services/api/client";
 import type { ApiResponse } from "@/types/api";
 
-export async function fetchAdminOrders() {
+export async function fetchAdminOrders(params?: { status?: string }) {
   const res = await api.get<ApiResponse<{ orders: Order[] }>>(
-    "/api/v1/admin/orders"
+    "/api/v1/admin/orders",
+    {
+      params: params?.status
+        ? { status: params.status.toUpperCase() }
+        : undefined,
+    }
   );
   return res.data.data.orders;
 }

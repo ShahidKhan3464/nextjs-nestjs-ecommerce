@@ -22,6 +22,7 @@ export class GetCartProvider {
         .where('cart.userId = :userId', { userId })
         .innerJoinAndSelect('cart.variant', 'variant')
         .innerJoinAndSelect('variant.product', 'product')
+        .withDeleted()
         .addOrderBy('cart.createdAt', 'ASC'),
       'product',
     ).getMany();

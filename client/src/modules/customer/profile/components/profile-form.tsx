@@ -6,11 +6,14 @@ import * as React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/auth-store";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Separator } from "@/components/ui/separator";
 import { useForm, type Resolver } from "react-hook-form";
+import { resolveUploadUrl } from "@/lib/resolve-upload-url";
 import {
+  fetchProfile,
   updateProfile,
   changePassword,
   uploadProfileAvatar,
@@ -40,12 +43,56 @@ function splitName(fullName?: string) {
   };
 }
 
+function ProfileFormSkeleton() {
+  return (
+    <div className="space-y-6">
+      <section className="space-y-3">
+        <div className="flex items-center gap-6">
+          <Skeleton className="size-24 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-9 w-28" />
+          </div>
+        </div>
+        <div className="space-y-1">
+          <Skeleton className="h-4 w-12" />
+          <Skeleton className="h-4 w-48" />
+        </div>
+      </section>
+      <Separator />
+      <section className="space-y-3">
+        <Skeleton className="h-6 w-36" />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Skeleton className="h-10 sm:col-span-1" />
+          <Skeleton className="h-10 sm:col-span-1" />
+          <Skeleton className="h-10 sm:col-span-2" />
+          <Skeleton className="h-9 w-28 sm:col-span-2" />
+        </div>
+      </section>
+      <Separator />
+      <section className="space-y-3">
+        <Skeleton className="h-6 w-24" />
+        <div className="max-w-md space-y-4">
+          <Skeleton className="h-10" />
+          <Skeleton className="h-10" />
+          <Skeleton className="h-10" />
+          <Skeleton className="h-9 w-32" />
+        </div>
+      </section>
+    </div>
+  );
+}
+
 export function ProfileForm() {
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const profileLoadedRef = React.useRef(false);
+  const [profileLoading, setProfileLoading] = React.useState(true);
   const [uploadingAvatar, setUploadingAvatar] = React.useState(false);
-  const [avatarUrl, setAvatarUrl] = React.useState(user?.avatarUrl ?? "");
+  const [avatarUrl, setAvatarUrl] = React.useState(
+    resolveUploadUrl(user?.avatarUrl) ?? ""
+  );
 
   const { firstName, lastName } = splitName(user?.fullName ?? user?.name);
 
@@ -57,6 +104,29 @@ export function ProfileForm() {
       phoneNumber: user?.phoneNumber ?? "",
     },
   });
+
+  React.useEffect(() => {
+    if (profileLoadedRef.current) return;
+    profileLoadedRef.current = true;
+
+    void fetchProfile()
+      .then((profile) => {
+        setAvatarUrl(resolveUploadUrl(profile.avatarUrl) ?? "");
+        setUser(profile);
+        const { firstName: fn, lastName: ln } = splitName(profile.fullName);
+        profileForm.reset({
+          firstName: fn,
+          lastName: ln,
+          phoneNumber: profile.phoneNumber ?? "",
+        });
+      })
+      .catch(() => {
+        profileLoadedRef.current = false;
+      })
+      .finally(() => {
+        setProfileLoading(false);
+      });
+  }, [setUser, profileForm]);
 
   const passwordForm = useForm<PasswordValues>({
     resolver: zodResolver(passwordSchema) as Resolver<PasswordValues>,
@@ -97,9 +167,10 @@ export function ProfileForm() {
     setUploadingAvatar(true);
     try {
       const url = await uploadProfileAvatar(file);
-      setAvatarUrl(url);
+      const resolved = resolveUploadUrl(url) ?? url;
+      setAvatarUrl(resolved);
       if (user) {
-        setUser({ ...user, avatarUrl: url });
+        setUser({ ...user, avatarUrl: resolved });
       }
       toast.success("Profile photo updated");
     } catch (error) {
@@ -108,6 +179,10 @@ export function ProfileForm() {
       setUploadingAvatar(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
+  }
+
+  if (profileLoading) {
+    return <ProfileFormSkeleton />;
   }
 
   return (

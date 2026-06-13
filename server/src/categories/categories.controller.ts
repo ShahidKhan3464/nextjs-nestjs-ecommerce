@@ -53,4 +53,10 @@ export class CategoriesController {
   delete(@Param('id', ParseIntPipe) id: number) {
     return this.categoriesService.delete(id);
   }
+
+  @Patch(':id/restore')
+  @Roles(UserRole.ADMIN)
+  restore(@Param('id', ParseIntPipe) id: number) {
+    return this.categoriesService.restore(id);
+  }
 }

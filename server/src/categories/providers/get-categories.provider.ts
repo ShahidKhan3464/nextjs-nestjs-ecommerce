@@ -16,6 +16,15 @@ export class GetCategoriesProvider {
 
   private buildFilteredQb(query: QueryCategoryDto) {
     const qb = this.categoryRepository.createQueryBuilder('category');
+
+    if (query.lifeCycle === 'all' || query.lifeCycle === 'removed') {
+      qb.withDeleted();
+    }
+
+    if (query.lifeCycle === 'removed') {
+      qb.andWhere('category.deletedAt IS NOT NULL');
+    }
+
     if (query.search?.trim()) {
       qb.andWhere('category.name ILIKE :search', {
         search: `%${query.search.trim()}%`,
@@ -42,7 +51,10 @@ export class GetCategoriesProvider {
   }
 
   public async findOne(id: number): Promise<Category> {
-    const category = await this.categoryRepository.findOne({ where: { id } });
+    const category = await this.categoryRepository.findOne({
+      where: { id },
+      withDeleted: true,
+    });
     if (!category) {
       throw new NotFoundException('Category not found');
     }

@@ -5,6 +5,7 @@ import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import stripeConfig from 'src/config/stripe.config';
 import type { Stripe as StripeTypes } from 'stripe';
+import { UsersService } from 'src/users/users.service';
 import { OrderItem } from '../entities/order-item.entity';
 import { OrderStatus } from '../constants/order.constants';
 import { CartItem } from 'src/cart/entities/cart-item.entity';
@@ -37,6 +38,7 @@ export class CompleteCheckoutProvider {
     private readonly sessionRepository: Repository<CheckoutSession>,
     private readonly dataSource: DataSource,
     private readonly mailService: MailService,
+    private readonly usersService: UsersService,
     @Inject(stripeConfig.KEY)
     private readonly stripeConfiguration: ConfigType<typeof stripeConfig>,
   ) {
@@ -74,7 +76,9 @@ export class CompleteCheckoutProvider {
     });
     if (existingOrder) {
       const full = await this.loadOrder(existingOrder.id);
-      return mapOrderToResponse(full);
+      const response = mapOrderToResponse(full);
+      await this.sendConfirmationEmail(existingOrder.userId, response);
+      return response;
     }
 
     const session = await joinProductImages(
@@ -83,6 +87,7 @@ export class CompleteCheckoutProvider {
         .leftJoinAndSelect('session.items', 'items')
         .leftJoinAndSelect('items.variant', 'variant')
         .leftJoinAndSelect('variant.product', 'product')
+        .withDeleted()
         .where('session.id = :sessionId', { sessionId })
         .andWhere('session.userId = :userId', { userId }),
       'product',
@@ -138,14 +143,17 @@ export class CompleteCheckoutProvider {
 
       const savedOrder = await orderRepo.save(order);
 
-      const orderItems = session.items.map((sessionItem) =>
-        itemRepo.create({
+      const orderItems = session.items.map((sessionItem) => {
+        const imageUrl =
+          sessionItem.variant?.product?.images?.[0]?.urlPath ?? null;
+        return itemRepo.create({
           orderId: savedOrder.id,
           variantId: sessionItem.variantId,
           quantity: sessionItem.quantity,
           priceAtPurchase: sessionItem.priceAtPurchase,
-        }),
-      );
+          imageUrl,
+        });
+      });
 
       await itemRepo.save(orderItems);
       await cartRepo.delete({ userId });
@@ -157,14 +165,27 @@ export class CompleteCheckoutProvider {
     const created = await this.loadOrder(orderId);
     const response = mapOrderToResponse(created);
 
-    const user = created.user;
-    if (user?.email) {
-      void this.mailService
-        .sendOrderConfirmationEmail(user.email, user.fullName, response)
-        .catch(() => undefined);
-    }
+    await this.sendConfirmationEmail(userId, response);
 
     return response;
+  }
+
+  private async sendConfirmationEmail(
+    userId: number,
+    order: OrderResponse,
+  ): Promise<void> {
+    const customer = await this.usersService.findOneById(userId);
+    if (!customer?.email) return;
+
+    try {
+      await this.mailService.sendOrderConfirmationEmail(
+        customer.email,
+        customer.fullName,
+        order,
+      );
+    } catch {
+      /* checkout must succeed even if email fails */
+    }
   }
 
   private async loadOrder(orderId: number): Promise<Order> {
@@ -175,6 +196,7 @@ export class CompleteCheckoutProvider {
         .leftJoinAndSelect('order.items', 'items')
         .leftJoinAndSelect('items.variant', 'variant')
         .leftJoinAndSelect('variant.product', 'product')
+        .withDeleted()
         .where('order.id = :orderId', { orderId }),
       'product',
     ).getOneOrFail();

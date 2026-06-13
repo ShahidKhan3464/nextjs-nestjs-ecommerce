@@ -54,6 +54,7 @@ export function unwrapNestDataResponsePayload(raw: unknown): unknown {
 export type NestCategoryPayload = {
   id: number;
   name: string;
+  deletedAt?: string | null;
   description?: string | null;
 };
 

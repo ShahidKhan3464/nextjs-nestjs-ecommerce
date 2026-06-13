@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { QueryOrderDto } from './dto/query-order.dto';
 import { CreateCheckoutDto } from './dto/create-checkout.dto';
 import { CancelCheckoutDto } from './dto/cancel-checkout.dto';
 import { CompleteCheckoutDto } from './dto/complete-checkout.dto';
@@ -21,12 +22,12 @@ export class OrdersService {
     private readonly updateOrderStatusProvider: UpdateOrderStatusProvider,
   ) {}
 
-  findMine(userId: number) {
-    return this.getOrdersProvider.findByUser(userId);
+  findMine(userId: number, query: QueryOrderDto = {}) {
+    return this.getOrdersProvider.findByUser(userId, query);
   }
 
-  findAllAdmin() {
-    return this.getOrdersProvider.findAll();
+  findAllAdmin(query: QueryOrderDto = {}) {
+    return this.getOrdersProvider.findAll(query);
   }
 
   findOne(orderId: number, userId: number) {

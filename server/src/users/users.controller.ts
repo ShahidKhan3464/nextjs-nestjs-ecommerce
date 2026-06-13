@@ -35,7 +35,7 @@ export class UsersController {
 
   @Get('me')
   getMe(@ActiveUser() userId: number) {
-    return this.usersService.findOne(userId);
+    return this.usersService.findMeWithAvatar(userId);
   }
 
   @Patch('me')

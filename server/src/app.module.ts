@@ -19,6 +19,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RolesGuard } from './auth/guards/roles/roles.guard';
 import { CategoriesModule } from './categories/categories.module';
 import environmentValidation from './config/environment.validation';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { PaginationModule } from './common/pagination/pagination.module';
 import { AccessTokenGuard } from './auth/guards/access-token/access-token.guard';
 import { AuthenticationGuard } from './auth/guards/authentication/authentication.guard';
@@ -38,6 +39,13 @@ import { DataResponseInterceptor } from './common/interceptors/data-response/dat
     PaginationModule,
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
+    ThrottlerModule.forRoot([
+      {
+        limit: 100,
+        ttl: 60_000,
+        name: 'default',
+      },
+    ]),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
@@ -73,6 +81,10 @@ import { DataResponseInterceptor } from './common/interceptors/data-response/dat
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })

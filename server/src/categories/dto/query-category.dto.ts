@@ -23,4 +23,12 @@ export class QueryCategoryDto extends PaginationQueryDto {
   @IsOptional()
   @IsIn(['ASC', 'DESC'])
   sortOrder?: 'ASC' | 'DESC' = 'ASC';
+
+  @ApiPropertyOptional({
+    enum: ['active', 'removed', 'all'],
+    default: 'active',
+  })
+  @IsOptional()
+  @IsIn(['active', 'removed', 'all'])
+  lifeCycle?: 'active' | 'removed' | 'all' = 'active';
 }

@@ -7,6 +7,7 @@ export type NestProductDto = {
   id: number;
   name: string;
   status?: string;
+  deletedAt?: string | null;
   description?: string | null;
   variants?: NestVariantDto[];
   images?: NestProductImageDto[];
@@ -58,5 +59,6 @@ export function mapNestProductToAdminProduct(p: NestProductDto): Product {
     images,
     variants,
     basePrice,
+    isRemoved: Boolean(p.deletedAt),
   };
 }

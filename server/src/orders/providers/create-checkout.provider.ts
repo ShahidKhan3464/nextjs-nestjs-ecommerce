@@ -126,6 +126,7 @@ export class CreateCheckoutProvider {
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount: amountCents,
       currency: 'usd',
+      automatic_payment_methods: { enabled: false },
       payment_method_types: ['card'],
       metadata: {
         checkoutSessionId: String(savedSession.id),

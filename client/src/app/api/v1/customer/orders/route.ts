@@ -14,7 +14,10 @@ function mapOrders(raw: unknown): Order[] {
 
 export async function GET(req: Request) {
   const backend = getBackendUrl();
-  const res = await fetch(`${backend}/orders`, {
+  const { searchParams } = new URL(req.url);
+  const status = searchParams.get("status");
+  const query = status ? `?status=${encodeURIComponent(status)}` : "";
+  const res = await fetch(`${backend}/orders${query}`, {
     headers: { ...forwardAuthorization(req) },
   });
 

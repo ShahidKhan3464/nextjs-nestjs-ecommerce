@@ -25,6 +25,10 @@ export class OrderItem {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   priceAtPurchase: number;
 
+  /** Snapshot of catalog image at purchase time (survives product removal). */
+  @Column({ type: 'varchar', length: 512, nullable: true })
+  imageUrl: string | null;
+
   @ManyToOne(() => Order, (order) => order.items, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'orderId' })
   order: Order;

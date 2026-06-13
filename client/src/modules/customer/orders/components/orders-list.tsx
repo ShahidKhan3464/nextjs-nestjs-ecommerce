@@ -17,6 +17,13 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
 import {
+  Select,
+  SelectItem,
+  SelectValue,
+  SelectContent,
+  SelectTrigger,
+} from "@/components/ui/select";
+import {
   Table,
   TableRow,
   TableBody,
@@ -36,20 +43,32 @@ const statusVariant: Record<
   cancelled: "destructive",
 };
 
+const ORDER_STATUS_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "paid", label: "Paid" },
+  { value: "shipped", label: "Shipped" },
+  { value: "delivered", label: "Delivered" },
+  { value: "cancelled", label: "Cancelled" },
+] as const;
+
 export function OrdersList() {
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [searchInput, setSearchInput] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const debouncedSearch = useDebouncedValue(searchInput, 500);
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, statusFilter]);
 
   const { data, isPending } = useQuery({
-    queryKey: queryKeys.orders.list(),
-    queryFn: fetchOrders,
+    queryKey: queryKeys.orders.list({ status: statusFilter }),
+    queryFn: () =>
+      fetchOrders(
+        statusFilter === "all" ? undefined : { status: statusFilter }
+      ),
   });
 
   const filtered = useMemo(() => {
@@ -60,13 +79,12 @@ export function OrdersList() {
       const idMatch =
         o.id.toLowerCase().includes(q) ||
         o.orderNumber.toLowerCase().includes(q);
-      const statusMatch = o.status.toLowerCase().includes(q);
       const itemMatch = o.items.some(
         (i) =>
           i.productName.toLowerCase().includes(q) ||
           i.variantLabel.toLowerCase().includes(q)
       );
-      return idMatch || statusMatch || itemMatch;
+      return idMatch || itemMatch;
     });
   }, [data, debouncedSearch]);
 
@@ -82,7 +100,7 @@ export function OrdersList() {
   if (isPending) {
     return (
       <AdminTableSkeleton
-        filterWidths={["w-72", "w-24"]}
+        filterWidths={["w-72", "w-32", "w-24"]}
         columns={[
           { className: "flex-1" },
           { className: "w-24" },
@@ -95,7 +113,7 @@ export function OrdersList() {
     );
   }
 
-  if (!data?.length) {
+  if (!data?.length && statusFilter === "all" && !debouncedSearch.trim()) {
     return (
       <EmptyState
         title="No orders yet"
@@ -118,6 +136,23 @@ export function OrdersList() {
             placeholder="Search orders"
             onChange={(e) => setSearchInput(e.target.value)}
           />
+        </div>
+        <div className="w-32">
+          <Select
+            value={statusFilter}
+            onValueChange={(value) => setStatusFilter(value ?? "all")}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              {ORDER_STATUS_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <Button
           onClick={() =>

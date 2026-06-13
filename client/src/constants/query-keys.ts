@@ -16,7 +16,8 @@ export const queryKeys = {
   },
   orders: {
     all: ["orders"] as const,
-    list: () => [...queryKeys.orders.all, "list"] as const,
+    list: (filters?: Record<string, unknown>) =>
+      [...queryKeys.orders.all, "list", filters ?? {}] as const,
     detail: (id: string) => [...queryKeys.orders.all, "detail", id] as const,
   },
   auth: {
@@ -24,7 +25,8 @@ export const queryKeys = {
   },
   admin: {
     users: ["admin", "users"] as const,
-    orders: ["admin", "orders"] as const,
+    orders: (filters?: Record<string, unknown>) =>
+      ["admin", "orders", filters ?? {}] as const,
     products: ["admin", "products"] as const,
     analytics: ["admin", "analytics"] as const,
     customers: ["admin", "customers"] as const,

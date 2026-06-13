@@ -1,6 +1,21 @@
 import type { User } from "../types";
 import { api } from "@/services/api/client";
 import type { ApiResponse } from "@/types/api";
+import { resolveUploadUrl } from "@/lib/resolve-upload-url";
+
+let profileFetchInFlight: Promise<User> | null = null;
+
+export async function fetchProfile() {
+  if (!profileFetchInFlight) {
+    profileFetchInFlight = api
+      .get<ApiResponse<{ user: User }>>("/api/v1/customer/profile/me")
+      .then((res) => res.data.data.user)
+      .finally(() => {
+        profileFetchInFlight = null;
+      });
+  }
+  return profileFetchInFlight;
+}
 
 export async function updateProfile(body: {
   fullName: string;
@@ -21,7 +36,7 @@ export async function uploadProfileAvatar(file: File) {
     form,
     { headers: { "Content-Type": "multipart/form-data" } }
   );
-  return res.data.data.avatarUrl;
+  return resolveUploadUrl(res.data.data.avatarUrl) ?? res.data.data.avatarUrl;
 }
 
 export async function changePassword(body: {

@@ -1,4 +1,5 @@
 import type { User, UserRole } from "@/modules/auth/types";
+import { resolveUploadUrl } from "@/lib/resolve-upload-url";
 
 /** Backend user shape (TypeORM entity JSON). */
 export type NestUserDto = {
@@ -7,6 +8,7 @@ export type NestUserDto = {
   email: string;
   fullName: string;
   isBlocked?: boolean;
+  avatarUrl?: string;
   createdAt?: string | Date;
   createDate?: string | Date;
   phoneNumber?: string | null;
@@ -36,5 +38,6 @@ export function mapNestUserToClient(dto: NestUserDto): User {
     fullName: dto.fullName,
     isBlocked: dto.isBlocked ?? false,
     phoneNumber: dto.phoneNumber ?? undefined,
+    avatarUrl: resolveUploadUrl(dto.avatarUrl),
   };
 }

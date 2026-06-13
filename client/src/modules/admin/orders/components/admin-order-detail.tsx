@@ -48,11 +48,11 @@ export function AdminOrderDetail({ orderId }: Props) {
       updateAdminOrderStatus(
         orderId,
         status.toUpperCase() as
-          | "PENDING"
-          | "PAID"
-          | "SHIPPED"
-          | "DELIVERED"
-          | "CANCELLED"
+        | "PENDING"
+        | "PAID"
+        | "SHIPPED"
+        | "DELIVERED"
+        | "CANCELLED"
       ),
     onSuccess: (updatedOrder) => {
       toast.success("Order status updated");
@@ -61,7 +61,7 @@ export function AdminOrderDetail({ orderId }: Props) {
           ? { ...current, order: updatedOrder }
           : { order: updatedOrder, customerUserId: updatedOrder.userId }
       );
-      void qc.invalidateQueries({ queryKey: queryKeys.admin.orders });
+      void qc.invalidateQueries({ queryKey: queryKeys.admin.orders() });
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Could not update status"));
@@ -147,8 +147,8 @@ export function AdminOrderDetail({ orderId }: Props) {
               <div className="relative size-16 shrink-0 overflow-hidden rounded-md bg-muted">
                 {item.image && (
                   <Image
-                    alt=""
                     fill
+                    alt=""
                     sizes="64px"
                     src={item.image}
                     className="object-cover"
