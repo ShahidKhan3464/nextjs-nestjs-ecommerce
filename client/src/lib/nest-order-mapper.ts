@@ -7,9 +7,14 @@ export type NestOrderPayload = {
   status: string;
   subtotal: number;
   createdAt: string;
+  shippedAt?: string;
   id: string | number;
   orderNumber?: string;
+  deliveredAt?: string;
+  cancelledAt?: string;
+  paymentStatus: string;
   userId: string | number;
+  cancellationReason?: string;
   paymentMethodSummary: string;
   items: NestOrderLineItemPayload[];
   shippingAddress: {
@@ -56,14 +61,19 @@ export function normalizeNestOrderPayload(order: NestOrderPayload): Order {
   return {
     id: String(order.id),
     tax: Number(order.tax),
+    shippedAt: order.shippedAt,
     createdAt: order.createdAt,
     total: Number(order.total),
     userId: String(order.userId),
+    deliveredAt: order.deliveredAt,
+    cancelledAt: order.cancelledAt,
     subtotal: Number(order.subtotal),
     shippingAddress: order.shippingAddress,
+    cancellationReason: order.cancellationReason,
     paymentMethodSummary: order.paymentMethodSummary,
     items: (order.items ?? []).map(normalizeLineItem),
     orderNumber: order.orderNumber ?? String(order.id),
     status: order.status.toLowerCase() as Order["status"],
+    paymentStatus: (order.paymentStatus ?? "paid").toLowerCase() as Order["paymentStatus"],
   };
 }

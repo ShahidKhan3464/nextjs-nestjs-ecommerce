@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { QueryOrderDto } from './dto/query-order.dto';
+import { CancelOrderDto } from './dto/cancel-order.dto';
 import { CreateCheckoutDto } from './dto/create-checkout.dto';
 import { CancelCheckoutDto } from './dto/cancel-checkout.dto';
 import { CompleteCheckoutDto } from './dto/complete-checkout.dto';
 import { GetOrderProvider } from './providers/get-order.provider';
 import { GetOrdersProvider } from './providers/get-orders.provider';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { CancelOrderProvider } from './providers/cancel-order.provider';
 import { CreateCheckoutProvider } from './providers/create-checkout.provider';
 import { CancelCheckoutProvider } from './providers/cancel-checkout.provider';
 import { CompleteCheckoutProvider } from './providers/complete-checkout.provider';
@@ -16,6 +18,7 @@ export class OrdersService {
   constructor(
     private readonly getOrderProvider: GetOrderProvider,
     private readonly getOrdersProvider: GetOrdersProvider,
+    private readonly cancelOrderProvider: CancelOrderProvider,
     private readonly createCheckoutProvider: CreateCheckoutProvider,
     private readonly cancelCheckoutProvider: CancelCheckoutProvider,
     private readonly completeCheckoutProvider: CompleteCheckoutProvider,
@@ -48,5 +51,9 @@ export class OrdersService {
 
   updateStatus(orderId: number, dto: UpdateOrderStatusDto) {
     return this.updateOrderStatusProvider.update(orderId, dto.status);
+  }
+
+  cancelOrder(orderId: number, userId: number, dto: CancelOrderDto) {
+    return this.cancelOrderProvider.cancel(orderId, userId, dto);
   }
 }

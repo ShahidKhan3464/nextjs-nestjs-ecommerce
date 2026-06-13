@@ -2,27 +2,71 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useMemo, useState } from "react";
 import { ROUTES } from "@/constants/routes";
-import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/constants/query-keys";
 import { formatOrderDate } from "@/lib/format-date";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { Separator } from "@/components/ui/separator";
-import { buttonVariants } from "@/components/ui/button";
-import { fetchOrder } from "../services/orders.service";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
+import {
+  AlertDialog,
+  AlertDialogTitle,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogDescription,
+} from "@/components/ui/alert-dialog";
+import {
+  fetchOrder,
+  cancelOrder,
+} from "../services/orders.service";
+import {
+  OrderStatusBadge,
+  PaymentStatusBadge,
+} from "./order-status-badges";
 
 type Props = {
   orderId: string;
 };
 
 export function OrderDetailView({ orderId }: Props) {
+  const qc = useQueryClient();
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+
   const { data, isPending, isError } = useQuery({
     queryKey: queryKeys.orders.detail(orderId),
     queryFn: () => fetchOrder(orderId),
   });
+
+  const cancelMutation = useMutation({
+    mutationFn: () => cancelOrder(orderId, { reason: cancelReason.trim() }),
+    onSuccess: (updated) => {
+      toast.success("Order cancelled");
+      qc.setQueryData(queryKeys.orders.detail(orderId), updated);
+      void qc.invalidateQueries({ queryKey: queryKeys.orders.list() });
+      setCancelOpen(false);
+      setCancelReason("");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not cancel order"));
+    },
+  });
+
+  const canCancel = useMemo(
+    () => data?.status === "pending",
+    [data?.status]
+  );
 
   if (isPending) {
     return (
@@ -62,8 +106,28 @@ export function OrderDetailView({ orderId }: Props) {
             Placed {formatOrderDate(data.createdAt)}
           </p>
         </div>
-        <Badge>{data.status}</Badge>
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex flex-wrap gap-2">
+            <OrderStatusBadge status={data.status} />
+            <PaymentStatusBadge status={data.paymentStatus} />
+          </div>
+          {canCancel ? (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setCancelOpen(true)}
+            >
+              Cancel order
+            </Button>
+          ) : null}
+        </div>
       </div>
+
+      {data.status === "cancelled" && data.cancellationReason ? (
+        <p className="text-muted-foreground rounded-lg border px-4 py-3 text-sm">
+          Cancellation reason: {data.cancellationReason}
+        </p>
+      ) : null}
 
       <section className="space-y-3">
         <h2 className="text-sm font-medium tracking-wide uppercase">Items</h2>
@@ -122,6 +186,16 @@ export function OrderDetailView({ orderId }: Props) {
             <br />
             {data.shippingAddress.country}
           </p>
+          {data.shippedAt ? (
+            <p className="text-muted-foreground text-xs">
+              Shipped {formatOrderDate(data.shippedAt)}
+            </p>
+          ) : null}
+          {data.deliveredAt ? (
+            <p className="text-muted-foreground text-xs">
+              Delivered {formatOrderDate(data.deliveredAt)}
+            </p>
+          ) : null}
         </div>
         <div className="space-y-3 text-sm">
           <h2 className="font-medium tracking-wide uppercase">Payment</h2>
@@ -149,6 +223,41 @@ export function OrderDetailView({ orderId }: Props) {
       >
         All orders
       </Link>
+
+      <AlertDialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel this order?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your payment will be refunded and stock will be restored. This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2">
+            <label htmlFor="cancel-reason" className="text-sm font-medium">
+              Reason for cancellation
+            </label>
+            <Textarea
+              id="cancel-reason"
+              value={cancelReason}
+              placeholder="Tell us why you are cancelling"
+              onChange={(e) => setCancelReason(e.target.value)}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep order</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={
+                cancelMutation.isPending || cancelReason.trim().length === 0
+              }
+              onClick={() => cancelMutation.mutate()}
+            >
+              Cancel order
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -12,11 +12,20 @@ function mapOrders(raw: unknown): Order[] {
   return (list as NestOrderPayload[]).map(normalizeNestOrderPayload);
 }
 
+function buildQueryString(searchParams: URLSearchParams): string {
+  const allowed = ["status", "paymentStatus", "userId", "dateFrom", "dateTo"];
+  const parts: string[] = [];
+  for (const key of allowed) {
+    const value = searchParams.get(key);
+    if (value) parts.push(`${key}=${encodeURIComponent(value)}`);
+  }
+  return parts.length > 0 ? `?${parts.join("&")}` : "";
+}
+
 export async function GET(req: Request) {
   const backend = getBackendUrl();
   const { searchParams } = new URL(req.url);
-  const status = searchParams.get("status");
-  const query = status ? `?status=${encodeURIComponent(status)}` : "";
+  const query = buildQueryString(searchParams);
   const res = await fetch(`${backend}/orders${query}`, {
     headers: { ...forwardAuthorization(req) },
   });

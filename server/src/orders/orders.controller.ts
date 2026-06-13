@@ -1,5 +1,6 @@
 import { OrdersService } from './orders.service';
 import { QueryOrderDto } from './dto/query-order.dto';
+import { CancelOrderDto } from './dto/cancel-order.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from 'src/users/constants/user.constants';
@@ -57,6 +58,15 @@ export class OrdersController {
   @Get(':id')
   findOne(@ActiveUser() userId: number, @Param('id', ParseIntPipe) id: number) {
     return this.ordersService.findOne(id, userId);
+  }
+
+  @Post(':id/cancel')
+  cancelOrder(
+    @ActiveUser() userId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CancelOrderDto,
+  ) {
+    return this.ordersService.cancelOrder(id, userId, dto);
   }
 
   @Patch(':id/status')

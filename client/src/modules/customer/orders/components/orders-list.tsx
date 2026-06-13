@@ -4,7 +4,6 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { EyeIcon } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { queryKeys } from "@/constants/query-keys";
 import { formatOrderDate } from "@/lib/format-date";
@@ -16,6 +15,10 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
+import {
+  OrderStatusBadge,
+  PaymentStatusBadge,
+} from "./order-status-badges";
 import {
   Select,
   SelectItem,
@@ -32,23 +35,18 @@ import {
   TableHeader,
 } from "@/components/ui/table";
 
-const statusVariant: Record<
-  string,
-  "default" | "secondary" | "outline" | "destructive"
-> = {
-  paid: "default",
-  pending: "outline",
-  shipped: "secondary",
-  delivered: "secondary",
-  cancelled: "destructive",
-};
-
 const ORDER_STATUS_OPTIONS = [
   { value: "all", label: "All" },
-  { value: "paid", label: "Paid" },
+  { value: "pending", label: "Pending" },
   { value: "shipped", label: "Shipped" },
   { value: "delivered", label: "Delivered" },
   { value: "cancelled", label: "Cancelled" },
+] as const;
+
+const PAYMENT_STATUS_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "paid", label: "Paid" },
+  { value: "refunded", label: "Refunded" },
 ] as const;
 
 export function OrdersList() {
@@ -57,18 +55,23 @@ export function OrdersList() {
   const [perPage, setPerPage] = useState(10);
   const [searchInput, setSearchInput] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [paymentFilter, setPaymentFilter] = useState("all");
   const debouncedSearch = useDebouncedValue(searchInput, 500);
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, statusFilter]);
+  }, [debouncedSearch, statusFilter, paymentFilter]);
+
+  const listParams = useMemo(() => {
+    const params: { status?: string; paymentStatus?: string } = {};
+    if (statusFilter !== "all") params.status = statusFilter;
+    if (paymentFilter !== "all") params.paymentStatus = paymentFilter;
+    return Object.keys(params).length > 0 ? params : undefined;
+  }, [statusFilter, paymentFilter]);
 
   const { data, isPending } = useQuery({
-    queryKey: queryKeys.orders.list({ status: statusFilter }),
-    queryFn: () =>
-      fetchOrders(
-        statusFilter === "all" ? undefined : { status: statusFilter }
-      ),
+    queryKey: queryKeys.orders.list(listParams ?? {}),
+    queryFn: () => fetchOrders(listParams),
   });
 
   const filtered = useMemo(() => {
@@ -100,9 +103,10 @@ export function OrdersList() {
   if (isPending) {
     return (
       <AdminTableSkeleton
-        filterWidths={["w-72", "w-32", "w-24"]}
+        filterWidths={["w-72", "w-32", "w-32", "w-24"]}
         columns={[
           { className: "flex-1" },
+          { className: "w-24" },
           { className: "w-24" },
           { className: "flex-1" },
           { className: "min-w-32 flex-1" },
@@ -113,7 +117,7 @@ export function OrdersList() {
     );
   }
 
-  if (!data?.length && statusFilter === "all" && !debouncedSearch.trim()) {
+  if (!data?.length && statusFilter === "all" && paymentFilter === "all" && !debouncedSearch.trim()) {
     return (
       <EmptyState
         title="No orders yet"
@@ -143,10 +147,27 @@ export function OrdersList() {
             onValueChange={(value) => setStatusFilter(value ?? "all")}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder="Order status" />
             </SelectTrigger>
             <SelectContent>
               {ORDER_STATUS_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="w-32">
+          <Select
+            value={paymentFilter}
+            onValueChange={(value) => setPaymentFilter(value ?? "all")}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Payment" />
+            </SelectTrigger>
+            <SelectContent>
+              {PAYMENT_STATUS_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
@@ -169,11 +190,12 @@ export function OrdersList() {
             <TableRow>
               <TableHead>Order</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Payment</TableHead>
               <TableHead>Placed</TableHead>
               <TableHead className="min-w-32 whitespace-normal">
                 Items
               </TableHead>
-              <TableHead className="text-right">Total</TableHead>
+              <TableHead>Total</TableHead>
               <TableHead className="w-36 text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -181,7 +203,7 @@ export function OrdersList() {
             {pageRows.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={7}
                   className="text-muted-foreground py-10 text-center text-sm"
                 >
                   No orders found.
@@ -194,9 +216,10 @@ export function OrdersList() {
                     {order.orderNumber}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={statusVariant[order.status] ?? "outline"}>
-                      {order.status}
-                    </Badge>
+                    <OrderStatusBadge status={order.status} />
+                  </TableCell>
+                  <TableCell>
+                    <PaymentStatusBadge status={order.paymentStatus} />
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm tabular-nums">
                     {formatOrderDate(order.createdAt)}
@@ -206,7 +229,7 @@ export function OrdersList() {
                     {order.items.length === 1 ? "" : "s"}
                     {order.items[0] ? ` · ${order.items[0].productName}` : ""}
                   </TableCell>
-                  <TableCell className="text-right font-medium tabular-nums">
+                  <TableCell className="text-left font-medium tabular-nums">
                     ${order.total.toFixed(2)}
                   </TableCell>
                   <TableCell className="text-center">

@@ -5,55 +5,53 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { useMemo, useState } from "react";
 import { ROUTES } from "@/constants/routes";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { queryKeys } from "@/constants/query-keys";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getApiErrorMessage } from "@/lib/api-error";
+import { formatOrderDate } from "@/lib/format-date";
+import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Select,
-  SelectItem,
-  SelectValue,
-  SelectContent,
-  SelectTrigger,
-} from "@/components/ui/select";
+  AlertDialog,
+  AlertDialogTitle,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogDescription,
+} from "@/components/ui/alert-dialog";
 import {
   fetchAdminOrder,
+  cancelAdminOrder,
   updateAdminOrderStatus,
 } from "../services/orders.service";
+import {
+  OrderStatusBadge,
+  PaymentStatusBadge,
+} from "@/modules/customer/orders/components/order-status-badges";
 
 type Props = { orderId: string };
 
-const STATUS_OPTIONS = [
-  "pending",
-  "paid",
-  "shipped",
-  "delivered",
-  "cancelled",
-] as const;
-
 export function AdminOrderDetail({ orderId }: Props) {
   const qc = useQueryClient();
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+
   const { data, isPending, isError } = useQuery({
     queryKey: queryKeys.admin.order(orderId),
     queryFn: () => fetchAdminOrder(orderId),
   });
 
   const statusMutation = useMutation({
-    mutationFn: (status: (typeof STATUS_OPTIONS)[number]) =>
-      updateAdminOrderStatus(
-        orderId,
-        status.toUpperCase() as
-        | "PENDING"
-        | "PAID"
-        | "SHIPPED"
-        | "DELIVERED"
-        | "CANCELLED"
-      ),
+    mutationFn: (status: "SHIPPED" | "DELIVERED") =>
+      updateAdminOrderStatus(orderId, status),
     onSuccess: (updatedOrder) => {
       toast.success("Order status updated");
       qc.setQueryData(queryKeys.admin.order(orderId), (current) =>
@@ -67,6 +65,33 @@ export function AdminOrderDetail({ orderId }: Props) {
       toast.error(getApiErrorMessage(error, "Could not update status"));
     },
   });
+
+  const cancelMutation = useMutation({
+    mutationFn: () => cancelAdminOrder(orderId, { reason: cancelReason.trim() }),
+    onSuccess: (updatedOrder) => {
+      toast.success("Order cancelled and refunded");
+      qc.setQueryData(queryKeys.admin.order(orderId), (current) =>
+        current
+          ? { ...current, order: updatedOrder }
+          : { order: updatedOrder, customerUserId: updatedOrder.userId }
+      );
+      void qc.invalidateQueries({ queryKey: queryKeys.admin.orders() });
+      setCancelOpen(false);
+      setCancelReason("");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not cancel order"));
+    },
+  });
+
+  const nextStatus = useMemo(() => {
+    if (!data?.order) return null;
+    if (data.order.status === "pending") return "SHIPPED" as const;
+    if (data.order.status === "shipped") return "DELIVERED" as const;
+    return null;
+  }, [data?.order]);
+
+  const canCancel = data?.order.status === "pending";
 
   if (isPending) {
     return (
@@ -108,25 +133,30 @@ export function AdminOrderDetail({ orderId }: Props) {
           </p>
         </div>
         <div className="flex flex-col items-end gap-3">
-          <Badge>{order.status}</Badge>
-          <Select
-            value={order.status}
-            disabled={statusMutation.isPending}
-            onValueChange={(value) =>
-              statusMutation.mutate(value as (typeof STATUS_OPTIONS)[number])
-            }
-          >
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Update status" />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUS_OPTIONS.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {status}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex flex-wrap gap-2">
+            <OrderStatusBadge status={order.status} />
+            <PaymentStatusBadge status={order.paymentStatus} />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {nextStatus ? (
+              <Button
+                size="sm"
+                disabled={statusMutation.isPending}
+                onClick={() => statusMutation.mutate(nextStatus)}
+              >
+                Mark as {nextStatus === "SHIPPED" ? "shipped" : "delivered"}
+              </Button>
+            ) : null}
+            {canCancel ? (
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => setCancelOpen(true)}
+              >
+                Cancel order
+              </Button>
+            ) : null}
+          </div>
           <Link
             href={ROUTES.user(customerUserId)}
             className="text-primary text-sm hover:underline"
@@ -135,6 +165,12 @@ export function AdminOrderDetail({ orderId }: Props) {
           </Link>
         </div>
       </div>
+
+      {order.status === "cancelled" && order.cancellationReason ? (
+        <p className="text-muted-foreground rounded-lg border px-4 py-3 text-sm">
+          Cancellation reason: {order.cancellationReason}
+        </p>
+      ) : null}
 
       <section className="space-y-3">
         <h3 className="text-sm font-medium tracking-wide uppercase">Items</h3>
@@ -187,6 +223,16 @@ export function AdminOrderDetail({ orderId }: Props) {
             <br />
             {order.shippingAddress.country}
           </p>
+          {order.shippedAt ? (
+            <p className="text-muted-foreground text-xs">
+              Shipped {formatOrderDate(order.shippedAt)}
+            </p>
+          ) : null}
+          {order.deliveredAt ? (
+            <p className="text-muted-foreground text-xs">
+              Delivered {formatOrderDate(order.deliveredAt)}
+            </p>
+          ) : null}
         </div>
         <div className="space-y-2 text-sm">
           <h3 className="font-medium tracking-wide uppercase">Totals</h3>
@@ -216,6 +262,40 @@ export function AdminOrderDetail({ orderId }: Props) {
       >
         All orders
       </Link>
+
+      <AlertDialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel this order?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The customer will be refunded and inventory will be restored.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2">
+            <label htmlFor="admin-cancel-reason" className="text-sm font-medium">
+              Cancellation reason
+            </label>
+            <Textarea
+              id="admin-cancel-reason"
+              value={cancelReason}
+              placeholder="Required for audit trail"
+              onChange={(e) => setCancelReason(e.target.value)}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep order</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={
+                cancelMutation.isPending || cancelReason.trim().length === 0
+              }
+              onClick={() => cancelMutation.mutate()}
+            >
+              Cancel and refund
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

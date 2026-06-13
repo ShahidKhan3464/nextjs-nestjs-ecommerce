@@ -13,12 +13,12 @@ import { CartItem } from 'src/cart/entities/cart-item.entity';
 import { GetOrderProvider } from './providers/get-order.provider';
 import { GetOrdersProvider } from './providers/get-orders.provider';
 import { CheckoutSession } from './entities/checkout-session.entity';
+import { CancelOrderProvider } from './providers/cancel-order.provider';
 import { CreateCheckoutProvider } from './providers/create-checkout.provider';
 import { CheckoutSessionItem } from './entities/checkout-session-item.entity';
 import { CancelCheckoutProvider } from './providers/cancel-checkout.provider';
 import { CompleteCheckoutProvider } from './providers/complete-checkout.provider';
 import { UpdateOrderStatusProvider } from './providers/update-order-status.provider';
-import { CleanupAbandonedOrdersProvider } from './providers/cleanup-abandoned-orders.provider';
 
 @Module({
   imports: [
@@ -39,11 +39,11 @@ import { CleanupAbandonedOrdersProvider } from './providers/cleanup-abandoned-or
     OrdersService,
     GetOrderProvider,
     GetOrdersProvider,
+    CancelOrderProvider,
     CreateCheckoutProvider,
     CancelCheckoutProvider,
     CompleteCheckoutProvider,
     UpdateOrderStatusProvider,
-    CleanupAbandonedOrdersProvider,
   ],
 })
 export class OrdersModule {}

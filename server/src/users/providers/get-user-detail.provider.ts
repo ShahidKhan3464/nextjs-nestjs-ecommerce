@@ -4,7 +4,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from 'src/orders/entities/order.entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { FileOwnerModule } from 'src/common/files/file.constants';
-import { OrderStatus } from 'src/orders/constants/order.constants';
 import { joinProductImages } from 'src/common/files/file-query.util';
 import { StoredFile } from 'src/common/files/entities/stored-file.entity';
 import { WishlistItem } from 'src/wishlist/entities/wishlist-item.entity';
@@ -58,7 +57,6 @@ export class GetUserDetailProvider {
         .leftJoinAndSelect('variant.product', 'product')
         .withDeleted()
         .where('order.userId = :userId', { userId })
-        .andWhere('order.status != :pending', { pending: OrderStatus.PENDING })
         .orderBy('order.createdAt', 'DESC'),
       'product',
     ).getMany();
