@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Address } from "@/modules/customer/orders/types";
+import type { Address } from "@/modules/customer/checkout/types";
 
 type CheckoutStep = "shipping" | "payment" | "review";
 

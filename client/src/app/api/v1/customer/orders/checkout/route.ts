@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { ApiResponse } from "@/types";
 import { getBackendUrl } from "@/lib/backend-url";
 import { jsonMessage, jsonOk } from "@/lib/api-response";
-import type { CheckoutSession } from "@/modules/customer/orders/types";
+import type { CheckoutSession } from "@/modules/customer/checkout/types";
 import { nestErrorMessage, forwardAuthorization } from "@/lib/nest-http";
 
 const checkoutSchema = z.object({
