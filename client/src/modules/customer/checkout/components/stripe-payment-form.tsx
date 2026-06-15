@@ -26,9 +26,7 @@ export function StripePaymentForm() {
   const [expiryComplete, setExpiryComplete] = React.useState(false);
   const [cvcComplete, setCvcComplete] = React.useState(false);
 
-  function handleChange(
-    setter: React.Dispatch<React.SetStateAction<boolean>>
-  ) {
+  function handleChange(setter: React.Dispatch<React.SetStateAction<boolean>>) {
     return (event: StripeElementChangeEvent) => {
       setter(event.complete);
     };

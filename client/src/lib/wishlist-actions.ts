@@ -22,9 +22,7 @@ export async function wishlistToggle(productId: string): Promise<void> {
     const { productIds } = await toggleWishlistItem(productId);
     useWishlistStore.getState().setProductIds(productIds);
     const isWishlisted = productIds.includes(productId);
-    toast.success(
-      isWishlisted ? "Added to wishlist" : "Removed from wishlist"
-    );
+    toast.success(isWishlisted ? "Added to wishlist" : "Removed from wishlist");
   } catch (error) {
     useWishlistStore.getState().setProductIds(prev);
     toast.error(getApiErrorMessage(error, "Could not update wishlist"));

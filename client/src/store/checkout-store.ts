@@ -13,6 +13,7 @@ interface CheckoutState {
   shippingAddress: Partial<Address> | null;
   setPaymentSummary: (summary: string) => void;
   setCheckoutSession: (paymentIntentId: string, clientSecret: string) => void;
+  clearCheckoutSession: () => void;
   reset: () => void;
 }
 
@@ -28,6 +29,8 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
     set({ paymentIntentId, clientSecret, step: "payment" }),
   setPaymentSummary: (paymentSummary) =>
     set({ paymentSummary, step: "review" }),
+  clearCheckoutSession: () =>
+    set({ clientSecret: null, paymentIntentId: null, step: "shipping" }),
   reset: () =>
     set({
       step: "shipping",

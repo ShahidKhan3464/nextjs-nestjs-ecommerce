@@ -67,7 +67,8 @@ export function AdminOrderDetail({ orderId }: Props) {
   });
 
   const cancelMutation = useMutation({
-    mutationFn: () => cancelAdminOrder(orderId, { reason: cancelReason.trim() }),
+    mutationFn: () =>
+      cancelAdminOrder(orderId, { reason: cancelReason.trim() }),
     onSuccess: (updatedOrder) => {
       toast.success("Order cancelled and refunded");
       qc.setQueryData(queryKeys.admin.order(orderId), (current) =>
@@ -272,7 +273,10 @@ export function AdminOrderDetail({ orderId }: Props) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-2">
-            <label htmlFor="admin-cancel-reason" className="text-sm font-medium">
+            <label
+              htmlFor="admin-cancel-reason"
+              className="text-sm font-medium"
+            >
               Cancellation reason
             </label>
             <Textarea

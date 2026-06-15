@@ -200,7 +200,9 @@ export function AdminOrdersList() {
             ) : (
               pageRows.map((o) => (
                 <TableRow key={o.id}>
-                  <TableCell className="font-mono text-sm">{o.orderNumber}</TableCell>
+                  <TableCell className="font-mono text-sm">
+                    {o.orderNumber}
+                  </TableCell>
                   <TableCell>
                     <OrderStatusBadge status={o.status} />
                   </TableCell>

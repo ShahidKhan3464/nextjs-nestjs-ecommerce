@@ -21,6 +21,14 @@ export async function cancelCheckout(paymentIntentId: string) {
   });
 }
 
+/** Best-effort server cleanup when the user abandons checkout. */
+export function abandonCheckout(paymentIntentId: string | null | undefined) {
+  if (!paymentIntentId) return;
+  void cancelCheckout(paymentIntentId).catch(() => {
+    // Ignore errors — session may already be completed or expired.
+  });
+}
+
 export async function completeCheckout(body: CompleteCheckoutInput) {
   const res = await api.post<ApiResponse<{ order: Order }>>(
     "/api/v1/customer/orders/checkout/complete",

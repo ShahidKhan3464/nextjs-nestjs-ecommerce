@@ -153,18 +153,18 @@ export function ProductDetailView({ product }: Props) {
     if (!variant || adding) return;
     setAdding(true);
     try {
-    await cartAddItem({
-      variantId: variant.id,
-      productId: product.id,
-      slug: product.slug ?? product.id,
-      name: product.name,
-      variantLabel: formatVariantLabel(variant),
-      price: variant.price,
-      quantity: 1,
-      image: variant.image ?? product.images[0],
-      maxQty: variant.stock,
-    });
-    toast.success("Added to bag");
+      await cartAddItem({
+        variantId: variant.id,
+        productId: product.id,
+        slug: product.slug ?? product.id,
+        name: product.name,
+        variantLabel: formatVariantLabel(variant),
+        price: variant.price,
+        quantity: 1,
+        image: variant.image ?? product.images[0],
+        maxQty: variant.stock,
+      });
+      toast.success("Added to bag");
     } finally {
       setAdding(false);
     }

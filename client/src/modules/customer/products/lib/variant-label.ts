@@ -45,16 +45,6 @@ export function findVariantByOptions(
   });
 }
 
-/** Variants that match a selected size or color (for dependent option pickers). */
-export function filterVariantsByOption(
-  variants: ProductVariant[],
-  key: "size" | "color",
-  value?: string
-): ProductVariant[] {
-  if (!value) return variants;
-  return variants.filter((v) => v.options?.[key]?.trim() === value);
-}
-
 /** Whether each size+color pair maps to exactly one variant. */
 export function hasUniqueVariantOptionMatrix(
   variants: ProductVariant[]

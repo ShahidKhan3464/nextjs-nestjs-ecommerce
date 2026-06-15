@@ -51,11 +51,6 @@ export async function fetchAdminUsers(params?: {
   };
 }
 
-export async function fetchAdminUser(id: string | number) {
-  const res = await api.get<{ data: User }>(`/api/v1/admin/users/${id}`);
-  return res.data.data;
-}
-
 export async function fetchAdminUserDetail(id: string | number) {
   const res = await api.get<{ data: AdminUserDetail }>(
     `/api/v1/admin/users/${id}/detail`

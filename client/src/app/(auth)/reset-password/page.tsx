@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
 import { ROUTES } from "@/constants/routes";
-import { ResetPasswordForm } from "@/modules/auth/components/reset-password-form";
+import { ResetPasswordForm } from "@/modules/auth";
 
 export const metadata: Metadata = {
   title: "Reset password",

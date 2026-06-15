@@ -29,7 +29,7 @@ export type NestOrderPayload = {
   };
 };
 
-export type NestOrderLineItemPayload = {
+type NestOrderLineItemPayload = {
   image?: string;
   quantity: number;
   productName: string;
@@ -74,6 +74,8 @@ export function normalizeNestOrderPayload(order: NestOrderPayload): Order {
     items: (order.items ?? []).map(normalizeLineItem),
     orderNumber: order.orderNumber ?? String(order.id),
     status: order.status.toLowerCase() as Order["status"],
-    paymentStatus: (order.paymentStatus ?? "paid").toLowerCase() as Order["paymentStatus"],
+    paymentStatus: (
+      order.paymentStatus ?? "paid"
+    ).toLowerCase() as Order["paymentStatus"],
   };
 }

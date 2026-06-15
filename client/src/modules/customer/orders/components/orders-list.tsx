@@ -15,10 +15,7 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { EmptyState } from "@/shared/components/feedback/empty-state";
-import {
-  OrderStatusBadge,
-  PaymentStatusBadge,
-} from "./order-status-badges";
+import { OrderStatusBadge, PaymentStatusBadge } from "./order-status-badges";
 import {
   Select,
   SelectItem,
@@ -117,7 +114,12 @@ export function OrdersList() {
     );
   }
 
-  if (!data?.length && statusFilter === "all" && paymentFilter === "all" && !debouncedSearch.trim()) {
+  if (
+    !data?.length &&
+    statusFilter === "all" &&
+    paymentFilter === "all" &&
+    !debouncedSearch.trim()
+  ) {
     return (
       <EmptyState
         title="No orders yet"

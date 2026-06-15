@@ -14,7 +14,7 @@ export type OrderAddress = {
   postalCode: string;
 };
 
-export type OrderLineItemResponse = {
+type OrderLineItemResponse = {
   image?: string;
   quantity: number;
   variantId: string;

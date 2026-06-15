@@ -6,7 +6,8 @@ function toQueryParams(params?: OrderListParams) {
   if (!params) return undefined;
   const query: Record<string, string> = {};
   if (params.status) query.status = params.status.toUpperCase();
-  if (params.paymentStatus) query.paymentStatus = params.paymentStatus.toUpperCase();
+  if (params.paymentStatus)
+    query.paymentStatus = params.paymentStatus.toUpperCase();
   return Object.keys(query).length > 0 ? query : undefined;
 }
 

@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
 import { ROUTES } from "@/constants/routes";
-import { LoginForm } from "@/modules/auth/components/login-form";
+import { LoginForm } from "@/modules/auth";
 
 export const metadata: Metadata = {
   title: "Sign in",

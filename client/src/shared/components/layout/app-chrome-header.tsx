@@ -7,9 +7,9 @@ import { siteConfig } from "@/config/site";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
 import { LogOut, User } from "lucide-react";
+import { logoutRequest } from "@/modules/auth";
 import { useAuthStore } from "@/store/auth-store";
 import { buttonVariants } from "@/components/ui/button";
-import { logoutRequest } from "@/modules/auth/services/auth.service";
 import { resetCartWishlistSession } from "@/lib/cart-wishlist-session";
 import {
   DropdownMenu,

@@ -6,7 +6,7 @@ import { AuthController } from './auth.controller';
 import { forwardRef, Module } from '@nestjs/common';
 import { UsersModule } from 'src/users/users.module';
 import { LoginProvider } from './providers/login.provider';
-import { BcryptProvider } from './providers/bycrypt.provider';
+import { BcryptProvider } from './providers/bcrypt.provider';
 import { HashingProvider } from './providers/hashing.provider';
 import { RefreshTokensProvider } from './providers/refresh-tokens.provider';
 import { ResetPasswordProvider } from './providers/reset-password.provider';

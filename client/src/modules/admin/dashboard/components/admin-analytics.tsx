@@ -101,7 +101,9 @@ export function AdminAnalytics() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Pending orders</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Pending orders
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-semibold tabular-nums">
@@ -190,7 +192,9 @@ export function AdminAnalytics() {
                     <Cell
                       key={entry.status}
                       fill={
-                        orderStatusChartColor[normalizeOrderStatus(entry.status)]
+                        orderStatusChartColor[
+                          normalizeOrderStatus(entry.status)
+                        ]
                       }
                     />
                   ))}
@@ -281,7 +285,9 @@ export function AdminAnalytics() {
               <TableBody>
                 {data.lowStock.map((row) => (
                   <TableRow key={row.sku}>
-                    <TableCell className="font-mono text-xs">{row.sku}</TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {row.sku}
+                    </TableCell>
                     <TableCell className="text-center">{row.product}</TableCell>
                     <TableCell className="text-right tabular-nums">
                       {row.stock}

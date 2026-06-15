@@ -139,7 +139,8 @@ export function ProfileForm() {
 
   async function onProfileSubmit(values: ProfileValues) {
     try {
-      const fullName = `${values.firstName.trim()} ${values.lastName.trim()}`.trim();
+      const fullName =
+        `${values.firstName.trim()} ${values.lastName.trim()}`.trim();
       const next = await updateProfile({
         fullName,
         phoneNumber: values.phoneNumber?.trim() || undefined,
@@ -305,7 +306,11 @@ export function ProfileForm() {
                 <FormItem>
                   <FormLabel>Current password</FormLabel>
                   <FormControl>
-                    <Input type="password" autoComplete="current-password" {...field} />
+                    <Input
+                      type="password"
+                      autoComplete="current-password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -318,7 +323,11 @@ export function ProfileForm() {
                 <FormItem>
                   <FormLabel>New password</FormLabel>
                   <FormControl>
-                    <Input type="password" autoComplete="new-password" {...field} />
+                    <Input
+                      type="password"
+                      autoComplete="new-password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -331,7 +340,11 @@ export function ProfileForm() {
                 <FormItem>
                   <FormLabel>Confirm new password</FormLabel>
                   <FormControl>
-                    <Input type="password" autoComplete="new-password" {...field} />
+                    <Input
+                      type="password"
+                      autoComplete="new-password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

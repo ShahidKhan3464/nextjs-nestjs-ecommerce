@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { completeCheckout } from "../services/checkout.service";
-import { CardNumberElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import {
+  CardNumberElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
 
 type Props = {
   onSuccess: () => void;
@@ -61,7 +65,11 @@ export function PlaceOrderButton({ onSuccess }: Props) {
   }
 
   return (
-    <Button type="button" disabled={loading} onClick={() => void handlePlaceOrder()}>
+    <Button
+      type="button"
+      disabled={loading}
+      onClick={() => void handlePlaceOrder()}
+    >
       {loading ? "Processing…" : "Place order"}
     </Button>
   );

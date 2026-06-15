@@ -26,14 +26,8 @@ import {
   AlertDialogContent,
   AlertDialogDescription,
 } from "@/components/ui/alert-dialog";
-import {
-  fetchOrder,
-  cancelOrder,
-} from "../services/orders.service";
-import {
-  OrderStatusBadge,
-  PaymentStatusBadge,
-} from "./order-status-badges";
+import { fetchOrder, cancelOrder } from "../services/orders.service";
+import { OrderStatusBadge, PaymentStatusBadge } from "./order-status-badges";
 
 type Props = {
   orderId: string;
@@ -63,10 +57,7 @@ export function OrderDetailView({ orderId }: Props) {
     },
   });
 
-  const canCancel = useMemo(
-    () => data?.status === "pending",
-    [data?.status]
-  );
+  const canCancel = useMemo(() => data?.status === "pending", [data?.status]);
 
   if (isPending) {
     return (
