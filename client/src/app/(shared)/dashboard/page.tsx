@@ -10,22 +10,7 @@ export const metadata: Metadata = {
 export default async function DashboardPage() {
   const session = await getAccessTokenPayload();
 
-  if (session?.role === "admin") {
-    return (
-      <div className="space-y-4">
-        <header className="space-y-0.5">
-          <h1 className="font-heading text-3xl font-semibold tracking-tight">
-            Analytics
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Monitor sales trends and order volume to spot what is performing
-            well.
-          </p>
-        </header>
-        <AdminAnalytics />
-      </div>
-    );
-  }
+  if (session?.role === "admin") return <AdminAnalytics />
 
   return <DashboardOverview />;
 }

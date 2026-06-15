@@ -10,6 +10,20 @@ export const orderStatusVariant: Record<OrderStatus, BadgeVariant> = {
   cancelled: "destructive",
 };
 
+/** Chart bar fills aligned with each status badge variant. */
+export const orderStatusChartColor: Record<OrderStatus, string> = {
+  pending: "var(--muted-foreground)",
+  shipped: "var(--secondary-foreground)",
+  delivered: "var(--primary)",
+  cancelled: "var(--destructive)",
+};
+
+export function normalizeOrderStatus(status: string): OrderStatus {
+  const key = status.toLowerCase() as OrderStatus;
+  if (key in orderStatusVariant) return key;
+  return "pending";
+}
+
 export const paymentStatusVariant: Record<PaymentStatus, BadgeVariant> = {
   paid: "default",
   failed: "destructive",
