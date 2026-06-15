@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
-import { RegisterForm } from "@/modules/auth/components/register-form";
+import { RegisterForm } from "@/modules/auth";
 
 export const metadata: Metadata = {
   title: "Create account",

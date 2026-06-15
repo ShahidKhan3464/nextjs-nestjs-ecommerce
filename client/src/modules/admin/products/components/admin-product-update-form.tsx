@@ -2,6 +2,7 @@
 
 import { toast } from "sonner";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
 import { Input } from "@/components/ui/input";
@@ -13,13 +14,17 @@ import { getApiErrorMessage } from "@/lib/api-error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Resolver } from "react-hook-form";
 import { PlusIcon, Trash2Icon, XIcon } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
 import { productSchema, type ProductValues } from "../schemas";
 import { type Product } from "@/modules/customer/products/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { updateAdminProduct } from "../services/products.service";
+import { useProductImageFilePreviews } from "../hooks/use-product-image-previews";
 import { fetchAdminCategories } from "../../categories/services/categories.service";
 import {
+  parseCategoryId,
+  sortCategoriesByName,
+  DEFAULT_PRODUCT_VARIANT,
+  mapFormVariantsToPayload,
   mapProductImagesToRetainPaths,
   mapProductVariantsToFormValues,
 } from "../lib/product-form";
@@ -32,15 +37,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-function previewKey(file: File, index: number) {
-  return `${file.name}-${file.size}-${file.lastModified}-${index}`;
-}
-
 export function AdminProductUpdateForm({ initial }: { initial: Product }) {
   const router = useRouter();
   const qc = useQueryClient();
   const [newFiles, setNewFiles] = useState<File[]>([]);
-  const objectUrlsRef = useRef<Map<File, string>>(new Map());
+  const { objectUrlFor, revokeFile, previewKey } = useProductImageFilePreviews();
   const [existingImages, setExistingImages] = useState<string[]>(
     initial.images
   );
@@ -50,12 +51,7 @@ export function AdminProductUpdateForm({ initial }: { initial: Product }) {
     queryFn: () => fetchAdminCategories({ limit: 200 }),
   });
 
-  const categoryOptions = useMemo(() => {
-    const cats = categoriesResp?.categories ?? [];
-    return [...cats].sort((a, b) =>
-      a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
-    );
-  }, [categoriesResp?.categories]);
+  const categoryOptions = sortCategoriesByName(categoriesResp?.categories ?? []);
 
   const form = useForm<ProductValues>({
     resolver: zodResolver(productSchema) as Resolver<ProductValues>,
@@ -70,14 +66,6 @@ export function AdminProductUpdateForm({ initial }: { initial: Product }) {
   useEffect(() => {
     setExistingImages(initial.images);
   }, [initial.images]);
-
-  useEffect(() => {
-    const map = objectUrlsRef.current;
-    return () => {
-      map.forEach((url) => URL.revokeObjectURL(url));
-      map.clear();
-    };
-  }, []);
 
   useEffect(() => {
     const categories = categoriesResp?.categories ?? [];
@@ -95,16 +83,6 @@ export function AdminProductUpdateForm({ initial }: { initial: Product }) {
     name: "variants",
   });
 
-  function objectUrlFor(file: File): string {
-    const map = objectUrlsRef.current;
-    let url = map.get(file);
-    if (!url) {
-      url = URL.createObjectURL(file);
-      map.set(file, url);
-    }
-    return url;
-  }
-
   function addFiles(incoming: File[]) {
     if (incoming.length === 0) return;
     setNewFiles((prev) => [...prev, ...incoming]);
@@ -114,13 +92,7 @@ export function AdminProductUpdateForm({ initial }: { initial: Product }) {
     setNewFiles((prev) => {
       const next = [...prev];
       const [removed] = next.splice(index, 1);
-      if (removed) {
-        const url = objectUrlsRef.current.get(removed);
-        if (url) {
-          URL.revokeObjectURL(url);
-          objectUrlsRef.current.delete(removed);
-        }
-      }
+      if (removed) revokeFile(removed);
       return next;
     });
   }
@@ -136,8 +108,8 @@ export function AdminProductUpdateForm({ initial }: { initial: Product }) {
     }
 
     try {
-      const categoryId = Number(values.categoryId);
-      if (!Number.isFinite(categoryId) || categoryId < 1) {
+      const categoryId = parseCategoryId(values.categoryId);
+      if (categoryId === null) {
         toast.error("Pick a valid category");
         return;
       }
@@ -147,13 +119,7 @@ export function AdminProductUpdateForm({ initial }: { initial: Product }) {
         description: values.description?.trim() || undefined,
         retainImagePaths: mapProductImagesToRetainPaths(existingImages),
         newImages: newFiles,
-        variants: values.variants.map((v) => ({
-          stock: v.stock,
-          price: v.price,
-          sku: v.sku.trim(),
-          size: v.size.trim(),
-          color: v.color.trim(),
-        })),
+        variants: mapFormVariantsToPayload(values.variants),
       });
       toast.success("Product updated");
       await qc.invalidateQueries({ queryKey: queryKeys.admin.products });
@@ -250,15 +216,7 @@ export function AdminProductUpdateForm({ initial }: { initial: Product }) {
               size="sm"
               type="button"
               variant="outline"
-              onClick={() =>
-                append({
-                  size: "M",
-                  color: "Black",
-                  sku: "",
-                  stock: 20,
-                  price: 99,
-                })
-              }
+              onClick={() => append(DEFAULT_PRODUCT_VARIANT)}
             >
               <PlusIcon className="mr-2 size-4" />
               Add Variant

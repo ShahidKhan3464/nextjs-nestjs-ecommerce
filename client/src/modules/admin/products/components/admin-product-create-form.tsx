@@ -2,6 +2,7 @@
 
 import { toast } from "sonner";
 import Image from "next/image";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useFieldArray } from "react-hook-form";
@@ -11,11 +12,17 @@ import { getApiErrorMessage } from "@/lib/api-error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Resolver } from "react-hook-form";
 import { XIcon, PlusIcon, Trash2Icon } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
 import { productSchema, type ProductValues } from "../schemas";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createAdminProduct } from "../services/products.service";
+import { useProductImageFilePreviews } from "../hooks/use-product-image-previews";
 import { fetchAdminCategories } from "../../categories/services/categories.service";
+import {
+  parseCategoryId,
+  sortCategoriesByName,
+  DEFAULT_PRODUCT_VARIANT,
+  mapFormVariantsToPayload,
+} from "../lib/product-form";
 import {
   Form,
   FormItem,
@@ -25,43 +32,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-function previewKey(file: File, index: number) {
-  return `${file.name}-${file.size}-${file.lastModified}-${index}`;
-}
-
 export function AdminProductCreateForm() {
   const qc = useQueryClient();
   const [files, setFiles] = useState<File[]>([]);
-  const objectUrlsRef = useRef<Map<File, string>>(new Map());
+  const { objectUrlFor, revokeFile, previewKey } = useProductImageFilePreviews();
   const { data: categoriesResp, isPending: categoriesLoading } = useQuery({
     queryKey: queryKeys.admin.categories,
     queryFn: () => fetchAdminCategories({ limit: 200 }),
   });
 
-  const categoryOptions = useMemo(() => {
-    const categories = categoriesResp?.categories ?? [];
-    return [...categories].sort((a, b) =>
-      a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
-    );
-  }, [categoriesResp?.categories]);
-
-  useEffect(() => {
-    const map = objectUrlsRef.current;
-    return () => {
-      map.forEach((url) => URL.revokeObjectURL(url));
-      map.clear();
-    };
-  }, []);
-
-  function objectUrlFor(file: File): string {
-    const map = objectUrlsRef.current;
-    let url = map.get(file);
-    if (!url) {
-      url = URL.createObjectURL(file);
-      map.set(file, url);
-    }
-    return url;
-  }
+  const categoryOptions = sortCategoriesByName(categoriesResp?.categories ?? []);
 
   function addFiles(incoming: File[]) {
     if (incoming.length === 0) return;
@@ -72,13 +52,7 @@ export function AdminProductCreateForm() {
     setFiles((prev) => {
       const next = [...prev];
       const [removed] = next.splice(index, 1);
-      if (removed) {
-        const url = objectUrlsRef.current.get(removed);
-        if (url) {
-          URL.revokeObjectURL(url);
-          objectUrlsRef.current.delete(removed);
-        }
-      }
+      if (removed) revokeFile(removed);
       return next;
     });
   }
@@ -89,7 +63,7 @@ export function AdminProductCreateForm() {
       name: "",
       description: "",
       categoryId: "",
-      variants: [{ size: "M", color: "Black", sku: "", stock: 20, price: 99 }],
+      variants: [DEFAULT_PRODUCT_VARIANT],
     },
   });
 
@@ -105,8 +79,8 @@ export function AdminProductCreateForm() {
     }
 
     try {
-      const categoryId = Number(values.categoryId);
-      if (!Number.isFinite(categoryId) || categoryId < 1) {
+      const categoryId = parseCategoryId(values.categoryId);
+      if (categoryId === null) {
         toast.error("Pick a valid category");
         return;
       }
@@ -115,13 +89,7 @@ export function AdminProductCreateForm() {
         images: files,
         name: values.name.trim(),
         description: values.description?.trim() || undefined,
-        variants: values.variants.map((v) => ({
-          stock: v.stock,
-          price: v.price,
-          sku: v.sku.trim(),
-          size: v.size.trim(),
-          color: v.color.trim(),
-        })),
+        variants: mapFormVariantsToPayload(values.variants),
       });
       toast.success("Product created");
       await qc.invalidateQueries({ queryKey: queryKeys.admin.products });
@@ -209,18 +177,10 @@ export function AdminProductCreateForm() {
               Variants
             </h3>
             <Button
+              size="sm"
               type="button"
               variant="outline"
-              size="sm"
-              onClick={() =>
-                append({
-                  size: "M",
-                  color: "Black",
-                  sku: "",
-                  stock: 20,
-                  price: 99,
-                })
-              }
+              onClick={() => append(DEFAULT_PRODUCT_VARIANT)}
             >
               <PlusIcon className="mr-2 size-4" />
               Add Variant

@@ -18,7 +18,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PlaceOrderButton } from "./place-order-button";
 import { StripePaymentForm } from "./stripe-payment-form";
 import { useCheckoutStore } from "@/store/checkout-store";
-import { createCheckout } from "../services/checkout.service";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { shippingSchema, type ShippingValues } from "../schemas";
 import { useCartHydrate } from "@/shared/hooks/use-cart-hydrate";
@@ -33,6 +32,11 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  cancelCheckout,
+  createCheckout,
+  abandonCheckout,
+} from "../services/checkout.service";
 
 export function CheckoutWizard() {
   useCartHydrate();
@@ -46,8 +50,33 @@ export function CheckoutWizard() {
   const paymentIntentId = useCheckoutStore((s) => s.paymentIntentId);
   const shippingAddress = useCheckoutStore((s) => s.shippingAddress);
   const setCheckoutSession = useCheckoutStore((s) => s.setCheckoutSession);
+  const clearCheckoutSession = useCheckoutStore((s) => s.clearCheckoutSession);
 
   const [checkoutLoading, setCheckoutLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    return () => {
+      abandonCheckout(useCheckoutStore.getState().paymentIntentId);
+    };
+  }, []);
+
+  async function releaseCheckoutSession(paymentIntentId: string) {
+    try {
+      await cancelCheckout(paymentIntentId);
+    } catch {
+      // Session may already be completed or removed.
+    }
+    clearCheckoutSession();
+  }
+
+  function handleStepChange(next: string) {
+    const stepValue = next as typeof step;
+    if (stepValue === "shipping" && paymentIntentId) {
+      void releaseCheckoutSession(paymentIntentId);
+      return;
+    }
+    setStep(stepValue);
+  }
 
   const form = useForm<ShippingValues>({
     resolver: zodResolver(shippingSchema),
@@ -71,6 +100,11 @@ export function CheckoutWizard() {
     setShipping(values as Address);
     setCheckoutLoading(true);
     try {
+      const existingPaymentIntentId =
+        useCheckoutStore.getState().paymentIntentId;
+      if (existingPaymentIntentId) {
+        await releaseCheckoutSession(existingPaymentIntentId);
+      }
       const session = await createCheckout({
         shippingAddress: values as Address,
       });
@@ -182,7 +216,7 @@ export function CheckoutWizard() {
       <Tabs
         value={step}
         className="space-y-6"
-        onValueChange={(v) => setStep(v as typeof step)}
+        onValueChange={handleStepChange}
       >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="shipping" className="cursor-pointer">Shipping</TabsTrigger>
