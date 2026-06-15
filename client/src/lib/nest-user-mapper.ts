@@ -1,4 +1,4 @@
-import type { User, UserRole } from "@/modules/auth/types";
+import type { User, UserRole } from "@/modules/auth";
 import { resolveUploadUrl } from "@/lib/resolve-upload-url";
 
 /** Backend user shape (TypeORM entity JSON). */

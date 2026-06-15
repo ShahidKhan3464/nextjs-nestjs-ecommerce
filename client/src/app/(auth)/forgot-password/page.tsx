@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
-import { ForgotPasswordForm } from "@/modules/auth/components/forgot-password-form";
+import { ForgotPasswordForm } from "@/modules/auth";
 
 export const metadata: Metadata = {
   title: "Forgot password",

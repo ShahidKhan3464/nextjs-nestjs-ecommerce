@@ -1,4 +1,4 @@
-export type { UserRole, User } from "@/modules/auth/types";
+export type { UserRole, User } from "@/modules/auth";
 export type { Order } from "@/modules/customer/orders/types";
 export type {
   Product,
