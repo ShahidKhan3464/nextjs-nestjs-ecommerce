@@ -1,7 +1,6 @@
 import { isAxiosError } from "axios";
 
-const GENERIC_API_ERROR_MESSAGE =
-  "Something went wrong, plz try again";
+const GENERIC_API_ERROR_MESSAGE = "Something went wrong, plz try again";
 
 function messageFromPayload(data: unknown): string | null {
   if (!data || typeof data !== "object") return null;
@@ -39,10 +38,7 @@ export function getApiErrorMessage(
     const fromBody = messageFromPayload(error.response?.data);
     if (fromBody) return fromBody;
     if (status && status >= 500) return GENERIC_API_ERROR_MESSAGE;
-    if (
-      error.message?.trim() &&
-      !isTechnicalMessage(error.message)
-    ) {
+    if (error.message?.trim() && !isTechnicalMessage(error.message)) {
       return error.message;
     }
     return fallback;

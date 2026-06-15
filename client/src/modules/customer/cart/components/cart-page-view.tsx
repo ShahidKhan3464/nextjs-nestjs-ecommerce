@@ -136,7 +136,10 @@ export function CartPageView() {
           </div>
           <Link
             href={ROUTES.checkout}
-            className={cn(buttonVariants(), "inline-flex w-full justify-center")}
+            className={cn(
+              buttonVariants(),
+              "inline-flex w-full justify-center"
+            )}
           >
             Proceed to checkout
           </Link>

@@ -34,10 +34,6 @@ export function OrderStatusBadge({ status }: { status: OrderStatus }) {
   return <Badge variant={orderStatusVariant[status]}>{status}</Badge>;
 }
 
-export function PaymentStatusBadge({
-  status,
-}: {
-  status: PaymentStatus;
-}) {
+export function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
   return <Badge variant={paymentStatusVariant[status]}>{status}</Badge>;
 }

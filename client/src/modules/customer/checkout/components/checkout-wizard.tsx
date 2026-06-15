@@ -154,7 +154,7 @@ export function CheckoutWizard() {
         className={cn(
           "space-y-4",
           step !== "payment" &&
-          "pointer-events-none absolute left-[-9999px] h-px w-px overflow-hidden opacity-0"
+            "pointer-events-none absolute left-[-9999px] h-px w-px overflow-hidden opacity-0"
         )}
       >
         <StripePaymentForm />
@@ -213,17 +213,23 @@ export function CheckoutWizard() {
 
   return (
     <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[1fr_340px] lg:px-6">
-      <Tabs
-        value={step}
-        className="space-y-6"
-        onValueChange={handleStepChange}
-      >
+      <Tabs value={step} className="space-y-6" onValueChange={handleStepChange}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="shipping" className="cursor-pointer">Shipping</TabsTrigger>
-          <TabsTrigger value="payment" className="cursor-pointer" disabled={!clientSecret}>
+          <TabsTrigger value="shipping" className="cursor-pointer">
+            Shipping
+          </TabsTrigger>
+          <TabsTrigger
+            value="payment"
+            className="cursor-pointer"
+            disabled={!clientSecret}
+          >
             Payment
           </TabsTrigger>
-          <TabsTrigger value="review" className="cursor-pointer" disabled={!clientSecret}>
+          <TabsTrigger
+            value="review"
+            className="cursor-pointer"
+            disabled={!clientSecret}
+          >
             Review
           </TabsTrigger>
         </TabsList>
@@ -330,7 +336,9 @@ export function CheckoutWizard() {
                 />
               </div>
               <Button type="submit" disabled={checkoutLoading}>
-                {checkoutLoading ? "Preparing checkout…" : "Continue to payment"}
+                {checkoutLoading
+                  ? "Preparing checkout…"
+                  : "Continue to payment"}
               </Button>
             </form>
           </Form>

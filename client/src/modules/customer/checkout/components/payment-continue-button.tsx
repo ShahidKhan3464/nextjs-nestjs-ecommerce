@@ -3,7 +3,11 @@
 import * as React from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { CardNumberElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import {
+  CardNumberElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
 
 type Props = {
   onContinue: () => void;
@@ -21,7 +25,8 @@ export function PaymentContinueButton({ onContinue }: Props) {
       setCardComplete(detail.complete);
     }
     window.addEventListener("stripe-card-form-change", onCardChange);
-    return () => window.removeEventListener("stripe-card-form-change", onCardChange);
+    return () =>
+      window.removeEventListener("stripe-card-form-change", onCardChange);
   }, []);
 
   async function handleContinue() {

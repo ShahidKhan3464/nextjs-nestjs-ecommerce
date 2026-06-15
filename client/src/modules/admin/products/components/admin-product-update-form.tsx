@@ -41,7 +41,8 @@ export function AdminProductUpdateForm({ initial }: { initial: Product }) {
   const router = useRouter();
   const qc = useQueryClient();
   const [newFiles, setNewFiles] = useState<File[]>([]);
-  const { objectUrlFor, revokeFile, previewKey } = useProductImageFilePreviews();
+  const { objectUrlFor, revokeFile, previewKey } =
+    useProductImageFilePreviews();
   const [existingImages, setExistingImages] = useState<string[]>(
     initial.images
   );
@@ -51,7 +52,9 @@ export function AdminProductUpdateForm({ initial }: { initial: Product }) {
     queryFn: () => fetchAdminCategories({ limit: 200 }),
   });
 
-  const categoryOptions = sortCategoriesByName(categoriesResp?.categories ?? []);
+  const categoryOptions = sortCategoriesByName(
+    categoriesResp?.categories ?? []
+  );
 
   const form = useForm<ProductValues>({
     resolver: zodResolver(productSchema) as Resolver<ProductValues>,

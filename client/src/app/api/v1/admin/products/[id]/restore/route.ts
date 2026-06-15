@@ -12,10 +12,13 @@ export async function PATCH(req: Request, ctx: RouteCtx) {
 
   const { id } = await ctx.params;
   const backend = getBackendUrl();
-  const res = await fetch(`${backend}/products/${encodeURIComponent(id)}/restore`, {
-    method: "PATCH",
-    headers: { ...forwardAuthorization(req) },
-  });
+  const res = await fetch(
+    `${backend}/products/${encodeURIComponent(id)}/restore`,
+    {
+      method: "PATCH",
+      headers: { ...forwardAuthorization(req) },
+    }
+  );
 
   let raw: unknown = null;
   try {

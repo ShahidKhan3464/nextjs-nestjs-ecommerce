@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default async function DashboardPage() {
   const session = await getAccessTokenPayload();
 
-  if (session?.role === "admin") return <AdminAnalytics />
+  if (session?.role === "admin") return <AdminAnalytics />;
 
   return <DashboardOverview />;
 }

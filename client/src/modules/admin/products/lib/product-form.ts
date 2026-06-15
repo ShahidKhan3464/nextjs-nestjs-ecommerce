@@ -27,9 +27,7 @@ export function parseCategoryId(value: string): number | null {
   return categoryId;
 }
 
-export function mapFormVariantsToPayload(
-  variants: ProductValues["variants"]
-) {
+export function mapFormVariantsToPayload(variants: ProductValues["variants"]) {
   return variants.map((v) => ({
     stock: v.stock,
     price: v.price,

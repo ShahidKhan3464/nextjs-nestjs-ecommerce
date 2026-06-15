@@ -11,7 +11,8 @@ function userFromSessionPayload(payload: JwtPayload): User {
     email: payload.email,
     createdAt: new Date().toISOString(),
     isBlocked: payload.isBlocked ?? false,
-    name: payload.name ?? payload.fullName ?? payload.email.split("@")[0] ?? "User",
+    name:
+      payload.name ?? payload.fullName ?? payload.email.split("@")[0] ?? "User",
     fullName:
       payload.fullName ?? payload.name ?? payload.email.split("@")[0] ?? "User",
   };

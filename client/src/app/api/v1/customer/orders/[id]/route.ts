@@ -28,7 +28,9 @@ export async function GET(
     return jsonMessage(nestErrorMessage(raw), res.status);
   }
 
-  const envelope = raw as { data?: { order?: NestOrderPayload } | NestOrderPayload };
+  const envelope = raw as {
+    data?: { order?: NestOrderPayload } | NestOrderPayload;
+  };
   const payload = envelope?.data;
   const orderRaw =
     payload && typeof payload === "object" && "order" in payload

@@ -193,7 +193,9 @@ export function AdminUserDetail({ userId }: Props) {
                   </span>
                   <Link
                     href={ROUTES.order(order.id)}
-                    className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+                    className={cn(
+                      buttonVariants({ variant: "outline", size: "sm" })
+                    )}
                   >
                     View
                   </Link>

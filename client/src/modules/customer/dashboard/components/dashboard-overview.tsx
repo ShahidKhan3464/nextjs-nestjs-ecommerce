@@ -46,7 +46,10 @@ function formatStatusLabel(status: string) {
 function formatMonthLabel(month: string) {
   const [year, m] = month.split("-");
   const date = new Date(Number(year), Number(m) - 1, 1);
-  return date.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    year: "2-digit",
+  });
 }
 
 export function DashboardOverview() {

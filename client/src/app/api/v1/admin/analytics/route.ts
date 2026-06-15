@@ -52,9 +52,7 @@ export async function GET(req: Request) {
   return jsonOk({
     data: {
       ...payload,
-      recentOrders: (payload.recentOrders ?? []).map(
-        normalizeNestOrderPayload
-      ),
+      recentOrders: (payload.recentOrders ?? []).map(normalizeNestOrderPayload),
     },
   });
 }

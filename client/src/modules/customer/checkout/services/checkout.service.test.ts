@@ -15,7 +15,9 @@ describe("checkout.service", () => {
   });
 
   it("posts cancel payload to the checkout cancel route", async () => {
-    vi.mocked(api.post).mockResolvedValueOnce({ data: { data: { cancelled: true } } });
+    vi.mocked(api.post).mockResolvedValueOnce({
+      data: { data: { cancelled: true } },
+    });
 
     await cancelCheckout("pi_test_123");
 

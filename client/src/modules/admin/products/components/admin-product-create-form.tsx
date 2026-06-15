@@ -35,13 +35,16 @@ import {
 export function AdminProductCreateForm() {
   const qc = useQueryClient();
   const [files, setFiles] = useState<File[]>([]);
-  const { objectUrlFor, revokeFile, previewKey } = useProductImageFilePreviews();
+  const { objectUrlFor, revokeFile, previewKey } =
+    useProductImageFilePreviews();
   const { data: categoriesResp, isPending: categoriesLoading } = useQuery({
     queryKey: queryKeys.admin.categories,
     queryFn: () => fetchAdminCategories({ limit: 200 }),
   });
 
-  const categoryOptions = sortCategoriesByName(categoriesResp?.categories ?? []);
+  const categoryOptions = sortCategoriesByName(
+    categoriesResp?.categories ?? []
+  );
 
   function addFiles(incoming: File[]) {
     if (incoming.length === 0) return;
