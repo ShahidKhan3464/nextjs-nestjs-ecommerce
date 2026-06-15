@@ -17,6 +17,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
 import { ProductsModule } from './products/products.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RolesGuard } from './auth/guards/roles/roles.guard';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { CategoriesModule } from './categories/categories.module';
 import environmentValidation from './config/environment.validation';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
@@ -35,6 +36,7 @@ import { DataResponseInterceptor } from './common/interceptors/data-response/dat
     SeedersModule,
     WishlistModule,
     ProductsModule,
+    DashboardModule,
     CategoriesModule,
     PaginationModule,
     ConfigModule.forFeature(jwtConfig),

@@ -50,27 +50,6 @@ export type OrderListParams = {
   paymentStatus?: string;
 };
 
-export type CreateCheckoutInput = {
-  shippingAddress: Address;
-};
-
-export type CheckoutPreview = {
-  tax: number;
-  total: number;
-  subtotal: number;
-};
-
-export type CheckoutSession = {
-  clientSecret: string;
-  paymentIntentId: string;
-  preview: CheckoutPreview;
-  checkoutSessionId: string;
-};
-
-export type CompleteCheckoutInput = {
-  paymentIntentId: string;
-};
-
 export type CancelOrderInput = {
   reason: string;
 };

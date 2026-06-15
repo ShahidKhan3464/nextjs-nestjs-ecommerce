@@ -1,13 +1,6 @@
 import { api } from "@/services/api/client";
 import type { ApiResponse } from "@/types/api";
-import type {
-  Order,
-  CheckoutSession,
-  OrderListParams,
-  CancelOrderInput,
-  CreateCheckoutInput,
-  CompleteCheckoutInput,
-} from "../types";
+import type { Order, OrderListParams, CancelOrderInput } from "../types";
 
 function toQueryParams(params?: OrderListParams) {
   if (!params) return undefined;
@@ -28,28 +21,6 @@ export async function fetchOrders(params?: OrderListParams) {
 export async function fetchOrder(id: string) {
   const res = await api.get<ApiResponse<{ order: Order }>>(
     `/api/v1/customer/orders/${id}`
-  );
-  return res.data.data.order;
-}
-
-export async function createCheckout(body: CreateCheckoutInput) {
-  const res = await api.post<ApiResponse<CheckoutSession>>(
-    "/api/v1/customer/orders/checkout",
-    body
-  );
-  return res.data.data;
-}
-
-export async function cancelCheckout(paymentIntentId: string) {
-  await api.post("/api/v1/customer/orders/checkout/cancel", {
-    paymentIntentId,
-  });
-}
-
-export async function completeCheckout(body: CompleteCheckoutInput) {
-  const res = await api.post<ApiResponse<{ order: Order }>>(
-    "/api/v1/customer/orders/checkout/complete",
-    body
   );
   return res.data.data.order;
 }

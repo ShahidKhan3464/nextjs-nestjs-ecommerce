@@ -14,6 +14,9 @@ export const queryKeys = {
   wishlist: {
     all: ["wishlist"] as const,
   },
+  dashboard: {
+    customer: ["dashboard", "customer"] as const,
+  },
   orders: {
     all: ["orders"] as const,
     list: (filters?: Record<string, unknown>) =>

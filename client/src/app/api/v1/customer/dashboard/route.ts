@@ -1,5 +1,5 @@
+import { requireUser } from "@/lib/require-auth";
 import { getBackendUrl } from "@/lib/backend-url";
-import { requireAdmin } from "@/lib/require-auth";
 import { jsonOk, jsonMessage } from "@/lib/api-response";
 import { nestErrorMessage, forwardAuthorization } from "@/lib/nest-http";
 import {
@@ -7,27 +7,22 @@ import {
   normalizeNestOrderPayload,
 } from "@/lib/nest-order-mapper";
 
-type NestDashboardPayload = {
-  totals: {
-    orders: number;
-    revenue: number;
-    products: number;
-    variants: number;
-    customers: number;
-    pendingOrders: number;
-  };
+type NestCustomerDashboardPayload = {
+  totalOrders: number;
+  totalSpending: number;
+  wishlistCount: number;
+  cartItemCount: number;
   recentOrders: NestOrderPayload[];
-  revenueByDay: { date: string; revenue: number }[];
   ordersByStatus: { status: string; count: number }[];
-  lowStock: { sku: string; product: string; stock: number }[];
+  spendingByMonth: { month: string; amount: number }[];
 };
 
 export async function GET(req: Request) {
-  const admin = await requireAdmin(req);
-  if (admin instanceof Response) return admin;
+  const user = await requireUser(req);
+  if (user instanceof Response) return user;
 
   const backend = getBackendUrl();
-  const res = await fetch(`${backend}/dashboard/admin`, {
+  const res = await fetch(`${backend}/dashboard/customer`, {
     headers: { ...forwardAuthorization(req) },
   });
 
@@ -42,7 +37,7 @@ export async function GET(req: Request) {
     return jsonMessage(nestErrorMessage(raw), res.status);
   }
 
-  const envelope = raw as { data?: NestDashboardPayload };
+  const envelope = raw as { data?: NestCustomerDashboardPayload };
   const payload = envelope?.data;
 
   if (!payload) {
