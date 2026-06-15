@@ -12,7 +12,7 @@ import { CheckoutSession } from '../entities/checkout-session.entity';
 import { Inject, Injectable, BadRequestException } from '@nestjs/common';
 import { CheckoutSessionItem } from '../entities/checkout-session-item.entity';
 
-export type CheckoutPreview = {
+type CheckoutPreview = {
   tax: number;
   total: number;
   subtotal: number;

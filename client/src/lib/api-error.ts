@@ -1,6 +1,6 @@
 import { isAxiosError } from "axios";
 
-export const GENERIC_API_ERROR_MESSAGE =
+const GENERIC_API_ERROR_MESSAGE =
   "Something went wrong, plz try again";
 
 function messageFromPayload(data: unknown): string | null {

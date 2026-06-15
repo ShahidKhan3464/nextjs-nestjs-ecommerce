@@ -29,7 +29,7 @@ export type NestOrderPayload = {
   };
 };
 
-export type NestOrderLineItemPayload = {
+type NestOrderLineItemPayload = {
   image?: string;
   quantity: number;
   productName: string;

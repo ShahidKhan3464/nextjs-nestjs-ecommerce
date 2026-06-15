@@ -50,7 +50,6 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Auth(AuthType.NONE)
   async refresh(@Body() dto: RefreshTokenDto) {
-    console.log(dto);
     return this.authService.refreshTokens(dto);
   }
 }

@@ -15,12 +15,6 @@ export async function createCheckout(body: CreateCheckoutInput) {
   return res.data.data;
 }
 
-export async function cancelCheckout(paymentIntentId: string) {
-  await api.post("/api/v1/customer/orders/checkout/cancel", {
-    paymentIntentId,
-  });
-}
-
 export async function completeCheckout(body: CompleteCheckoutInput) {
   const res = await api.post<ApiResponse<{ order: Order }>>(
     "/api/v1/customer/orders/checkout/complete",

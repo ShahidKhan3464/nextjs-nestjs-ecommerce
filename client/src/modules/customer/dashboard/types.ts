@@ -1,6 +1,6 @@
 import type { Order } from "@/modules/customer/orders/types";
 
-export type DashboardStatusCount = {
+type DashboardStatusCount = {
   count: number;
   status: string;
 };

@@ -6,7 +6,7 @@ export type CreateCheckoutInput = {
   shippingAddress: Address;
 };
 
-export type CheckoutPreview = {
+type CheckoutPreview = {
   tax: number;
   total: number;
   subtotal: number;

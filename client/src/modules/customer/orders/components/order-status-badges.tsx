@@ -3,7 +3,7 @@ import type { OrderStatus, PaymentStatus } from "../types";
 
 type BadgeVariant = "default" | "secondary" | "outline" | "destructive";
 
-export const orderStatusVariant: Record<OrderStatus, BadgeVariant> = {
+const orderStatusVariant: Record<OrderStatus, BadgeVariant> = {
   pending: "outline",
   shipped: "secondary",
   delivered: "default",
@@ -24,7 +24,7 @@ export function normalizeOrderStatus(status: string): OrderStatus {
   return "pending";
 }
 
-export const paymentStatusVariant: Record<PaymentStatus, BadgeVariant> = {
+const paymentStatusVariant: Record<PaymentStatus, BadgeVariant> = {
   paid: "default",
   failed: "destructive",
   refunded: "secondary",
