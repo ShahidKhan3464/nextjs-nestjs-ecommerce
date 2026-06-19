@@ -8,13 +8,14 @@ import { FileOwnerModule } from 'src/common/files/file.constants';
 import { StoredFile } from 'src/common/files/entities/stored-file.entity';
 import { PaginationProviders } from 'src/common/pagination/providers/pagination.providers';
 import { PaginateQueryResult } from 'src/common/pagination/interfaces/paginated.interfaces';
+import {
+  UserResponse,
+  UserMeResponse,
+  mapUserToResponse,
+} from '../utils/map-user.util';
 
 export type FindUsersQuery = Omit<QueryUserDto, 'isBlocked'> & {
   isBlocked?: boolean;
-};
-
-export type UserMeResponse = User & {
-  avatarUrl?: string;
 };
 
 @Injectable()
@@ -29,7 +30,7 @@ export class GetUsersProvider {
 
   public async findAllPaginated(
     query: FindUsersQuery,
-  ): Promise<PaginateQueryResult<User>> {
+  ): Promise<PaginateQueryResult<UserResponse>> {
     const qb = this.userRepository.createQueryBuilder('user');
 
     // Exclude admins from the general user list
@@ -50,24 +51,32 @@ export class GetUsersProvider {
 
     const { limit, page, skip } = this.paginationProvider.resolvePaging(query);
     const total = await qb.getCount();
-    const data = await qb.skip(skip).take(limit).getMany();
-    return { data, page, limit, total };
+    const users = await qb.skip(skip).take(limit).getMany();
+    return {
+      data: users.map(mapUserToResponse),
+      page,
+      limit,
+      total,
+    };
   }
 
-  public async findOne(id: number): Promise<User> {
+  public async findOne(id: number): Promise<UserResponse> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return user;
+    return mapUserToResponse(user);
   }
 
   public async findMeWithAvatar(id: number): Promise<UserMeResponse> {
-    const user = await this.findOne(id);
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     const avatar = await this.fileRepository.findOne({
       where: { ownerModule: FileOwnerModule.CUSTOMER, ownerId: id },
       order: { sortOrder: 'ASC' },
     });
-    return { ...user, avatarUrl: avatar?.urlPath };
+    return { ...mapUserToResponse(user), avatarUrl: avatar?.urlPath };
   }
 }

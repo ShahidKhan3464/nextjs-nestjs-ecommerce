@@ -3,6 +3,7 @@ import { User } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateProfileDto } from '../dto/update-profile.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { UserResponse, mapUserToResponse } from '../utils/map-user.util';
 
 @Injectable()
 export class UpdateProfileProvider {
@@ -11,7 +12,7 @@ export class UpdateProfileProvider {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async update(userId: number, dto: UpdateProfileDto): Promise<User> {
+  async update(userId: number, dto: UpdateProfileDto): Promise<UserResponse> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
@@ -24,6 +25,7 @@ export class UpdateProfileProvider {
       user.phoneNumber = dto.phoneNumber.trim();
     }
 
-    return this.userRepository.save(user);
+    const saved = await this.userRepository.save(user);
+    return mapUserToResponse(saved);
   }
 }

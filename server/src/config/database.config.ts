@@ -1,4 +1,5 @@
 import { registerAs } from '@nestjs/config';
+import { parseEnvBoolean } from './parse-env-boolean.util';
 
 export default registerAs('database', () => ({
   database: process.env.DATABASE_NAME,
@@ -6,6 +7,9 @@ export default registerAs('database', () => ({
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   host: process.env.DATABASE_HOST || 'localhost',
-  synchronize: process.env.DATABASE_SYNCHRONIZE || true,
-  autoLoadEntities: process.env.DATABASE_AUTO_LOAD_ENTITIES || true,
+  synchronize: parseEnvBoolean(process.env.DATABASE_SYNCHRONIZE, false),
+  autoLoadEntities: parseEnvBoolean(
+    process.env.DATABASE_AUTO_LOAD_ENTITIES,
+    true,
+  ),
 }));

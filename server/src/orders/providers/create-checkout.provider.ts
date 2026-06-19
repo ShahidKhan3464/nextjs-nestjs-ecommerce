@@ -10,6 +10,7 @@ import { calculateOrderPricing } from '../utils/order-pricing.util';
 import { joinProductImages } from 'src/common/files/file-query.util';
 import { CheckoutSession } from '../entities/checkout-session.entity';
 import { Inject, Injectable, BadRequestException } from '@nestjs/common';
+import { ProductVariant } from 'src/products/entities/product-variant.entity';
 import { CheckoutSessionItem } from '../entities/checkout-session-item.entity';
 
 type CheckoutPreview = {
@@ -71,11 +72,6 @@ export class CreateCheckoutProvider {
 
     let subtotal = 0;
     for (const item of cartItems) {
-      if (item.quantity > item.variant.stock) {
-        throw new BadRequestException(
-          `Insufficient stock for ${item.variant.sku}`,
-        );
-      }
       subtotal += Number(item.variant.price) * item.quantity;
     }
 
@@ -93,6 +89,21 @@ export class CreateCheckoutProvider {
     const savedSession = await this.dataSource.transaction(async (manager) => {
       const sessionRepo = manager.getRepository(CheckoutSession);
       const itemRepo = manager.getRepository(CheckoutSessionItem);
+      const variantRepo = manager.getRepository(ProductVariant);
+
+      for (const item of cartItems) {
+        const variant = await variantRepo
+          .createQueryBuilder('variant')
+          .setLock('pessimistic_write')
+          .where('variant.id = :id', { id: item.productVariantId })
+          .getOne();
+
+        if (!variant || item.quantity > variant.stock) {
+          throw new BadRequestException(
+            `Insufficient stock for ${item.variant.sku}`,
+          );
+        }
+      }
 
       const session = sessionRepo.create({
         userId,

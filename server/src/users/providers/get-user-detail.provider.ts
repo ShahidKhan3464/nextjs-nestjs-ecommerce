@@ -5,6 +5,7 @@ import { Order } from 'src/orders/entities/order.entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { FileOwnerModule } from 'src/common/files/file.constants';
 import { joinProductImages } from 'src/common/files/file-query.util';
+import { UserResponse, mapUserToResponse } from '../utils/map-user.util';
 import { StoredFile } from 'src/common/files/entities/stored-file.entity';
 import { WishlistItem } from 'src/wishlist/entities/wishlist-item.entity';
 import {
@@ -14,7 +15,7 @@ import {
 } from 'src/orders/utils/map-order.util';
 
 export type UserDetailResponse = {
-  user: User;
+  user: UserResponse;
   totalOrders: number;
   totalSpending: number;
   wishlistCount: number;
@@ -78,7 +79,7 @@ export class GetUserDetailProvider {
     });
 
     return {
-      user,
+      user: mapUserToResponse(user),
       wishlistCount,
       totalOrders: orders.length,
       profilePhotoUrl: avatar?.urlPath,
