@@ -23,4 +23,5 @@ export default Joi.object({
   ADMIN_NAME: Joi.string().min(5).max(30).optional(),
   ADMIN_PHONE: Joi.string().min(10).max(15).optional(),
   ADMIN_PASSWORD: Joi.string().min(8).max(30).optional(),
+  SEED_DEMO_DATA: Joi.boolean().truthy('true').falsy('false').default(false),
 });

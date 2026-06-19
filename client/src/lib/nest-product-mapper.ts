@@ -1,5 +1,5 @@
 import { slugify } from "@/lib/slugify";
-import { getBackendUrl } from "@/lib/backend-url";
+import { resolveUploadUrl } from "@/lib/resolve-upload-url";
 import type { Product } from "@/modules/customer/products/types";
 import { formatVariantNameFromNest } from "@/modules/customer/products/lib/variant-label";
 
@@ -26,13 +26,11 @@ export type NestProductPayload = {
 };
 
 export function normalizeNestProductPayload(p: NestProductPayload): Product {
-  const backend = getBackendUrl();
-
   const images: string[] = (p.images ?? [])
     .map((img) => {
-      if (typeof img === "string") return img;
+      if (typeof img === "string") return resolveUploadUrl(img) ?? img;
       if (img && typeof img === "object" && "urlPath" in img && img.urlPath) {
-        return `${backend}${img.urlPath}`;
+        return resolveUploadUrl(img.urlPath) ?? null;
       }
       return null;
     })
