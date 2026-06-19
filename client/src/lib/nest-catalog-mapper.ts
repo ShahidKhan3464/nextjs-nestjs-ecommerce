@@ -1,5 +1,5 @@
 import { slugify } from "@/lib/slugify";
-import { getBackendUrl } from "@/lib/backend-url";
+import { resolveUploadUrl } from "@/lib/resolve-upload-url";
 import type { Product, ProductVariant } from "@/types";
 
 /** Backend product shape (relations loaded). Keep loose to track API drift. */
@@ -30,11 +30,11 @@ type NestVariantDto = {
 };
 
 export function mapNestProductToAdminProduct(p: NestProductDto): Product {
-  const base = getBackendUrl();
   const rawImages = (p.images ?? [])
     .slice()
     .sort((a, b) => a.sortOrder - b.sortOrder)
-    .map((img) => `${base}${img.urlPath}`);
+    .map((img) => resolveUploadUrl(img.urlPath))
+    .filter((url): url is string => Boolean(url));
   const images = rawImages.length > 0 ? rawImages : ["/placeholder.svg"];
 
   const variants: ProductVariant[] = (p.variants ?? []).map((v) => ({
