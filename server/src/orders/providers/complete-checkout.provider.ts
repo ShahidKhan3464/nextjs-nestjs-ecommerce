@@ -117,9 +117,12 @@ export class CompleteCheckoutProvider {
       const sessionRepo = manager.getRepository(CheckoutSession);
 
       for (const item of session.items) {
-        const variant = await variantRepo.findOne({
-          where: { id: item.variantId },
-        });
+        const variant = await variantRepo
+          .createQueryBuilder('variant')
+          .setLock('pessimistic_write')
+          .where('variant.id = :id', { id: item.variantId })
+          .getOne();
+
         if (!variant || variant.stock < item.quantity) {
           throw new BadRequestException(
             `Insufficient stock for variant ${item.variantId}`,
@@ -133,10 +136,10 @@ export class CompleteCheckoutProvider {
         userId,
         orderNumber,
         tax: session.tax,
-        status: OrderStatus.PENDING,
-        paymentStatus: PaymentStatus.PAID,
         subtotal: session.subtotal,
+        status: OrderStatus.PENDING,
         totalAmount: session.totalAmount,
+        paymentStatus: PaymentStatus.PAID,
         paymentMethodSummary: paymentSummary,
         stripePaymentIntentId: paymentIntent.id,
         shippingAddress: session.shippingAddress,

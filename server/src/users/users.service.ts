@@ -6,6 +6,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BlockUserProvider } from './providers/block-user.provider';
+import { UserMeResponse, UserResponse } from './utils/map-user.util';
 import { CreateUserProvider } from './providers/create-user.provider.js';
 import { UpdateProfileProvider } from './providers/update-profile.provider';
 import { ChangePasswordProvider } from './providers/change-password.provider';
@@ -17,7 +18,6 @@ import {
 } from './providers/get-user-detail.provider';
 import {
   FindUsersQuery,
-  UserMeResponse,
   GetUsersProvider,
 } from './providers/get-users.provider';
 
@@ -37,11 +37,11 @@ export class UsersService {
 
   public async findAllPaginated(
     query: FindUsersQuery,
-  ): Promise<PaginateQueryResult<User>> {
+  ): Promise<PaginateQueryResult<UserResponse>> {
     return await this.getUsersProvider.findAllPaginated(query);
   }
 
-  public async findOne(id: number): Promise<User> {
+  public async findOne(id: number): Promise<UserResponse> {
     return await this.getUsersProvider.findOne(id);
   }
 
@@ -56,7 +56,7 @@ export class UsersService {
   public async updateProfile(
     userId: number,
     dto: UpdateProfileDto,
-  ): Promise<User> {
+  ): Promise<UserResponse> {
     return this.updateProfileProvider.update(userId, dto);
   }
 
@@ -82,7 +82,10 @@ export class UsersService {
     return { avatarUrl };
   }
 
-  public async blockUser(id: number, isBlocked: boolean): Promise<User> {
+  public async blockUser(
+    id: number,
+    isBlocked: boolean,
+  ): Promise<UserResponse> {
     return await this.blockUserProvider.blockUser(id, isBlocked);
   }
 

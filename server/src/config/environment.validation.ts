@@ -11,7 +11,25 @@ export default Joi.object({
   DATABASE_PORT: Joi.number().default(5432),
   DATABASE_USERNAME: Joi.string().required(),
   DATABASE_PASSWORD: Joi.string().required(),
-  JWT_SECRET: Joi.string().required(),
+  DATABASE_SYNCHRONIZE: Joi.boolean()
+    .truthy('true')
+    .falsy('false')
+    .default(false),
+  DATABASE_AUTO_LOAD_ENTITIES: Joi.boolean()
+    .truthy('true')
+    .falsy('false')
+    .default(true),
+  JWT_SECRET: Joi.string()
+    .required()
+    .min(16)
+    .invalid(
+      'secret',
+      'your-secret',
+      'your-secret-key',
+      'change-me',
+      'jwt-secret',
+      'supersecret',
+    ),
   JWT_ACCESS_TOKEN_TTL: Joi.string().default('2d'),
   JWT_REFRESH_TOKEN_TTL: Joi.string().default('7d'),
   MAIL_HOST: Joi.string().required(),

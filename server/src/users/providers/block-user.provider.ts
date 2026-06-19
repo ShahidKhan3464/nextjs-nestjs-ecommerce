@@ -1,20 +1,27 @@
 import { Repository } from 'typeorm';
-import { Injectable } from '@nestjs/common';
 import { User } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GetUsersProvider } from './get-users.provider';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { UserResponse, mapUserToResponse } from '../utils/map-user.util';
 
 @Injectable()
 export class BlockUserProvider {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly getUsersProvider: GetUsersProvider,
   ) {}
 
-  public async blockUser(id: number, isBlocked: boolean): Promise<User> {
-    const user = await this.getUsersProvider.findOne(id);
+  public async blockUser(
+    id: number,
+    isBlocked: boolean,
+  ): Promise<UserResponse> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
     user.isBlocked = isBlocked;
-    return await this.userRepository.save(user);
+    const saved = await this.userRepository.save(user);
+    return mapUserToResponse(saved);
   }
 }

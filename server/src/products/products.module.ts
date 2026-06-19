@@ -5,6 +5,7 @@ import { Product } from './entities/product.entity';
 import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
 import { FilesModule } from 'src/common/files/files.module';
+import { OrderItem } from 'src/orders/entities/order-item.entity';
 import { Category } from 'src/categories/entities/category.entity';
 import { ProductVariant } from './entities/product-variant.entity';
 import { GetProductsProvider } from './providers/get-products.provider';
@@ -17,7 +18,7 @@ import { ProductImagesProvider } from './providers/product-images.provider';
   imports: [
     FilesModule,
     forwardRef(() => AuthModule),
-    TypeOrmModule.forFeature([Category, Product, ProductVariant]),
+    TypeOrmModule.forFeature([Category, Product, ProductVariant, OrderItem]),
   ],
   providers: [
     ProductsService,

@@ -64,9 +64,10 @@ import { DataResponseInterceptor } from './common/interceptors/data-response/dat
         database: configService.get('database.database'),
         username: configService.get('database.username'),
         password: configService.get('database.password'),
-        synchronize: configService.get('database.synchronize') === 'true',
-        autoLoadEntities:
-          configService.get('database.autoLoadEntities') === 'true',
+        synchronize: configService.get<boolean>('database.synchronize'),
+        autoLoadEntities: configService.get<boolean>(
+          'database.autoLoadEntities',
+        ),
       }),
     }),
   ],
